@@ -1,0 +1,36 @@
+export const PRODUCTS = [
+  { 
+    id: "1", 
+    name: "Classic Chocolate Chip", 
+    price: 299, 
+    image: "/premium_cookie.png", 
+    rating: 4.9, 
+    reviews: 128, 
+    category: "Classic", 
+    tags: ["Sweet", "Classic"],
+    moods: ["Happy", "Cozy"],
+    description: "Our signature cookie that started it all. Baked to perfection with crisp edges, a soft, chewy center, and loaded with premium Belgian dark chocolate chunks. Each bite delivers the perfect balance of sweet, buttery dough and rich, melty chocolate.",
+    ingredients: "Organic All-Purpose Flour, Grass-fed Butter, Brown Sugar, Organic Cane Sugar, Pasture-raised Eggs, Belgian Dark Chocolate Chunks (54%), Pure Vanilla Extract, Sea Salt, Baking Soda.",
+    images: ["/premium_cookie.png", "/cookie_gift_box.png", "/premium_cookie.png", "/premium_cookie.png"]
+  },
+  { 
+    id: "2", 
+    name: "Double Dark Chocolate", 
+    price: 349, 
+    image: "/premium_cookie.png", 
+    rating: 4.8, 
+    reviews: 95, 
+    category: "Classic", 
+    tags: ["Sweet", "Chocolate"],
+    moods: ["Relaxed"],
+    description: "For the true chocolate lover. A rich, dark cocoa dough studded with semi-sweet chocolate chips and finished with a sprinkle of flaky sea salt.",
+    ingredients: "Organic All-Purpose Flour, Dutch-Process Cocoa Powder, Grass-fed Butter, Brown Sugar, Eggs, Semi-Sweet Chocolate, Vanilla, Flaky Sea Salt.",
+    images: ["/premium_cookie.png", "/cookie_gift_box.png", "/premium_cookie.png", "/premium_cookie.png"]
+  },
+  { id: "3", name: "Oatmeal Raisin Bliss", price: 279, image: "/premium_cookie.png", rating: 4.7, reviews: 64, category: "Vegan", tags: ["Healthy", "Fruity"], moods: ["Cozy", "Relaxed"], description: "A comforting classic...", ingredients: "Oats, Flour...", images: ["/premium_cookie.png", "/premium_cookie.png"] },
+  { id: "4", name: "Peanut Butter Crunch", price: 329, image: "/premium_cookie.png", rating: 4.9, reviews: 112, category: "Classic", tags: ["Nutty", "Sweet"], moods: ["Energetic", "Happy"], description: "Peanut butter goodness...", ingredients: "Peanuts, Flour...", images: ["/premium_cookie.png", "/premium_cookie.png"] },
+  { id: "5", name: "Matcha White Chocolate", price: 399, image: "/premium_cookie.png", rating: 4.6, reviews: 45, category: "Specialty", tags: ["Tea", "Sweet"], moods: ["Relaxed"], description: "Earthy matcha meets sweet white chocolate...", ingredients: "Matcha, White Chocolate...", images: ["/premium_cookie.png", "/premium_cookie.png"] },
+  { id: "6", name: "Salted Caramel Pecan", price: 379, image: "/premium_cookie.png", rating: 4.9, reviews: 88, category: "Stuffed", tags: ["Sweet", "Nutty", "Caramel"], moods: ["Happy", "Energetic"], description: "Stuffed with caramel...", ingredients: "Caramel, Pecans...", images: ["/premium_cookie.png", "/premium_cookie.png"] },
+  { id: "7", name: "Vegan Lemon Poppyseed", price: 299, image: "/premium_cookie.png", rating: 4.5, reviews: 34, category: "Vegan", tags: ["Citrus", "Healthy"], moods: ["Energetic"], description: "Zesty and vegan...", ingredients: "Lemon, Poppyseeds...", images: ["/premium_cookie.png", "/premium_cookie.png"] },
+  { id: "8", name: "Gluten-Free Macadamia", price: 449, image: "/premium_cookie.png", rating: 4.8, reviews: 56, category: "Gluten-Free", tags: ["Nutty", "Premium"], moods: ["Happy", "Relaxed"], description: "Rich macadamia nuts...", ingredients: "GF Flour, Macadamia...", images: ["/premium_cookie.png", "/premium_cookie.png"] },
+];
