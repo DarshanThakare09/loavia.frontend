@@ -5,11 +5,17 @@ import { Categories } from "@/components/home/Categories";
 import { BuildBoxHighlight } from "@/components/home/BuildBoxHighlight";
 import { GiftingSection } from "@/components/home/GiftingSection";
 import { Testimonials } from "@/components/home/Testimonials";
+import WhyChoose from "@/components/home/WhyChoose";
+import FeaturedProducts from "@/components/home/FeaturedProducts";
+import CustomerLove from "@/components/home/CustomerLove";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <HeroSection />
+      <WhyChoose />
+<      FeaturedProducts />
+<CustomerLove />
       <ShopByMood />
       <BestSellers />
       <Categories />
