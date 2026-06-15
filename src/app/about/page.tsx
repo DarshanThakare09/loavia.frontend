@@ -82,6 +82,73 @@ export default function AboutPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 md:mt-32">
+        {/* OUR STORY SECTION */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-14 items-stretch mb-32 animate-section">
+
+  {/* LEFT - MASCOT IMAGE */}
+  <div className="relative w-full h-[450px] md:h-[550px] rounded-[2.5rem] overflow-hidden shadow-2xl bg-brand-gold/10 flex items-center justify-center">
+
+    <Image
+      src="/mascot.png"
+      alt="LOAVIA Mascot"
+      fill
+      className="object-contain p-8"
+    />
+
+  </div>
+
+  {/* RIGHT - FULL PARAGRAPH */}
+  <div className="flex flex-col justify-center text-brand-text-secondary text-lg md:text-xl leading-relaxed">
+
+    <p className="whitespace-pre-line">
+
+Hi, I am <strong>Pranita Vivek Patil</strong>, Founder of <strong>LOAVIA™</strong>.
+
+Baking has always been more than a passion — it has been a part of my heart and identity. After my children became independent and began shaping their own paths, I chose to dedicate my time to something that truly fulfilled me — the art of baking.
+
+My journey formally began in 2021, when I stepped into professional baking with curiosity and determination. I trained through specialized baking courses, and in 2022, I proudly earned my certification as a Pâtissier Chef. Soon after, I established Akshar Foods and introduced my bakery brand, “The Pastry Saga,” where every creation was crafted with love, care, and detail.
+
+Yet, deep within, I carried a larger vision — to create cookies that were not only delicious but also genuinely nourishing. This vision naturally led me to the world of millets.
+
+Millets are not new to India; they are part of our ancient food heritage. Rich in fiber, protein, calcium, iron, and essential minerals, they once formed the foundation of our traditional diet. Over time, with modern lifestyles and processed foods, these powerful grains slowly faded from our daily lives.
+
+As I explored them deeper, I realized their true potential — supporting children’s growth, improving digestion, strengthening heart health, and enhancing overall wellness.
+
+However, transforming these ancient grains into a truly delicious cookie was not easy. After countless experiments, refinements, and passion-driven trials, I finally created what I had envisioned — a wholesome, balanced, and delightful bite.
+
+Today, LOAVIA™ proudly brings you premium millet cookies crafted with love, freshness, and purpose — where health meets indulgence.
+
+    </p>
+
+  </div>
+
+</div>
+{/* LOAVIA MEANING */}
+<div className="mb-32 animate-section text-center max-w-4xl mx-auto">
+
+  <h2 className="text-4xl md:text-5xl font-serif font-bold text-brand-brown mb-6">
+    LOAVIA™
+  </h2>
+
+  <p className="text-xl font-semibold text-brand-brown mb-4">
+    A Celebration of Love for Wholesome Baking
+  </p>
+
+  <p className="text-brand-text-secondary text-lg leading-relaxed">
+    The name LOAVIA™ is inspired by Loaf — bakery and baked goodness and Via/Avia — journey, lifestyle, and nourishment.
+    Together, LOAVIA™ represents “A journey of healthy and delicious baking.”
+  </p>
+
+  <p className="mt-4 text-brand-text-secondary text-lg leading-relaxed">
+    At LOAVIA™, freshness and health matter more than mass production. We use fresh ingredients and freshly prepared millets in every batch,
+    which is why our millet cookies have a shelf life of only one month.
+  </p>
+
+  <p className="mt-4 text-brand-text-secondary text-lg leading-relaxed">
+    Our mission is to bring back the goodness of traditional grains in a delicious modern form for today’s generation.
+  </p>
+
+</div>
         {/* The Nashik Roots */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-32 animate-section">
           <div className="relative rounded-[2.5rem] overflow-hidden aspect-square shadow-2xl group">
@@ -109,32 +176,7 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* The Innovation Section (Banana 2) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-32 animate-section flex-col-reverse md:flex-row-reverse">
-          <div className="order-1 md:order-2 relative rounded-[2.5rem] overflow-hidden aspect-[4/3] shadow-2xl group">
-            <Image
-              src="/banana_2_brand.png"
-              alt="Banana Innovation"
-              fill
-              className="object-cover transform group-hover:scale-105 transition-transform duration-700"
-            />
-          </div>
-          <div className="order-2 md:order-1">
-            <div className="inline-block px-4 py-2 bg-brand-brown/10 text-brand-brown font-bold rounded-full mb-6 text-sm tracking-wider uppercase">
-              Flavor Innovation
-            </div>
-            <h2 className="text-4xl md:text-5xl font-serif font-bold text-brand-brown mb-6 leading-tight">
-              Pushing Boundaries
-            </h2>
-            <p className="text-brand-text-secondary text-lg leading-relaxed mb-6">
-              Our pursuit of the perfect cookie led us to explore unique ingredient combinations. The &quot;Banana 2&quot; initiative represents our dedication to sourcing premium local ingredients—like the rich, sweet bananas cultivated in Maharashtra&apos;s fertile soil—and elevating them into gourmet experiences.
-            </p>
-            <p className="text-brand-text-secondary text-lg leading-relaxed">
-              We spent years perfecting our recipes, ensuring that every innovative flavor profile maintains the comforting familiarity of a classic cookie while introducing a sophisticated, premium aesthetic.
-            </p>
-          </div>
-        </div>
-
+       
         {/* Stats Section */}
         <div className="bg-white rounded-[3rem] p-12 md:p-20 text-center shadow-2xl border border-brand-brown/5 relative overflow-hidden stats-container">
           {/* Decorative background elements */}
