@@ -58,17 +58,25 @@ export function HeroSection() {
             <span className="text-brand-gold">Yummy Outside.</span>
           </h1>
           <p className="hero-subtitle text-lg md:text-xl text-brand-text-secondary mb-10 max-w-lg">
-            Experience the perfect balance of premium ingredients and indulgent flavor in every bite. Designed for your cravings.
+           Premium millet cookies and healthy bakery products crafted with wholesome ingredients, rich flavours, and freshly baked goodness.
           </p>
-          <div className="hero-cta">
-            <Link 
-              href="/shop" 
-              className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-brand-cream bg-brand-brown rounded-full hover:bg-brand-gold transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            >
-              Shop Now
-            </Link>
-          </div>
+         <div className="hero-cta flex gap-4 justify-center">
+  <Link
+    href="/shop"
+    className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-brand-cream bg-brand-brown rounded-full hover:bg-brand-gold transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+  >
+    Shop Now
+  </Link>
+
+  <Link
+    href="/whatsapp"
+    className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-green-600 rounded-full hover:bg-green-700 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+  >
+    Order on WhatsApp
+  </Link>
+</div>
         </div>
+
 
         {/* Presentation Image */}
         <div className="hero-canvas h-[50vh] lg:h-[80vh] w-full relative z-0 flex items-center justify-center drop-shadow-2xl">

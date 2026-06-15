@@ -49,12 +49,14 @@ export function GiftingSection() {
         </div>
         
         <h2 className="gifting-element text-4xl md:text-5xl font-serif font-bold text-brand-brown mb-6">
-          Say it with <span className="text-brand-gold">Cookies</span>
+          Healthy gifting made  <span className="text-brand-gold">Delicious</span>
         </h2>
         
-        <p className="gifting-element text-lg text-brand-text-secondary max-w-2xl mx-auto mb-12">
-          The perfect gift for any occasion. Send a luxurious box of our premium cookies with a personalized message. Delivered fresh, right to their door.
-        </p>
+       <p className="gifting-element text-lg text-brand-text-secondary max-w-2xl mx-auto mb-10 leading-relaxed">
+  Celebrate special moments with beautifully crafted LOAVIA™ cookie hampers.
+  Our premium millet cookies make thoughtful gifts for festivals, corporate events,
+  family celebrations, and special occasions.
+</p>
 
         <div className="gifting-element flex flex-wrap justify-center gap-4 md:gap-8 mb-12">
           {occasions.map((occasion) => {
@@ -77,6 +79,10 @@ export function GiftingSection() {
           >
             Explore Gifting Options
           </Link>
+           
+          < h4  className="gifting-element text-sm text-brand-text-secondary max-w-xl mx-auto mt-6">
+  Customized packaging and bulk gifting solutions are available.</h4>
+
         </div>
       </div>
     </section>

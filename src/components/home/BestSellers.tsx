@@ -21,7 +21,7 @@ export function BestSellers() {
   const products = [
     {
       id: 1,
-      name: "Classic Chocolate Chip",
+      name: "	Choco Crunch Millet Cookies ",
       price: 299,
       image: "/premium_cookie.png",
       rating: 4.9,
@@ -30,7 +30,7 @@ export function BestSellers() {
     },
     {
       id: 2,
-      name: "Double Dark Chocolate",
+      name: "	Almond Jaggery Millet Cookies ",
       price: 349,
       image: "/premium_cookie.png",
       rating: 4.8,
@@ -38,7 +38,7 @@ export function BestSellers() {
     },
     {
       id: 3,
-      name: "Oatmeal Raisin Bliss",
+      name: "	Nut Overload Millet Cookies ",
       price: 279,
       image: "/premium_cookie.png",
       rating: 4.7,
@@ -46,7 +46,7 @@ export function BestSellers() {
     },
     {
       id: 4,
-      name: "Peanut Butter Crunch",
+      name: " Millet Nankhatai ",
       price: 329,
       image: "/premium_cookie.png",
       rating: 4.9,
