@@ -7,6 +7,7 @@ import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useSiteStore } from "@/store/siteStore";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,12 +18,8 @@ export function Categories() {
   const [isMobile, setIsMobile] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  const categories = [
-    { name: "Classic Collection", image: "/premium_cookie.png", link: "/shop?category=classic" },
-    { name: "Vegan Options", image: "/vegan_cookie.png", link: "/shop?category=vegan" },
-    { name: "Gluten-Free", image: "/gluten_free_cookie.png", link: "/shop?category=gluten-free" },
-    { name: "Stuffed Cookies", image: "/stuffed_cookie.png", link: "/shop?category=stuffed" },
-  ];
+  const { categoriesList } = useSiteStore();
+  const categories = categoriesList || [];
 
   const headingText = "Shop by Category".split("");
 

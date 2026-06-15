@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Star, Quote } from "lucide-react";
+import { useSiteStore } from "@/store/siteStore";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,29 +13,8 @@ export function Testimonials() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const testimonials = [
-    {
-      id: 1,
-      name: "Sarah Jenkins",
-      role: "Verified Buyer",
-      content: "These are genuinely the best cookies I've ever had. The Double Dark Chocolate is incredibly rich, and the packaging makes it feel so premium. Worth every penny!",
-      rating: 5
-    },
-    {
-      id: 2,
-      name: "Michael Chen",
-      role: "Verified Buyer",
-      content: "I sent the 12-pack custom box to my team for the holidays. They arrived fresh and everyone loved them. The UI for building the box was super easy to use.",
-      rating: 5
-    },
-    {
-      id: 3,
-      name: "Emma Roberts",
-      role: "Verified Buyer",
-      content: "I'm obsessed with the healthy alternatives. They actually taste like real, indulgent cookies without the guilt. LOAVIA has a customer for life.",
-      rating: 5
-    }
-  ];
+  const { testimonialsList } = useSiteStore();
+  const testimonials = testimonialsList || [];
 
   // Auto-advance testimonials
   useEffect(() => {

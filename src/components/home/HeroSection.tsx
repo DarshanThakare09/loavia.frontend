@@ -1,13 +1,20 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { useSiteStore } from "@/store/siteStore";
 
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { heroTitle, heroSubtitle } = useSiteStore();
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   useGSAP(() => {
     const tl = gsap.timeline();
@@ -53,12 +60,11 @@ export function HeroSection() {
         
         {/* Text Content */}
         <div className="max-w-2xl pt-10 lg:pt-0">
-          <h1 className="hero-title text-5xl md:text-7xl font-serif font-bold text-brand-brown leading-tight mb-6">
-            Healthy Inside,<br />
-            <span className="text-brand-gold">Yummy Outside.</span>
+          <h1 className="hero-title text-5xl md:text-7xl font-serif font-bold text-brand-brown leading-tight mb-6 whitespace-pre-wrap">
+            {mounted ? heroTitle : "Healthy Inside,\nYummy Outside."}
           </h1>
-          <p className="hero-subtitle text-lg md:text-xl text-brand-text-secondary mb-10 max-w-lg">
-           Premium millet cookies and healthy bakery products crafted with wholesome ingredients, rich flavours, and freshly baked goodness.
+          <p className="hero-subtitle text-lg md:text-xl text-brand-text-secondary mb-10 max-w-lg whitespace-pre-wrap">
+            {mounted ? heroSubtitle : "Premium millet cookies and healthy bakery products crafted with wholesome ingredients, rich flavours, and freshly baked goodness."}
           </p>
          <div className="hero-cta flex gap-4 justify-center">
   <Link

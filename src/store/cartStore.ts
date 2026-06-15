@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export interface CartItem {
   id: string;
@@ -21,6 +21,37 @@ interface CartState {
   closeMiniCart: () => void;
   getCartTotal: () => number;
 }
+
+// Custom storage with fallback
+const safeStorage = {
+  getItem: (name: string) => {
+    try {
+      if (typeof window === 'undefined') return null;
+      const item = localStorage.getItem(name);
+      return item;
+    } catch (e) {
+      console.warn('localStorage not available, using in-memory storage', e);
+      return null;
+    }
+  },
+  setItem: (name: string, value: string) => {
+    try {
+      if (typeof window === 'undefined') return;
+      localStorage.setItem(name, value);
+    } catch (e) {
+      console.warn('Failed to save to localStorage:', e);
+      // Silently fail - cart will still work in memory
+    }
+  },
+  removeItem: (name: string) => {
+    try {
+      if (typeof window === 'undefined') return;
+      localStorage.removeItem(name);
+    } catch (e) {
+      console.warn('Failed to remove from localStorage:', e);
+    }
+  },
+};
 
 export const useCartStore = create<CartState>()(
   persist(
@@ -72,7 +103,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'loavia-cart-storage',
-      // Don't persist the UI state of the mini cart being open/closed
+      storage: createJSONStorage(() => safeStorage),
       partialize: (state) => ({ items: state.items }),
     }
   )

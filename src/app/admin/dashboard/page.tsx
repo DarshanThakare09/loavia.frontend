@@ -1,87 +1,886 @@
-import { ArrowUpRight, DollarSign, Package, Users, ShoppingBag } from "lucide-react";
+"use client";
 
-export default function AdminDashboardPage() {
+import { useSiteStore, CategoryItem, TestimonialItem } from "@/store/siteStore";
+import { useAuthStore } from "@/store/authStore";
+import { useProductStore } from "@/store/productStore";
+import { useState, useEffect } from "react";
+import { Save, IndianRupee, ShoppingBag, Users, Cookie, Settings, Trash2, Plus, Star } from "lucide-react";
+
+export default function AdminDashboard() {
+  const { 
+    // State values from store
+    announcementText, heroTitle, heroSubtitle,
+    bestSellersTitle, bestSellersSubtitle,
+    whyChooseTitle, whyChooseDescription, whyChooseFeatures,
+    categoriesList,
+    giftingTitle, giftingDescription,
+    testimonialsList,
+
+    // About Page state values from store
+    aboutStoryTitle, aboutStorySubtitle,
+    aboutFounderName, aboutFounderText,
+    aboutMeaningTitle, aboutMeaningSubtitle,
+    aboutMeaningText1, aboutMeaningText2, aboutMeaningText3,
+    aboutNashikRootsTitle, aboutNashikRootsText1, aboutNashikRootsText2,
+    aboutStat1Number, aboutStat1Title, aboutStat1Desc,
+    aboutStat2Number, aboutStat2Title, aboutStat2Desc,
+    aboutStat3Number, aboutStat3Title, aboutStat3Desc,
+    
+    // Setters
+    updateAnnouncement, updateHero, updateBestSellers, updateWhyChoose, updateCategories, updateGifting,
+    updateAboutStory, updateAboutFounder, updateAboutMeaning, updateAboutRoots, updateAboutStats,
+    addTestimonial, updateTestimonial, deleteTestimonial
+  } = useSiteStore();
+
+  const { allOrders, allUsers } = useAuthStore();
+  const { products } = useProductStore();
+
+  const [activeSection, setActiveSection] = useState("hero");
+
+  // Hero section state
+  const [announcement, setAnnouncement] = useState(announcementText);
+  const [title, setTitle] = useState(heroTitle);
+  const [subtitle, setSubtitle] = useState(heroSubtitle);
+
+  // Best Sellers section state
+  const [bsTitle, setBsTitle] = useState(bestSellersTitle);
+  const [bsSubtitle, setBsSubtitle] = useState(bestSellersSubtitle);
+
+  // Why Choose section state
+  const [wcTitle, setWcTitle] = useState(whyChooseTitle);
+  const [wcDescription, setWcDescription] = useState(whyChooseDescription);
+  const [wcFeatures, setWcFeatures] = useState<string[]>(whyChooseFeatures);
+  const [newFeature, setNewFeature] = useState("");
+
+  // Categories section state
+  const [cats, setCats] = useState<CategoryItem[]>(categoriesList);
+
+  // Gifting section state
+  const [gTitle, setGTitle] = useState(giftingTitle);
+  const [gDescription, setGDescription] = useState(giftingDescription);
+
+  // About Page states
+  const [abStoryTitle, setAbStoryTitle] = useState(aboutStoryTitle);
+  const [abStorySubtitle, setAbStorySubtitle] = useState(aboutStorySubtitle);
+  const [abFounderName, setAbFounderName] = useState(aboutFounderName);
+  const [abFounderText, setAbFounderText] = useState(aboutFounderText);
+  const [abMeaningTitle, setAbMeaningTitle] = useState(aboutMeaningTitle);
+  const [abMeaningSubtitle, setAbMeaningSubtitle] = useState(aboutMeaningSubtitle);
+  const [abMeaningT1, setAbMeaningT1] = useState(aboutMeaningText1);
+  const [abMeaningT2, setAbMeaningT2] = useState(aboutMeaningText2);
+  const [abMeaningT3, setAbMeaningT3] = useState(aboutMeaningText3);
+  const [abRootsTitle, setAbRootsTitle] = useState(aboutNashikRootsTitle);
+  const [abRootsT1, setAbRootsT1] = useState(aboutNashikRootsText1);
+  const [abRootsT2, setAbRootsT2] = useState(aboutNashikRootsText2);
+  const [abS1Num, setAbS1Num] = useState(aboutStat1Number);
+  const [abS1Title, setAbS1Title] = useState(aboutStat1Title);
+  const [abS1Desc, setAbS1Desc] = useState(aboutStat1Desc);
+  const [abS2Num, setAbS2Num] = useState(aboutStat2Number);
+  const [abS2Title, setAbS2Title] = useState(aboutStat2Title);
+  const [abS2Desc, setAbS2Desc] = useState(aboutStat2Desc);
+  const [abS3Num, setAbS3Num] = useState(aboutStat3Number);
+  const [abS3Title, setAbS3Title] = useState(aboutStat3Title);
+  const [abS3Desc, setAbS3Desc] = useState(aboutStat3Desc);
+
+  // Testimonial Form Modal/Editor state
+  const [editingTestimonial, setEditingTestimonial] = useState<TestimonialItem | null>(null);
+  const [isAddingTestimonial, setIsAddingTestimonial] = useState(false);
+  const [tName, setTName] = useState("");
+  const [tRole, setTRole] = useState("");
+  const [tContent, setTContent] = useState("");
+  const [tRating, setTRating] = useState(5);
+
+  // Sync state if store updates in background
+  useEffect(() => {
+    setAnnouncement(announcementText);
+    setTitle(heroTitle);
+    setSubtitle(heroSubtitle);
+    setBsTitle(bestSellersTitle);
+    setBsSubtitle(bestSellersSubtitle);
+    setWcTitle(whyChooseTitle);
+    setWcDescription(whyChooseDescription);
+    setWcFeatures(whyChooseFeatures);
+    setCats(categoriesList);
+    setGTitle(giftingTitle);
+    setGDescription(giftingDescription);
+    setAbStoryTitle(aboutStoryTitle);
+    setAbStorySubtitle(aboutStorySubtitle);
+    setAbFounderName(aboutFounderName);
+    setAbFounderText(aboutFounderText);
+    setAbMeaningTitle(aboutMeaningTitle);
+    setAbMeaningSubtitle(aboutMeaningSubtitle);
+    setAbMeaningT1(aboutMeaningText1);
+    setAbMeaningT2(aboutMeaningText2);
+    setAbMeaningT3(aboutMeaningText3);
+    setAbRootsTitle(aboutNashikRootsTitle);
+    setAbRootsT1(aboutNashikRootsText1);
+    setAbRootsT2(aboutNashikRootsText2);
+    setAbS1Num(aboutStat1Number);
+    setAbS1Title(aboutStat1Title);
+    setAbS1Desc(aboutStat1Desc);
+    setAbS2Num(aboutStat2Number);
+    setAbS2Title(aboutStat2Title);
+    setAbS2Desc(aboutStat2Desc);
+    setAbS3Num(aboutStat3Number);
+    setAbS3Title(aboutStat3Title);
+    setAbS3Desc(aboutStat3Desc);
+  }, [
+    announcementText, heroTitle, heroSubtitle,
+    bestSellersTitle, bestSellersSubtitle,
+    whyChooseTitle, whyChooseDescription, whyChooseFeatures,
+    categoriesList,
+    giftingTitle, giftingDescription,
+    aboutStoryTitle, aboutStorySubtitle,
+    aboutFounderName, aboutFounderText,
+    aboutMeaningTitle, aboutMeaningSubtitle,
+    aboutMeaningText1, aboutMeaningText2, aboutMeaningText3,
+    aboutNashikRootsTitle, aboutNashikRootsText1, aboutNashikRootsText2,
+    aboutStat1Number, aboutStat1Title, aboutStat1Desc,
+    aboutStat2Number, aboutStat2Title, aboutStat2Desc,
+    aboutStat3Number, aboutStat3Title, aboutStat3Desc
+  ]);
+
+  const handleSaveHero = () => {
+    updateAnnouncement(announcement);
+    updateHero(title, subtitle);
+    alert("Hero settings saved successfully!");
+  };
+
+  const handleSaveBestSellers = () => {
+    updateBestSellers(bsTitle, bsSubtitle);
+    alert("Best Sellers settings saved successfully!");
+  };
+
+  const handleSaveWhyChoose = () => {
+    updateWhyChoose(wcTitle, wcDescription, wcFeatures);
+    alert("Why Choose settings saved successfully!");
+  };
+
+  const handleSaveCategories = () => {
+    updateCategories(cats);
+    alert("Categories saved successfully!");
+  };
+
+  const handleSaveGifting = () => {
+    updateGifting(gTitle, gDescription);
+    alert("Gifting settings saved successfully!");
+  };
+
+  const handleSaveAbout = () => {
+    updateAboutStory(abStoryTitle, abStorySubtitle);
+    updateAboutFounder(abFounderName, abFounderText);
+    updateAboutMeaning(abMeaningTitle, abMeaningSubtitle, abMeaningT1, abMeaningT2, abMeaningT3);
+    updateAboutRoots(abRootsTitle, abRootsT1, abRootsT2);
+    updateAboutStats(
+      abS1Num, abS1Title, abS1Desc,
+      abS2Num, abS2Title, abS2Desc,
+      abS3Num, abS3Title, abS3Desc
+    );
+    alert("About & Brand Story settings saved successfully!");
+  };
+
+  const handleAddFeature = () => {
+    if (newFeature && !wcFeatures.includes(newFeature)) {
+      setWcFeatures([...wcFeatures, newFeature]);
+      setNewFeature("");
+    }
+  };
+
+  const handleRemoveFeature = (f: string) => {
+    setWcFeatures(wcFeatures.filter(feature => feature !== f));
+  };
+
+  const handleCatChange = (index: number, field: keyof CategoryItem, value: string) => {
+    const updatedCats = [...cats];
+    updatedCats[index] = { ...updatedCats[index], [field]: value };
+    setCats(updatedCats);
+  };
+
+  const handleAddTestimonial = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tName || !tContent) return;
+    addTestimonial({ name: tName, role: tRole || "Verified Buyer", content: tContent, rating: tRating });
+    setTName("");
+    setTRole("");
+    setTContent("");
+    setTRating(5);
+    setIsAddingTestimonial(false);
+    alert("Testimonial added successfully!");
+  };
+
+  const handleUpdateTestimonial = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTestimonial || !tName || !tContent) return;
+    updateTestimonial(editingTestimonial.id, { name: tName, role: tRole, content: tContent, rating: tRating });
+    setEditingTestimonial(null);
+    setTName("");
+    setTRole("");
+    setTContent("");
+    setTRating(5);
+    alert("Testimonial updated successfully!");
+  };
+
+  const startEditTestimonial = (t: TestimonialItem) => {
+    setEditingTestimonial(t);
+    setIsAddingTestimonial(false);
+    setTName(t.name);
+    setTRole(t.role);
+    setTContent(t.content);
+    setTRating(t.rating);
+  };
+
+  const cancelTestimonialForm = () => {
+    setEditingTestimonial(null);
+    setIsAddingTestimonial(false);
+    setTName("");
+    setTRole("");
+    setTContent("");
+    setTRating(5);
+  };
+
+  const handleDeleteTestimonial = (id: number) => {
+    if (confirm("Are you sure you want to delete this testimonial?")) {
+      deleteTestimonial(id);
+    }
+  };
+
+  // Calculate live analytics
+  const activeOrders = allOrders.filter(o => o.status !== "Cancelled");
+  const totalRevenue = activeOrders.reduce((acc, curr) => acc + curr.total, 0);
+  const ordersCount = allOrders.length;
+  const customersCount = allUsers.length;
+  const productsCount = products.length;
+
   const stats = [
-    { name: 'Total Revenue', value: '₹14,50,000', change: '+12.5%', icon: DollarSign },
-    { name: 'Total Orders', value: '1,425', change: '+18.2%', icon: Package },
-    { name: 'Total Customers', value: '8,234', change: '+4.3%', icon: Users },
-    { name: 'Products Sold', value: '12,500', change: '+24.5%', icon: ShoppingBag },
+    { name: "Total Revenue", value: `₹${totalRevenue.toLocaleString()}`, icon: IndianRupee, color: "text-emerald-600 bg-emerald-50 border-emerald-100" },
+    { name: "Total Orders", value: ordersCount, icon: ShoppingBag, color: "text-blue-600 bg-blue-50 border-blue-100" },
+    { name: "Active Customers", value: customersCount, icon: Users, color: "text-indigo-600 bg-indigo-50 border-indigo-100" },
+    { name: "Catalog Products", value: productsCount, icon: Cookie, color: "text-amber-600 bg-amber-50 border-amber-100" },
   ];
 
-  const recentOrders = [
-    { id: '#ORD-8X9Y2Z', customer: 'John Doe', date: 'Today, 10:45 AM', status: 'Processing', total: '₹4,097' },
-    { id: '#ORD-7A2B4C', customer: 'Emma Roberts', date: 'Today, 09:12 AM', status: 'Shipped', total: '₹1,799' },
-    { id: '#ORD-9P1Q3R', customer: 'Michael Chen', date: 'Yesterday, 04:30 PM', status: 'Delivered', total: '₹3,499' },
-    { id: '#ORD-5L8M2N', customer: 'Sarah Jenkins', date: 'Yesterday, 11:15 AM', status: 'Delivered', total: '₹598' },
+  const sections = [
+    { id: "hero", label: "Hero & Announcement" },
+    { id: "bestsellers", label: "Best Sellers Header" },
+    { id: "whychoose", label: "Why Choose Section" },
+    { id: "categories", label: "Featured Categories" },
+    { id: "gifting", label: "Gifting Section" },
+    { id: "testimonials", label: "Customer Reviews" },
+    { id: "about", label: "About & Brand Story" },
   ];
 
   return (
-    <div className="animate-in fade-in duration-500">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-brand-brown">Dashboard</h1>
-        <p className="text-brand-text-secondary">Overview of your store's performance.</p>
+    <div className="max-w-6xl space-y-8 animate-in fade-in duration-500 pb-16">
+      <div>
+        <h1 className="text-3xl font-bold text-brand-brown font-serif">Dashboard</h1>
+        <p className="text-brand-text-secondary mt-1">Manage global website settings and monitor activity</p>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* Analytics Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.name} className="bg-white p-6 rounded-2xl shadow-sm border border-brand-brown/5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10 h-10 rounded-full bg-brand-light flex items-center justify-center text-brand-brown">
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className="flex items-center text-green-600 text-sm font-bold">
-                  <span>{stat.change}</span>
-                  <ArrowUpRight className="w-4 h-4 ml-1" />
-                </div>
+            <div key={stat.name} className="p-6 bg-white rounded-2xl border border-brand-brown/5 shadow-sm flex items-center space-x-4">
+              <div className={`p-3 rounded-xl border ${stat.color.split(' ').slice(1).join(' ')}`}>
+                <Icon className={`w-6 h-6 ${stat.color.split(' ')[0]}`} />
               </div>
-              <p className="text-brand-text-secondary text-sm font-medium mb-1">{stat.name}</p>
-              <h3 className="text-2xl font-bold text-brand-brown">{stat.value}</h3>
+              <div>
+                <p className="text-xs font-semibold text-brand-text-secondary uppercase tracking-wider">{stat.name}</p>
+                <p className="text-2xl font-bold text-brand-text-primary mt-1 font-serif">{stat.value}</p>
+              </div>
             </div>
           );
         })}
       </div>
 
-      {/* Recent Orders Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-brand-brown/5 overflow-hidden">
-        <div className="p-6 border-b border-brand-brown/5 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-brand-brown">Recent Orders</h2>
-          <button className="text-brand-gold hover:text-brand-brown text-sm font-bold transition-colors">View All</button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-brand-light/50 text-brand-text-secondary text-sm uppercase tracking-wider">
-                <th className="p-4 font-bold border-b border-brand-brown/5">Order ID</th>
-                <th className="p-4 font-bold border-b border-brand-brown/5">Customer</th>
-                <th className="p-4 font-bold border-b border-brand-brown/5">Date</th>
-                <th className="p-4 font-bold border-b border-brand-brown/5">Status</th>
-                <th className="p-4 font-bold border-b border-brand-brown/5">Total</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-brand-brown/5">
-              {recentOrders.map((order) => (
-                <tr key={order.id} className="hover:bg-brand-light/30 transition-colors">
-                  <td className="p-4 font-medium text-brand-brown">{order.id}</td>
-                  <td className="p-4 text-brand-text-secondary">{order.customer}</td>
-                  <td className="p-4 text-brand-text-secondary">{order.date}</td>
-                  <td className="p-4">
-                    <span className={`px-3 py-1 text-xs font-bold rounded-full ${
-                      order.status === 'Processing' ? 'bg-yellow-100 text-yellow-800' :
-                      order.status === 'Shipped' ? 'bg-blue-100 text-blue-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="p-4 font-bold text-brand-brown">{order.total}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Storefront Settings customizer panel */}
+      <div className="bg-white rounded-2xl shadow-sm border border-brand-brown/10 overflow-hidden flex flex-col md:flex-row min-h-[500px]">
+        {/* Left Nav */}
+        <aside className="w-full md:w-64 border-r border-brand-brown/10 bg-brand-light/40 flex-shrink-0 p-4 space-y-1">
+          <p className="text-[10px] font-bold text-brand-text-secondary/70 uppercase tracking-widest mb-3 ml-3 flex items-center">
+            <Settings className="w-3.5 h-3.5 mr-1" /> Homepage Sections
+          </p>
+          {sections.map(sec => (
+            <button
+              key={sec.id}
+              onClick={() => {
+                setActiveSection(sec.id);
+                cancelTestimonialForm();
+              }}
+              className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                activeSection === sec.id
+                  ? "bg-brand-brown text-white shadow-sm"
+                  : "text-brand-text-secondary hover:bg-brand-light"
+              }`}
+            >
+              {sec.label}
+            </button>
+          ))}
+        </aside>
+
+        {/* Right Editor Form */}
+        <main className="flex-1 p-6 sm:p-8 space-y-6">
+          
+          {/* Hero & Announcement */}
+          {activeSection === "hero" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">Hero & Header Settings</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-brand-text-primary mb-1">
+                    Announcement Bar Text
+                  </label>
+                  <textarea
+                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none min-h-[85px] text-sm"
+                    value={announcement}
+                    onChange={(e) => setAnnouncement(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-brand-text-primary mb-1">
+                    Hero Section Title (use \n for line breaks)
+                  </label>
+                  <textarea
+                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none min-h-[85px] text-sm font-serif"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-brand-text-primary mb-1">
+                    Hero Section Subtitle
+                  </label>
+                  <textarea
+                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none min-h-[100px] text-sm"
+                    value={subtitle}
+                    onChange={(e) => setSubtitle(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button 
+                  onClick={handleSaveHero}
+                  className="flex items-center space-x-2 px-6 py-2.5 bg-brand-brown text-white rounded-xl hover:bg-brand-gold transition-colors font-semibold cursor-pointer text-sm"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save Hero Section</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Best Sellers Header */}
+          {activeSection === "bestsellers" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">Best Sellers Section Header</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-brand-text-primary mb-1">
+                    Section Title
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-sm font-semibold"
+                    value={bsTitle}
+                    onChange={(e) => setBsTitle(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-brand-text-primary mb-1">
+                    Section Subtitle
+                  </label>
+                  <textarea
+                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none min-h-[80px] text-sm"
+                    value={bsSubtitle}
+                    onChange={(e) => setBsSubtitle(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button 
+                  onClick={handleSaveBestSellers}
+                  className="flex items-center space-x-2 px-6 py-2.5 bg-brand-brown text-white rounded-xl hover:bg-brand-gold transition-colors font-semibold cursor-pointer text-sm"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save Best Sellers</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Why Choose Section */}
+          {activeSection === "whychoose" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">Why Choose Us Section</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-brand-text-primary mb-1">
+                    Section Title
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-sm font-semibold"
+                    value={wcTitle}
+                    onChange={(e) => setWcTitle(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-brand-text-primary mb-1">
+                    Section Description Text
+                  </label>
+                  <textarea
+                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none min-h-[100px] text-sm"
+                    value={wcDescription}
+                    onChange={(e) => setWcDescription(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-brand-text-primary mb-1">
+                    Add Feature Badge
+                  </label>
+                  <div className="flex space-x-2 mb-2">
+                    <input
+                      type="text"
+                      className="flex-1 px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-sm"
+                      placeholder="e.g. Organic Millet Sweetened"
+                      value={newFeature}
+                      onChange={(e) => setNewFeature(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleAddFeature()}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddFeature}
+                      className="px-4 py-2 bg-brand-brown text-white hover:bg-brand-gold rounded-xl transition-colors text-sm font-semibold cursor-pointer"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2 mt-3 p-3 bg-brand-light/50 border border-brand-brown/5 rounded-xl min-h-[60px]">
+                    {wcFeatures.map((f, i) => (
+                      <span key={i} className="px-3 py-1 bg-brand-brown text-white text-xs font-bold rounded-full flex items-center shadow-sm">
+                        {f}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveFeature(f)}
+                          className="ml-2 hover:text-brand-gold transition-colors text-xs font-bold cursor-pointer"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    ))}
+                    {wcFeatures.length === 0 && (
+                      <span className="text-xs text-brand-text-secondary/70 italic m-auto">No features added yet.</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button 
+                  onClick={handleSaveWhyChoose}
+                  className="flex items-center space-x-2 px-6 py-2.5 bg-brand-brown text-white rounded-xl hover:bg-brand-gold transition-colors font-semibold cursor-pointer text-sm"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save Why Choose</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Featured Categories */}
+          {activeSection === "categories" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">Featured Categories (4 circles)</h2>
+              
+              <div className="space-y-6">
+                {cats.map((cat, idx) => (
+                  <div key={idx} className="p-4 bg-brand-light/30 border border-brand-brown/10 rounded-2xl space-y-3 shadow-inner">
+                    <span className="font-bold text-xs text-brand-gold uppercase tracking-wider block mb-1">Category {idx + 1}</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold text-brand-text-secondary mb-1">Category Name</label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-xs font-semibold"
+                          value={cat.name}
+                          onChange={(e) => handleCatChange(idx, "name", e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-brand-text-secondary mb-1">Image Path / URL</label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-xs"
+                          value={cat.image}
+                          onChange={(e) => handleCatChange(idx, "image", e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-brand-text-secondary mb-1">Shop Route Link</label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-xs"
+                          value={cat.link}
+                          onChange={(e) => handleCatChange(idx, "link", e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button 
+                  onClick={handleSaveCategories}
+                  className="flex items-center space-x-2 px-6 py-2.5 bg-brand-brown text-white rounded-xl hover:bg-brand-gold transition-colors font-semibold cursor-pointer text-sm"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save Categories</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Gifting Section */}
+          {activeSection === "gifting" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">Gifting Section</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-brand-text-primary mb-1">
+                    Gifting Heading (Title)
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-sm font-semibold"
+                    value={gTitle}
+                    onChange={(e) => setGTitle(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-brand-text-primary mb-1">
+                    Gifting Description Text
+                  </label>
+                  <textarea
+                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none min-h-[110px] text-sm"
+                    value={gDescription}
+                    onChange={(e) => setGDescription(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button 
+                  onClick={handleSaveGifting}
+                  className="flex items-center space-x-2 px-6 py-2.5 bg-brand-brown text-white rounded-xl hover:bg-brand-gold transition-colors font-semibold cursor-pointer text-sm"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save Gifting</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Customer Reviews (Testimonials CRUD) */}
+          {activeSection === "testimonials" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              
+              {/* Testimonials List view */}
+              {!isAddingTestimonial && !editingTestimonial && (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center border-b border-brand-brown/10 pb-2">
+                    <h2 className="text-xl font-bold text-brand-brown font-serif">Customer Testimonials</h2>
+                    <button
+                      onClick={() => setIsAddingTestimonial(true)}
+                      className="flex items-center space-x-1 px-3 py-1.5 bg-brand-brown text-white hover:bg-brand-gold rounded-xl transition-all text-xs font-semibold cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Add Review</span>
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {testimonialsList.map(t => (
+                      <div key={t.id} className="p-4 bg-brand-light/40 border border-brand-brown/5 rounded-2xl flex justify-between items-start shadow-sm">
+                        <div className="space-y-2 flex-1 min-w-0 pr-4">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-bold text-sm text-brand-brown">{t.name}</span>
+                            <span className="text-[10px] bg-brand-gold/10 text-brand-gold border border-brand-gold/20 px-2 py-0.5 rounded font-bold">{t.role}</span>
+                          </div>
+                          <p className="text-xs text-brand-text-secondary leading-relaxed italic">"{t.content}"</p>
+                          <div className="flex text-amber-500">
+                            {[...Array(t.rating)].map((_, i) => (
+                              <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="flex space-x-2 flex-shrink-0">
+                          <button
+                            onClick={() => startEditTestimonial(t)}
+                            className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                            title="Edit"
+                          >
+                            <Settings className="w-4.5 h-4.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTestimonial(t.id)}
+                            className="text-rose-500 hover:text-rose-700 p-2 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4.5 h-4.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {testimonialsList.length === 0 && (
+                      <p className="text-xs text-brand-text-secondary italic text-center py-6">No testimonials available. Add some reviews above!</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Add / Edit Testimonial Form */}
+              {(isAddingTestimonial || editingTestimonial) && (
+                <form 
+                  onSubmit={isAddingTestimonial ? handleAddTestimonial : handleUpdateTestimonial}
+                  className="space-y-4 p-5 border border-brand-brown/10 rounded-2xl bg-brand-light/35 shadow-inner"
+                >
+                  <h3 className="font-serif font-bold text-lg text-brand-brown">
+                    {isAddingTestimonial ? "Add New Review" : "Edit Review Info"}
+                  </h3>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-brand-text-primary mb-1">Customer Name *</label>
+                      <input
+                        type="text"
+                        required
+                        className="w-full px-4.5 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-xs font-semibold"
+                        value={tName}
+                        onChange={(e) => setTName(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-brand-text-primary mb-1">Badge Role (e.g. Verified Buyer)</label>
+                      <input
+                        type="text"
+                        className="w-full px-4.5 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-xs"
+                        value={tRole}
+                        onChange={(e) => setTRole(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-brand-text-primary mb-1">Rating Stars</label>
+                    <select
+                      className="px-4.5 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-xs"
+                      value={tRating}
+                      onChange={(e) => setTRating(Number(e.target.value))}
+                    >
+                      {[5, 4, 3, 2, 1].map(n => (
+                        <option key={n} value={n}>{n} Stars</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-brand-text-primary mb-1">Review Content *</label>
+                    <textarea
+                      required
+                      className="w-full px-4.5 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none min-h-[90px] text-xs leading-relaxed"
+                      value={tContent}
+                      onChange={(e) => setTContent(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex justify-end space-x-3 pt-3">
+                    <button
+                      type="button"
+                      onClick={cancelTestimonialForm}
+                      className="px-4 py-2 bg-white text-brand-text-secondary border border-brand-brown/15 rounded-xl hover:bg-brand-light font-semibold text-xs cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex items-center space-x-1.5 px-5 py-2 bg-brand-brown text-white hover:bg-brand-gold rounded-xl transition-colors font-bold text-xs cursor-pointer"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>{isAddingTestimonial ? "Add Testimonial" : "Update Testimonial"}</span>
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          )}
+
+          {/* About & Brand Story */}
+          {activeSection === "about" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">About & Brand Story Settings</h2>
+              
+              <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+                
+                {/* Story Hero */}
+                <div className="p-4 bg-brand-light/30 border border-brand-brown/5 rounded-2xl space-y-3">
+                  <span className="font-bold text-xs text-brand-gold uppercase tracking-wider block">1. Story Hero Header</span>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-text-secondary mb-1">Hero Title</label>
+                    <input type="text" className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs font-semibold" value={abStoryTitle} onChange={e => setAbStoryTitle(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-text-secondary mb-1">Hero Subtitle</label>
+                    <input type="text" className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs" value={abStorySubtitle} onChange={e => setAbStorySubtitle(e.target.value)} />
+                  </div>
+                </div>
+
+                {/* Founder Info */}
+                <div className="p-4 bg-brand-light/30 border border-brand-brown/5 rounded-2xl space-y-3">
+                  <span className="font-bold text-xs text-brand-gold uppercase tracking-wider block">2. Founder Profile & Narrative</span>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-text-secondary mb-1">Founder Full Name</label>
+                    <input type="text" className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs font-semibold" value={abFounderName} onChange={e => setAbFounderName(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-text-secondary mb-1">Founder Journey Narrative</label>
+                    <textarea className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs min-h-[160px] leading-relaxed" value={abFounderText} onChange={e => setAbFounderText(e.target.value)} />
+                  </div>
+                </div>
+
+                {/* Brand Name Meaning */}
+                <div className="p-4 bg-brand-light/30 border border-brand-brown/5 rounded-2xl space-y-3">
+                  <span className="font-bold text-xs text-brand-gold uppercase tracking-wider block">3. Brand Name Meaning</span>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-text-secondary mb-1">Meaning Title</label>
+                    <input type="text" className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs font-semibold" value={abMeaningTitle} onChange={e => setAbMeaningTitle(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-text-secondary mb-1">Meaning Subtitle</label>
+                    <input type="text" className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs font-semibold text-brand-brown" value={abMeaningSubtitle} onChange={e => setAbMeaningSubtitle(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-text-secondary mb-1">Meaning Text Block 1</label>
+                    <textarea className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs min-h-[60px]" value={abMeaningT1} onChange={e => setAbMeaningT1(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-text-secondary mb-1">Meaning Text Block 2</label>
+                    <textarea className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs min-h-[60px]" value={abMeaningT2} onChange={e => setAbMeaningT2(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-text-secondary mb-1">Meaning Text Block 3</label>
+                    <textarea className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs min-h-[60px]" value={abMeaningT3} onChange={e => setAbMeaningT3(e.target.value)} />
+                  </div>
+                </div>
+
+                {/* Nashik Roots */}
+                <div className="p-4 bg-brand-light/30 border border-brand-brown/5 rounded-2xl space-y-3">
+                  <span className="font-bold text-xs text-brand-gold uppercase tracking-wider block">4. Nashik Roots Story</span>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-text-secondary mb-1">Roots Heading</label>
+                    <input type="text" className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs font-semibold" value={abRootsTitle} onChange={e => setAbRootsTitle(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-text-secondary mb-1">Roots Paragraph 1</label>
+                    <textarea className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs min-h-[80px]" value={abRootsT1} onChange={e => setAbRootsT1(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-brand-text-secondary mb-1">Roots Paragraph 2</label>
+                    <textarea className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs min-h-[80px]" value={abRootsT2} onChange={e => setAbRootsT2(e.target.value)} />
+                  </div>
+                </div>
+
+                {/* Stats Counters */}
+                <div className="p-4 bg-brand-light/30 border border-brand-brown/5 rounded-2xl space-y-4">
+                  <span className="font-bold text-xs text-brand-gold uppercase tracking-wider block">5. Quality Statistics Counters</span>
+                  
+                  {/* Stat 1 */}
+                  <div className="p-3 bg-white border border-brand-brown/5 rounded-xl space-y-2">
+                    <span className="font-semibold text-xs text-brand-brown block">Counter Card 1</span>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="block text-[10px] font-bold text-brand-text-secondary mb-0.5">Big Number</label>
+                        <input type="text" className="w-full px-2 py-1 border border-brand-brown/20 rounded-lg text-xs" value={abS1Num} onChange={e => setAbS1Num(e.target.value)} />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-[10px] font-bold text-brand-text-secondary mb-0.5">Title</label>
+                        <input type="text" className="w-full px-2 py-1 border border-brand-brown/20 rounded-lg text-xs font-bold" value={abS1Title} onChange={e => setAbS1Title(e.target.value)} />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-brand-text-secondary mb-0.5">Description</label>
+                      <input type="text" className="w-full px-2 py-1 border border-brand-brown/20 rounded-lg text-xs" value={abS1Desc} onChange={e => setAbS1Desc(e.target.value)} />
+                    </div>
+                  </div>
+
+                  {/* Stat 2 */}
+                  <div className="p-3 bg-white border border-brand-brown/5 rounded-xl space-y-2">
+                    <span className="font-semibold text-xs text-brand-brown block">Counter Card 2</span>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="block text-[10px] font-bold text-brand-text-secondary mb-0.5">Big Number</label>
+                        <input type="text" className="w-full px-2 py-1 border border-brand-brown/20 rounded-lg text-xs" value={abS2Num} onChange={e => setAbS2Num(e.target.value)} />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-[10px] font-bold text-brand-text-secondary mb-0.5">Title</label>
+                        <input type="text" className="w-full px-2 py-1 border border-brand-brown/20 rounded-lg text-xs font-bold" value={abS2Title} onChange={e => setAbS2Title(e.target.value)} />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-brand-text-secondary mb-0.5">Description</label>
+                      <input type="text" className="w-full px-2 py-1 border border-brand-brown/20 rounded-lg text-xs" value={abS2Desc} onChange={e => setAbS2Desc(e.target.value)} />
+                    </div>
+                  </div>
+
+                  {/* Stat 3 */}
+                  <div className="p-3 bg-white border border-brand-brown/5 rounded-xl space-y-2">
+                    <span className="font-semibold text-xs text-brand-brown block">Counter Card 3</span>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="block text-[10px] font-bold text-brand-text-secondary mb-0.5">Big Number</label>
+                        <input type="text" className="w-full px-2 py-1 border border-brand-brown/20 rounded-lg text-xs" value={abS3Num} onChange={e => setAbS3Num(e.target.value)} />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-[10px] font-bold text-brand-text-secondary mb-0.5">Title</label>
+                        <input type="text" className="w-full px-2 py-1 border border-brand-brown/20 rounded-lg text-xs font-bold" value={abS3Title} onChange={e => setAbS3Title(e.target.value)} />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-brand-text-secondary mb-0.5">Description</label>
+                      <input type="text" className="w-full px-2 py-1 border border-brand-brown/20 rounded-lg text-xs" value={abS3Desc} onChange={e => setAbS3Desc(e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button 
+                  onClick={handleSaveAbout}
+                  className="flex items-center space-x-2 px-6 py-2.5 bg-brand-brown text-white rounded-xl hover:bg-brand-gold transition-colors font-semibold cursor-pointer text-sm"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Save About Settings</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+        </main>
       </div>
     </div>
   );

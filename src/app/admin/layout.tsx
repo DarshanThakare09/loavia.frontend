@@ -1,13 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, ShoppingBag, Users, Settings, Tag, LogOut, Menu, X, ArrowLeft } from "lucide-react";
+import { useAdminAuthStore } from "@/store/adminAuthStore";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { isAdminAuthenticated, logout } = useAdminAuthStore();
+
+  const isLoginPage = pathname?.startsWith('/admin/login');
+
+  useEffect(() => {
+    setMounted(true);
+    try {
+      if (localStorage.getItem("mockAdminAuth") === "true") {
+        useAdminAuthStore.getState().login();
+      } else if (!isAdminAuthenticated && !isLoginPage) {
+        router.push('/admin/login');
+      }
+    } catch (err) {}
+  }, [isAdminAuthenticated, isLoginPage, router]);
 
   const navItems = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -16,6 +33,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Customers", href: "/admin/users", icon: Users },
     { name: "Settings", href: "#", icon: Settings },
   ];
+
+  if (!mounted) {
+    return null;
+  }
+
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
+
+  if (!isAdminAuthenticated) {
+    return (
+      <div className="min-h-screen bg-brand-light flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-brand-gold border-t-brand-brown"></div>
+          <p className="text-brand-brown font-medium">Checking authorization...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-brand-light flex">
@@ -67,7 +103,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <ArrowLeft className="w-5 h-5" />
             <span>Storefront</span>
           </Link>
-          <button className="w-full flex items-center space-x-3 px-4 py-3 text-brand-cream/80 hover:bg-white/10 hover:text-white rounded-xl transition-colors">
+          <button 
+            onClick={() => {
+              localStorage.removeItem("mockAdminAuth");
+              logout();
+              router.push('/admin/login');
+            }}
+            className="w-full flex items-center space-x-3 px-4 py-3 text-brand-cream/80 hover:bg-white/10 hover:text-white rounded-xl transition-colors"
+          >
             <LogOut className="w-5 h-5" />
             <span>Logout</span>
           </button>

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Filter, ChevronDown, ShoppingCart, Star, Heart } from "lucide-react";
-import { PRODUCTS } from "@/lib/mockData";
+import { useProductStore } from "@/store/productStore";
 import { useCartStore } from "@/store/cartStore";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/authStore";
@@ -19,9 +19,18 @@ export default function ShopPage() {
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
   const { user, toggleWishlist } = useAuthStore();
+  
+  const { products: storeProducts } = useProductStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const products = mounted ? storeProducts : [];
 
   // Filtering Logic
-  const filteredProducts = PRODUCTS.filter(product => {
+  const filteredProducts = products.filter(product => {
     if (selectedCategory !== "All" && product.category !== selectedCategory) return false;
     if (selectedFlavors.length > 0 && !selectedFlavors.some(tag => product.tags.includes(tag) || (product as any).moods?.includes(tag))) return false;
     return true;
@@ -44,7 +53,7 @@ export default function ShopPage() {
     addItem({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: product.discountPrice || product.price,
       image: product.image,
       quantity: 1
     });
@@ -162,6 +171,11 @@ export default function ShopPage() {
                       fill
                       className="object-cover transform group-hover:scale-105 transition-transform duration-500"
                     />
+                    {product.inStock === false && (
+                      <div className="absolute inset-0 bg-black/40 z-10 flex items-center justify-center">
+                        <span className="bg-brand-error text-white font-bold text-xs uppercase px-3 py-1.5 rounded-lg shadow-md tracking-wider">Out of Stock</span>
+                      </div>
+                    )}
                   </Link>
 
                   <div className="p-5">
@@ -178,14 +192,27 @@ export default function ShopPage() {
                     </div>
 
                     <div className="flex justify-between items-center mt-4 pt-4 border-t border-brand-brown/10">
-                      <span className="font-bold text-xl text-brand-brown">₹{product.price}</span>
-                      <button 
-                        onClick={() => handleAddToCart(product)}
-                        className="p-2.5 rounded-full bg-brand-light text-brand-brown hover:bg-brand-brown hover:text-white transition-colors"
-                        aria-label="Add to cart"
-                      >
-                        <ShoppingCart className="w-5 h-5" />
-                      </button>
+                      <div className="flex flex-col">
+                        {product.discountPrice ? (
+                          <>
+                            <span className="font-bold text-xl text-brand-brown">₹{product.discountPrice}</span>
+                            <span className="text-sm line-through text-brand-text-secondary">₹{product.price}</span>
+                          </>
+                        ) : (
+                          <span className="font-bold text-xl text-brand-brown">₹{product.price}</span>
+                        )}
+                      </div>
+                      {product.inStock === false ? (
+                        <span className="text-xs font-bold text-brand-error uppercase tracking-wider bg-brand-error/10 px-2.5 py-1 rounded-md border border-brand-error/20">Out of Stock</span>
+                      ) : (
+                        <button 
+                          onClick={() => handleAddToCart(product)}
+                          className="p-2.5 rounded-full bg-brand-light text-brand-brown hover:bg-brand-brown hover:text-white transition-colors cursor-pointer"
+                          aria-label="Add to cart"
+                        >
+                          <ShoppingCart className="w-5 h-5" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -7,7 +7,8 @@ import { Search, User, ShoppingCart, Menu, X } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
-import { PRODUCTS } from "@/lib/mockData";
+import { useProductStore } from "@/store/productStore";
+import { useSiteStore } from "@/store/siteStore";
 
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -18,6 +19,8 @@ export function Navbar() {
 
   const { items, openMiniCart } = useCartStore();
   const { isAuthenticated } = useAuthStore();
+  const { products } = useProductStore();
+  const { announcementText } = useSiteStore();
   
   // Prevent hydration mismatch
   const [mounted, setMounted] = useState(false);
@@ -34,8 +37,8 @@ export function Navbar() {
   }, []);
 
   const searchResults = searchQuery.trim() === "" 
-    ? PRODUCTS.slice(0, 4) 
-    : PRODUCTS.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 4);
+    ? products.slice(0, 4) 
+    : products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 4);
 
   const totalItems = mounted ? items.reduce((acc, item) => acc + item.quantity, 0) : 0;
   const authLink = mounted && isAuthenticated ? "/profile" : "/auth";
@@ -51,11 +54,13 @@ export function Navbar() {
   return (
     <>
       {/* Announcement Bar */}
-      <div className="bg-brand-brown text-brand-gold text-[11px] sm:text-xs font-medium py-1.5 tracking-wider flex w-full relative z-50">
-        <marquee scrollamount="10" className="w-full" onMouseOver={(e: any) => e.target.stop()} onMouseOut={(e: any) => e.target.start()}>
-          ✨ Free shipping on all orders over ₹999! Taste the magic of Nashik. ✨ &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 100% Organic, Zero Preservatives &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; Use code LOAVIA10 for 10% off your first order! ✨
-        </marquee>
-      </div>
+      {announcementText && (
+        <div className="bg-brand-brown text-brand-gold text-[11px] sm:text-xs font-medium py-1.5 tracking-wider flex w-full relative z-50">
+          <marquee scrollamount="10" className="w-full" onMouseOver={(e: any) => e.target.stop()} onMouseOut={(e: any) => e.target.start()}>
+            {announcementText}
+          </marquee>
+        </div>
+      )}
 
       <header className="sticky top-0 left-0 right-0 z-40 bg-brand-cream/60 backdrop-blur-md border-b border-brand-brown/10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

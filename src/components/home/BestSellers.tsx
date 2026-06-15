@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart, Heart } from "lucide-react";
@@ -9,6 +9,8 @@ import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
+import { useProductStore } from "@/store/productStore";
+import { useSiteStore } from "@/store/siteStore";
 import { toast } from "sonner";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -16,44 +18,17 @@ gsap.registerPlugin(ScrollTrigger);
 export function BestSellers() {
   const { addItem } = useCartStore();
   const { user, toggleWishlist } = useAuthStore();
+  const { products: storeProducts } = useProductStore();
+  const { bestSellersTitle, bestSellersSubtitle } = useSiteStore();
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  const products = [
-    {
-      id: 1,
-      name: "	Choco Crunch Millet Cookies ",
-      price: 299,
-      image: "/premium_cookie.png",
-      rating: 4.9,
-      reviews: 128,
-      badge: "Best Seller",
-    },
-    {
-      id: 2,
-      name: "	Almond Jaggery Millet Cookies ",
-      price: 349,
-      image: "/premium_cookie.png",
-      rating: 4.8,
-      reviews: 95,
-    },
-    {
-      id: 3,
-      name: "	Nut Overload Millet Cookies ",
-      price: 279,
-      image: "/premium_cookie.png",
-      rating: 4.7,
-      reviews: 64,
-    },
-    {
-      id: 4,
-      name: " Millet Nankhatai ",
-      price: 329,
-      image: "/premium_cookie.png",
-      rating: 4.9,
-      reviews: 112,
-      badge: "Popular",
-    },
-  ];
+  const popularProducts = storeProducts.filter(p => p.isPopular);
+  const products = mounted 
+    ? (popularProducts.length > 0 ? popularProducts.slice(0, 4) : storeProducts.slice(0, 4)) 
+    : [];
 
   useGSAP(() => {
     gsap.fromTo(
@@ -78,8 +53,8 @@ export function BestSellers() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-end mb-12">
           <div>
-            <h2 className="text-4xl font-serif font-bold text-brand-brown mb-4">Our Best Sellers</h2>
-            <p className="text-brand-text-secondary">The cookies everyone is talking about.</p>
+            <h2 className="text-4xl font-serif font-bold text-brand-brown mb-4">{bestSellersTitle}</h2>
+            <p className="text-brand-text-secondary">{bestSellersSubtitle}</p>
           </div>
           <Link href="/shop" className="hidden sm:inline-block font-medium text-brand-gold hover:text-brand-brown transition-colors">
             View All →
@@ -89,11 +64,6 @@ export function BestSellers() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {products.map((product) => (
             <div key={product.id} className="product-card group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
-              {product.badge && (
-                <div className="absolute top-4 left-4 z-10 bg-brand-gold text-white text-xs font-bold px-3 py-1 rounded-full">
-                  {product.badge}
-                </div>
-              )}
               <div className="absolute top-4 right-4 z-10">
                 <button 
                   onClick={(e) => {
@@ -136,13 +106,22 @@ export function BestSellers() {
                 </div>
 
                 <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
-                  <span className="font-bold text-xl text-brand-brown">₹{product.price}</span>
+                  <div className="flex flex-col">
+                    {product.discountPrice ? (
+                      <>
+                        <span className="font-bold text-xl text-brand-brown">₹{product.discountPrice}</span>
+                        <span className="text-sm line-through text-brand-text-secondary">₹{product.price}</span>
+                      </>
+                    ) : (
+                      <span className="font-bold text-xl text-brand-brown">₹{product.price}</span>
+                    )}
+                  </div>
                   <button 
                     onClick={() => {
                       addItem({
                         id: product.id.toString(),
                         name: product.name,
-                        price: product.price,
+                        price: product.discountPrice || product.price,
                         image: product.image,
                         quantity: 1
                       });

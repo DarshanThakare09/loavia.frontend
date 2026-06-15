@@ -1,8 +1,19 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useProductStore } from "@/store/productStore";
 
 export default function ProductsPage() {
+  const { products: storeProducts } = useProductStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const products = mounted ? storeProducts : [];
+
   return (
     <div className="bg-brand-cream min-h-screen py-20 px-4">
 
@@ -20,38 +31,20 @@ export default function ProductsPage() {
 
       {/* PRODUCT GRID */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-
-        {[
-          "Chocolate Millet Cookies",
-          "Almond Jaggery Millet Cookies",
-          "Jeera Millet Cookies",
-          "Coconut Millet Cookies",
-          "Choco Crunch Millet Cookies",
-          "Cheese Chilly Millet Cookies",
-          "Nut Overload Millet Cookies",
-          "Walnut Millet Cookies",
-          "Multi Millet Cardamom Cookies",
-          "Teekha Masala Millet Cookies",
-          "Finger Bite Millet Cookies",
-          "Kesar Ilaayachee Millet Cookies",
-          "Multi Millet Butter Cookies",
-          "Lemon Berry Millet Cookies",
-          "Millet Nankhatai"
-        ].map((item, index) => (
+        {mounted && products.map((item, index) => (
           <div
-            key={index}
+            key={item.id}
             className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition p-6"
           >
             <h2 className="text-lg font-semibold text-brand-brown mb-2">
-              {index + 1}. {item}
+              {index + 1}. {item.name}
             </h2>
 
             <p className="text-sm text-brand-text-secondary">
-              Premium handcrafted millet cookie made with love and wholesome ingredients.
+              {item.description}
             </p>
           </div>
         ))}
-
       </div>
 
       {/* HIGHLIGHTS SECTION */}
