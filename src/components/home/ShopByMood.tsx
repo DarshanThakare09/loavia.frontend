@@ -39,10 +39,10 @@ export function ShopByMood() {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   const moods = [
-    { id: "sweet", name: "Craving Sweet", icon: Heart, bgColor: "bg-[#FADCD9]", hoverBg: "#FFF0F0", borderHover: "border-[#FADCD9]", link: "/shop?mood=sweet" },
-    { id: "healthy", name: "Healthy Fix", icon: Sparkles, bgColor: "bg-[#D4E6B5]", hoverBg: "#F0F5EE", borderHover: "border-[#D4E6B5]", link: "/shop?mood=healthy" },
-    { id: "tea", name: "Perfect with Tea", icon: Coffee, bgColor: "bg-[#E6D4B5]", hoverBg: "#F7F0E5", borderHover: "border-[#E6D4B5]", link: "/shop?mood=tea" },
-    { id: "gifting", name: "Gifting", icon: PartyPopper, bgColor: "bg-[#F3D9FA]", hoverBg: "#F5F0FA", borderHover: "border-[#F3D9FA]", link: "/shop?mood=gifting" },
+    { id: "sweet", name: "Craving Sweet", icon: Heart, bgColor: "bg-[#FADCD9]", hoverBg: "#FFF0F0", borderHover: "border-[#FADCD9]", image: "/stuffed_cookie.png", link: "/shop?mood=sweet" },
+    { id: "healthy", name: "Healthy Fix", icon: Sparkles, bgColor: "bg-[#D4E6B5]", hoverBg: "#F0F5EE", borderHover: "border-[#D4E6B5]", image: "/vegan_cookie.png", link: "/shop?mood=healthy" },
+    { id: "tea", name: "Perfect with Tea", icon: Coffee, bgColor: "bg-[#E6D4B5]", hoverBg: "#F7F0E5", borderHover: "border-[#E6D4B5]", image: "/premium_cookie.png", link: "/shop?mood=tea" },
+    { id: "gifting", name: "Gifting", icon: PartyPopper, bgColor: "bg-[#F3D9FA]", hoverBg: "#F5F0FA", borderHover: "border-[#F3D9FA]", image: "/cookie_gift_box.png", link: "/shop?mood=gifting" },
   ];
 
   useEffect(() => {
@@ -160,12 +160,20 @@ export function ShopByMood() {
                     ${!isSelected ? 'hover:-translate-y-2 hover:scale-105 hover:shadow-[0_20px_60px_rgba(0,0,0,0.12)]' : ''}
                     focus:ring-2 focus:ring-brand-gold
                   `}
+                  style={{
+                    backgroundImage: `url('${mood.image}')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
                 >
+                  {/* Overlay for better text readability */}
+                  <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-b from-transparent via-transparent to-black/30 pointer-events-none" />
+                  
                   <div 
                     id={`icon-${mood.id}`}
                     className={`
-                      bg-white/60 p-5 rounded-full mb-6 
-                      transition-all duration-300 ease-out
+                      bg-white/80 p-5 rounded-full mb-6 
+                      transition-all duration-300 ease-out relative z-10
                       ${!isSelected ? 'group-hover:scale-[1.15] group-hover:rotate-[8deg]' : ''}
                     `}
                   >
@@ -174,7 +182,7 @@ export function ShopByMood() {
                   
                   <h3 
                     className={`
-                      text-lg md:text-xl font-bold transition-colors duration-[250ms]
+                      text-lg md:text-xl font-bold transition-colors duration-[250ms] relative z-10
                       ${isSelected || (!isSelected && isHovered) ? 'text-brand-gold' : 'text-brand-brown'}
                     `}
                   >
@@ -184,7 +192,7 @@ export function ShopByMood() {
                   <div 
                     className={`
                       mt-4 text-[10px] md:text-xs font-bold uppercase tracking-widest text-brand-brown
-                      transition-all duration-300 ease-out delay-100 h-4
+                      transition-all duration-300 ease-out delay-100 h-4 relative z-10
                       ${isSelected || (!isSelected && isHovered) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
                     `}
                   >

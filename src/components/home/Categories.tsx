@@ -205,6 +205,9 @@ export function Categories() {
             ))}
           </h2>
           <div className="cat-underline w-0 h-[3px] bg-brand-gold rounded-full"></div>
+          <p className="mt-6 text-brand-text-secondary max-w-2xl text-base md:text-lg leading-relaxed opacity-90">
+            Explore our carefully curated collections, each designed to delight your taste buds and satisfy your cravings.
+          </p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10">
