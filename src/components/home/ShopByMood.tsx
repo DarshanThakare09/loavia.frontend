@@ -154,7 +154,7 @@ export function ShopByMood() {
               >
                 <div 
                   className={`
-                    rounded-[2rem] p-6 md:p-8 h-full flex flex-col items-center justify-center text-center 
+                    ${mood.bgColor} rounded-[2rem] p-6 md:p-8 h-full flex flex-col items-center justify-center text-center 
                     transition-all duration-[350ms] ease-out relative overflow-hidden
                     ${isSelected ? 'ring-2 ring-brand-gold shadow-xl scale-105 filter brightness-95' : 'border-2 border-transparent'}
                     ${!isSelected ? 'hover:-translate-y-2 hover:scale-105 hover:shadow-[0_20px_60px_rgba(0,0,0,0.12)]' : ''}
@@ -164,7 +164,6 @@ export function ShopByMood() {
                     backgroundImage: `url('${mood.image}')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    backgroundColor: mood.bgColor.replace('bg-', '#'),
                   }}
                 >
                   {/* Overlay for better text readability */}
@@ -184,7 +183,7 @@ export function ShopByMood() {
                   <h3 
                     className={`
                       text-lg md:text-xl font-bold transition-colors duration-[250ms] relative z-10
-                      ${isSelected || (!isSelected && isHovered) ? 'text-brand-gold' : 'text-white drop-shadow-md'}
+                      ${isSelected || (!isSelected && isHovered) ? 'text-brand-gold' : 'text-brand-brown'}
                     `}
                   >
                     {mood.name}
@@ -192,7 +191,7 @@ export function ShopByMood() {
 
                   <div 
                     className={`
-                      mt-4 text-[10px] md:text-xs font-bold uppercase tracking-widest text-white drop-shadow-md
+                      mt-4 text-[10px] md:text-xs font-bold uppercase tracking-widest text-brand-brown
                       transition-all duration-300 ease-out delay-100 h-4 relative z-10
                       ${isSelected || (!isSelected && isHovered) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
                     `}

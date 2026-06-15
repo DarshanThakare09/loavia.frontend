@@ -225,17 +225,17 @@ export function Categories() {
                 <a 
                   href={category.link} 
                   onClick={(e) => handleCircleClick(e, category.link)}
-                  className="block relative rounded-full aspect-square overflow-hidden shadow-lg transition-all duration-300 group focus:outline-none focus:ring-4 focus:ring-white border-4 border-transparent"
+                  className="block relative rounded-full aspect-square overflow-hidden shadow-lg transition-all duration-300 group focus:outline-none focus:ring-4 focus:ring-brand-gold border-4 border-transparent"
                   style={{ backgroundColor: '#F5ECD7' }}
                   tabIndex={0}
                   aria-label={`Shop ${category.name}`}
                 >
-                  {/* SVG Ring Animation */}
+                  {/* SVG Gold Ring Animation */}
                   <svg className="absolute inset-0 w-full h-full z-20 pointer-events-none transform -rotate-90" viewBox="0 0 100 100">
                     <circle 
                       cx="50" cy="50" r="48" 
                       fill="none" 
-                      stroke={isHovered ? "#FFFFFF" : "#A0772A"} 
+                      stroke="#A0772A" 
                       strokeWidth="3"
                       strokeDasharray="301.59" /* 2 * PI * 48 */
                       strokeDashoffset={isHovered ? 0 : 301.59}
