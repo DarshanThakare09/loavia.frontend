@@ -39,8 +39,8 @@ interface ProductState {
 const defaultProducts: Product[] = initialProducts.map(p => ({
   ...p,
   discountPrice: null,
-  calories: '',
-  nutritionTable: [],
+  calories: p.calories || '',
+  nutritionTable: p.nutritionTable || [],
   inStock: true,
   isPopular: true // Mark default products as popular initially
 }));
@@ -67,7 +67,7 @@ export const useProductStore = create<ProductState>()(
       setProducts: (products) => set({ products }),
     }),
     {
-      name: 'loavia-product-storage',
+      name: 'loavia-product-storage-v2',
     }
   )
 );
