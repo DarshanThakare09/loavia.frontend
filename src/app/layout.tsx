@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
-import { MiniCart } from "@/components/layout/MiniCart";
 import { Toaster } from "sonner";
 
 const inter = Inter({
@@ -32,13 +29,8 @@ export default function RootLayout({
       className={`${inter.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans text-brand-text-primary bg-brand-cream">
-        <Navbar />
-        <MiniCart />
         <Toaster position="bottom-right" richColors />
-        <main className="flex-grow flex flex-col">
-          {children}
-        </main>
-        <Footer />
+        {children}
       </body>
     </html>
   );
