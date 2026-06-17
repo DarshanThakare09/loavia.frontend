@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { useProductStore, Product } from "@/store/productStore";
 import { ArrowLeft, Plus, Trash2, Save } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function EditProduct() {
   const router = useRouter();
@@ -16,7 +17,8 @@ export default function EditProduct() {
   useEffect(() => {
     const productToEdit = products.find(p => p.id === params.id);
     if (productToEdit) {
-      setFormData(productToEdit);
+      const frame = requestAnimationFrame(() => setFormData(productToEdit));
+      return () => cancelAnimationFrame(frame);
     } else {
       router.push('/admin/products');
     }
@@ -63,11 +65,15 @@ export default function EditProduct() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || formData.price === undefined) {
-      alert("Name and Price are required.");
+      toast.error("Name and Price are required.");
       return;
     }
-    updateProduct(params.id as string, formData);
-    alert("Product updated successfully!");
+    const productData = formData.isFeatured
+      ? formData
+      : { ...formData, featuredOrder: undefined };
+
+    updateProduct(params.id as string, productData);
+    toast.success("Product updated successfully.");
     router.push('/admin/products');
   };
 
@@ -123,7 +129,32 @@ export default function EditProduct() {
                 />
                 <span>Mark as Popular (Best Seller)</span>
               </label>
+              <label className="flex items-center space-x-2 text-sm font-medium text-brand-text-primary cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300 text-brand-brown focus:ring-brand-gold w-4 h-4 cursor-pointer"
+                  checked={formData.isFeatured ?? false}
+                  onChange={e => setFormData({
+                    ...formData,
+                    isFeatured: e.target.checked,
+                    featuredOrder: e.target.checked ? (formData.featuredOrder || 1) : undefined
+                  })}
+                />
+                <span>Mark as Featured</span>
+              </label>
             </div>
+            {formData.isFeatured && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-brand-text-primary mb-1">Featured Display Order</label>
+                  <input type="number" min="1" className="w-full px-4 py-2 border rounded-xl" value={formData.featuredOrder ?? 1} onChange={e => setFormData({...formData, featuredOrder: Number(e.target.value)})} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-brand-text-primary mb-1">Featured Badge Text</label>
+                  <input type="text" className="w-full px-4 py-2 border rounded-xl" value={formData.featuredBadgeText || ''} onChange={e => setFormData({...formData, featuredBadgeText: e.target.value})} />
+                </div>
+              </>
+            )}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-brand-text-primary mb-1">Image URL</label>
               <input type="text" className="w-full px-4 py-2 border rounded-xl" value={formData.image || ''} onChange={e => setFormData({...formData, image: e.target.value, images: [e.target.value]})} />
@@ -148,7 +179,7 @@ export default function EditProduct() {
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-brand-brown border-b border-brand-brown/10 pb-2">Nutrition & Calories</h2>
           <div>
-            <label className="block text-sm font-medium text-brand-text-primary mb-1">Calories (e.g., "120 kcal / cookie")</label>
+            <label className="block text-sm font-medium text-brand-text-primary mb-1">Calories (e.g., &quot;120 kcal / cookie&quot;)</label>
             <input type="text" className="w-full px-4 py-2 border rounded-xl" value={formData.calories || ''} onChange={e => setFormData({...formData, calories: e.target.value})} />
           </div>
           

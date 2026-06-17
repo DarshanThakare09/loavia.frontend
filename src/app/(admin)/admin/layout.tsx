@@ -16,14 +16,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isLoginPage = pathname?.startsWith('/admin/login');
 
   useEffect(() => {
-    setMounted(true);
+    const frame = requestAnimationFrame(() => setMounted(true));
     try {
       if (localStorage.getItem("mockAdminAuth") === "true") {
         useAdminAuthStore.getState().login();
       } else if (!isAdminAuthenticated && !isLoginPage) {
         router.push('/admin/login');
       }
-    } catch (err) {}
+    } catch {
+      // localStorage can be unavailable in restricted browser contexts.
+    }
+
+    return () => cancelAnimationFrame(frame);
   }, [isAdminAuthenticated, isLoginPage, router]);
 
   const navItems = [

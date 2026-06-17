@@ -1,17 +1,26 @@
 "use client";
 
-import { useProductStore } from "@/store/productStore";
-import Link from "next/link";
-import { Edit, Trash2, Plus } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { Edit, Plus, Star, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { useProductStore } from "@/store/productStore";
 
 export default function AdminProducts() {
-  const { products, deleteProduct } = useProductStore();
+  const { products, deleteProduct, toggleFeatured } = useProductStore();
 
   const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this product?")) {
       deleteProduct(id);
+      toast.success("Product deleted successfully.");
     }
+  };
+
+  const handleFeaturedToggle = (id: string, isFeatured?: boolean) => {
+    toggleFeatured(id);
+    toast.success(
+      isFeatured ? "Removed from featured products." : "Added to featured products."
+    );
   };
 
   return (
@@ -21,7 +30,7 @@ export default function AdminProducts() {
           <h1 className="text-3xl font-bold text-brand-brown font-serif">Products</h1>
           <p className="text-brand-text-secondary mt-1">Manage your cookie catalogue</p>
         </div>
-        <Link 
+        <Link
           href="/admin/products/add"
           className="flex items-center space-x-2 px-4 py-2 bg-brand-brown text-white rounded-xl hover:bg-brand-gold transition-colors"
         >
@@ -38,40 +47,81 @@ export default function AdminProducts() {
                 <th className="p-4 font-semibold text-brand-brown">Product</th>
                 <th className="p-4 font-semibold text-brand-brown">Category</th>
                 <th className="p-4 font-semibold text-brand-brown">Price</th>
+                <th className="p-4 font-semibold text-brand-brown">Featured</th>
                 <th className="p-4 font-semibold text-brand-brown">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {products.map(product => (
-                <tr key={product.id} className="border-b border-brand-brown/5 hover:bg-brand-light/50 transition-colors">
-                  <td className="p-4 flex items-center space-x-4">
-                    <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-brand-light">
-                      <Image src={product.image || "/premium_cookie.png"} alt={product.name} fill className="object-cover" />
+              {products.map((product) => (
+                <tr
+                  key={product.id}
+                  className="border-b border-brand-brown/5 hover:bg-brand-light/50 transition-colors"
+                >
+                  <td className="p-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-brand-light shrink-0">
+                        <Image
+                          src={product.image || "/premium_cookie.png"}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div>
+                        <span className="font-medium text-brand-text-primary">
+                          {product.name}
+                        </span>
+                        {product.isFeatured && (
+                          <span className="ml-2 inline-flex items-center rounded-full bg-brand-gold/15 px-2 py-0.5 text-xs font-semibold text-brand-brown">
+                            Featured
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <span className="font-medium text-brand-text-primary">{product.name}</span>
                   </td>
                   <td className="p-4 text-brand-text-secondary">{product.category}</td>
                   <td className="p-4 text-brand-text-secondary">
                     {product.discountPrice ? (
                       <div>
-                        <span className="text-green-600 font-medium">₹{product.discountPrice}</span>
-                        <span className="text-xs line-through ml-2">₹{product.price}</span>
+                        <span className="text-green-600 font-medium">
+                          Rs. {product.discountPrice}
+                        </span>
+                        <span className="text-xs line-through ml-2">
+                          Rs. {product.price}
+                        </span>
                       </div>
                     ) : (
-                      <span>₹{product.price}</span>
+                      <span>Rs. {product.price}</span>
                     )}
                   </td>
                   <td className="p-4">
+                    <button
+                      type="button"
+                      onClick={() => handleFeaturedToggle(product.id, product.isFeatured)}
+                      className={`inline-flex items-center space-x-2 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                        product.isFeatured
+                          ? "bg-brand-brown text-white hover:bg-brand-gold"
+                          : "bg-brand-light text-brand-text-secondary hover:text-brand-brown"
+                      }`}
+                    >
+                      <Star className={`w-4 h-4 ${product.isFeatured ? "fill-current" : ""}`} />
+                      <span>{product.isFeatured ? "Featured" : "Mark Featured"}</span>
+                    </button>
+                  </td>
+                  <td className="p-4">
                     <div className="flex space-x-3">
-                      <Link 
+                      <Link
                         href={`/admin/products/edit/${product.id}`}
                         className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-lg transition-colors"
+                        aria-label={`Edit ${product.name}`}
                       >
                         <Edit className="w-5 h-5" />
                       </Link>
-                      <button 
+                      <button
+                        type="button"
                         onClick={() => handleDelete(product.id)}
                         className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors"
+                        aria-label={`Delete ${product.name}`}
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
@@ -81,7 +131,7 @@ export default function AdminProducts() {
               ))}
               {products.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="p-8 text-center text-brand-text-secondary">
+                  <td colSpan={5} className="p-8 text-center text-brand-text-secondary">
                     No products found. Add one to get started.
                   </td>
                 </tr>

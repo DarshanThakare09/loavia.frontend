@@ -25,6 +25,9 @@ export interface Product {
   nutritionTable?: NutritionFact[];
   inStock?: boolean;
   isPopular?: boolean;
+  isFeatured?: boolean;
+  featuredOrder?: number;
+  featuredBadgeText?: string;
 }
 
 interface ProductState {
@@ -32,17 +35,21 @@ interface ProductState {
   addProduct: (product: Omit<Product, 'id' | 'rating' | 'reviews'>) => void;
   updateProduct: (id: string, productData: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
+  toggleFeatured: (id: string) => void;
   setProducts: (products: Product[]) => void;
 }
 
 // Convert mock data to new schema
-const defaultProducts: Product[] = initialProducts.map(p => ({
+const defaultProducts: Product[] = initialProducts.map((p, index) => ({
   ...p,
   discountPrice: null,
   calories: p.calories || '',
   nutritionTable: p.nutritionTable || [],
   inStock: true,
-  isPopular: true // Mark default products as popular initially
+  isPopular: true, // Mark default products as popular initially
+  isFeatured: index < 3,
+  featuredOrder: index + 1,
+  featuredBadgeText: "Featured",
 }));
 
 export const useProductStore = create<ProductState>()(
@@ -64,6 +71,23 @@ export const useProductStore = create<ProductState>()(
       deleteProduct: (id) => set((state) => ({
         products: state.products.filter(p => p.id !== id)
       })),
+      toggleFeatured: (id) => set((state) => {
+        const nextFeaturedOrder = Math.max(0, ...state.products.map(p => p.featuredOrder || 0)) + 1;
+
+        return {
+          products: state.products.map(p => {
+            if (p.id !== id) return p;
+
+            const isFeatured = !p.isFeatured;
+            return {
+              ...p,
+              isFeatured,
+              featuredOrder: isFeatured ? nextFeaturedOrder : undefined,
+              featuredBadgeText: isFeatured ? (p.featuredBadgeText || "Featured") : p.featuredBadgeText,
+            };
+          }),
+        };
+      }),
       setProducts: (products) => set({ products }),
     }),
     {

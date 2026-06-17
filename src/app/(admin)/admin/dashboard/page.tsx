@@ -5,6 +5,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useProductStore } from "@/store/productStore";
 import { useState, useEffect } from "react";
 import { Save, IndianRupee, ShoppingBag, Users, Cookie, Settings, Trash2, Plus, Star } from "lucide-react";
+import FeaturedProductsManager from "@/components/admin/FeaturedProductsManager";
 
 export default function AdminDashboard() {
   const { 
@@ -263,6 +264,7 @@ export default function AdminDashboard() {
     { id: "bestsellers", label: "Best Sellers Header" },
     { id: "whychoose", label: "Why Choose Section" },
     { id: "categories", label: "Featured Categories" },
+    { id: "featuredproducts", label: "Featured Products" },
     { id: "gifting", label: "Gifting Section" },
     { id: "testimonials", label: "Customer Reviews" },
     { id: "about", label: "About & Brand Story" },
@@ -412,6 +414,13 @@ export default function AdminDashboard() {
                   <span>Save Best Sellers</span>
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Featured Products */}
+          {activeSection === "featuredproducts" && (
+            <div className="animate-in fade-in duration-300">
+              <FeaturedProductsManager />
             </div>
           )}
 

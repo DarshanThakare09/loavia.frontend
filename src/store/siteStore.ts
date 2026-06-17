@@ -24,6 +24,11 @@ interface SiteState {
   // Best Sellers Section
   bestSellersTitle: string;
   bestSellersSubtitle: string;
+
+  // Featured Products Section
+  featuredProductsTitle: string;
+  featuredProductsSubtitle: string;
+  featuredProductsCtaText: string;
   
   // Why Choose Section
   whyChooseTitle: string;
@@ -67,6 +72,7 @@ interface SiteState {
   updateAnnouncement: (text: string) => void;
   updateHero: (title: string, subtitle: string) => void;
   updateBestSellers: (title: string, subtitle: string) => void;
+  updateFeaturedProducts: (title: string, subtitle: string, ctaText: string) => void;
   updateWhyChoose: (title: string, description: string, features: string[]) => void;
   updateCategories: (categories: CategoryItem[]) => void;
   updateGifting: (title: string, description: string) => void;
@@ -151,6 +157,11 @@ export const useSiteStore = create<SiteState>()(
       // Best Sellers Default Values
       bestSellersTitle: "Our Best Sellers",
       bestSellersSubtitle: "The cookies everyone is talking about.",
+
+      // Featured Products Default Values
+      featuredProductsTitle: "Featured Products",
+      featuredProductsSubtitle: "Explore our most loved millet cookies crafted for tea-time indulgence, healthy snacking, and premium gifting.",
+      featuredProductsCtaText: "Explore Products",
       
       // Why Choose Default Values
       whyChooseTitle: "Why Choose LOAVIA™",
@@ -194,6 +205,11 @@ export const useSiteStore = create<SiteState>()(
       updateAnnouncement: (text) => set({ announcementText: text }),
       updateHero: (title, subtitle) => set({ heroTitle: title, heroSubtitle: subtitle }),
       updateBestSellers: (title, subtitle) => set({ bestSellersTitle: title, bestSellersSubtitle: subtitle }),
+      updateFeaturedProducts: (title, subtitle, ctaText) => set({
+        featuredProductsTitle: title,
+        featuredProductsSubtitle: subtitle,
+        featuredProductsCtaText: ctaText,
+      }),
       updateWhyChoose: (title, description, features) => set({ 
         whyChooseTitle: title, 
         whyChooseDescription: description, 
