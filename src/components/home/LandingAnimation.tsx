@@ -22,6 +22,7 @@ export default function LandingAnimation() {
   const [scrollTop, setScrollTop] = useState(0);
   const [canvasPosition, setCanvasPosition] = useState<'fixed' | 'absolute'>('fixed');
   const [canvasTop, setCanvasTop] = useState(0);
+  const [skipAnimation, setSkipAnimation] = useState(false);
 
   // Scroll to top on fresh mount
   useEffect(() => {
@@ -375,6 +376,25 @@ export default function LandingAnimation() {
   }
   const showFourthOverlayPhase2 = fourthOverlayPhase2Opacity > 0;
 
+  const handleSkipScroll = () => {
+    setSkipAnimation(true);
+    // Scroll to hero section
+    setTimeout(() => {
+      const heroSection = document.getElementById('hero-section-wrapper');
+      if (heroSection) {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
+  };
+
+  // If user skipped animation, don't render anything
+  if (skipAnimation) {
+    return null;
+  }
+
   return (
     <>
       {loading ? (
@@ -545,6 +565,15 @@ export default function LandingAnimation() {
                 <div className="scroll-dot"></div>
               </div>
             </div>
+
+            {/* Skip Scroll Button */}
+            <button
+              onClick={handleSkipScroll}
+              style={{ opacity: scrollIndicatorOpacity }}
+              className="fixed top-6 right-6 px-6 py-3 bg-[#E29B52] text-brand-cream font-bold text-sm rounded-full shadow-lg hover:bg-white hover:text-brand-brown transition-all duration-300 hover:shadow-xl hover:scale-105 z-50 cursor-pointer"
+            >
+              Skip Scroll
+            </button>
           </div>
 
           {/* Spacer to allow scrolling - matches 1600vh height */}
