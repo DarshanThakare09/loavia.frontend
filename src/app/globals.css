@@ -12,6 +12,7 @@
 
   --font-sans: var(--font-inter);
   --font-serif: var(--font-playfair);
+  --font-proxima: var(--font-proxima);
 
   --animate-marquee: marquee 25s linear infinite;
   
@@ -45,3 +46,11 @@
   font-display: swap;
 }
 
+/* Exclude hero section and landing animation from Proxima Nova */
+#hero-section-wrapper,
+.landing-container,
+.scroll-animation-wrapper,
+.canvas-container,
+.scroll-spacer {
+  font-family: var(--font-sans);
+}

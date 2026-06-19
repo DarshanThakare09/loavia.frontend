@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Inter, Playfair_Display, Nunito } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 
@@ -10,6 +10,11 @@ const inter = Inter({
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
+  subsets: ["latin"],
+});
+
+const nunito = Nunito({
+  variable: "--font-proxima",
   subsets: ["latin"],
 });
 
@@ -26,9 +31,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${playfair.variable} h-full antialiased`}
+      className={`${inter.variable} ${playfair.variable} ${nunito.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans text-brand-text-primary bg-brand-cream">
+      <body className="min-h-full flex flex-col font-proxima text-brand-text-primary bg-brand-cream">
         <Toaster position="bottom-right" richColors />
         {children}
       </body>

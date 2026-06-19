@@ -139,10 +139,36 @@ export function HeroSection() {
 
             <Link
               href="/whatsapp"
-              className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-green-600 rounded-full hover:bg-green-700 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-green-500 rounded-full hover:bg-green-700 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
               Order on WhatsApp
             </Link>
+          </div>
+        </div>
+
+        {/* Mascot Image - Right Center */}
+        <div className="hidden lg:flex absolute right-[5vw] top-1/2 transform -translate-y-1/2 z-10 items-center justify-center h-full">
+          <div className="relative">
+            <Image
+              src="/loavia-mascot.png"
+              alt="Loavia Mascot"
+              width={450}
+              height={600}
+              className="object-contain drop-shadow-2xl"
+              priority
+            />
+            
+            {/* Speech Bubble */}
+            <div className="absolute -top-5 -right-8 bg-white rounded-3xl px-6 py-3 shadow-lg" style={{ minWidth: '200px', fontFamily: "'Outfit', 'Proxima Nova', 'Montserrat', sans-serif", fontWeight: 100 }}>
+              <p className="text-black text-sm text-center">Looking for cart it's up there</p>
+              {/* Speech bubble tail - left side */}
+              <div className="absolute bottom--2 left-8 w-0 h-0" style={{
+                bottom: '-8px',
+                borderRight: '12px solid transparent',
+                borderLeft: '0px solid transparent',
+                borderTop: '12px solid white'
+              }}></div>
+            </div>
           </div>
         </div>
       </section>
