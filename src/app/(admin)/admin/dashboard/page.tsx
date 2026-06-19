@@ -4,10 +4,12 @@ import { useSiteStore, CategoryItem, TestimonialItem } from "@/store/siteStore";
 import { useAuthStore } from "@/store/authStore";
 import { useProductStore } from "@/store/productStore";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Save, IndianRupee, ShoppingBag, Users, Cookie, Settings, Trash2, Plus, Star } from "lucide-react";
 import FeaturedProductsManager from "@/components/admin/FeaturedProductsManager";
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const { 
     // State values from store
     announcementText, heroTitle, heroSubtitle,
@@ -253,11 +255,15 @@ export default function AdminDashboard() {
   const productsCount = products.length;
 
   const stats = [
-    { name: "Total Revenue", value: `₹${totalRevenue.toLocaleString()}`, icon: IndianRupee, color: "text-emerald-600 bg-emerald-50 border-emerald-100" },
-    { name: "Total Orders", value: ordersCount, icon: ShoppingBag, color: "text-blue-600 bg-blue-50 border-blue-100" },
-    { name: "Active Customers", value: customersCount, icon: Users, color: "text-indigo-600 bg-indigo-50 border-indigo-100" },
-    { name: "Catalog Products", value: productsCount, icon: Cookie, color: "text-amber-600 bg-amber-50 border-amber-100" },
+    { name: "Total Revenue", value: `₹${totalRevenue.toLocaleString()}`, icon: IndianRupee, color: "text-emerald-600 bg-emerald-50 border-emerald-100", route: "/admin/orders", label: "Orders" },
+    { name: "Total Orders", value: ordersCount, icon: ShoppingBag, color: "text-blue-600 bg-blue-50 border-blue-100", route: "/admin/orders", label: "Orders" },
+    { name: "Active Customers", value: customersCount, icon: Users, color: "text-indigo-600 bg-indigo-50 border-indigo-100", route: "/admin/users", label: "Customers" },
+    { name: "Catalog Products", value: productsCount, icon: Cookie, color: "text-amber-600 bg-amber-50 border-amber-100", route: "/admin/products", label: "Products" },
   ];
+
+  const handleStatCardClick = (route: string) => {
+    router.push(route);
+  };
 
   const sections = [
     { id: "hero", label: "Hero & Announcement" },
@@ -282,7 +288,12 @@ export default function AdminDashboard() {
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.name} className="p-6 bg-white rounded-2xl border border-brand-brown/5 shadow-sm flex items-center space-x-4">
+            <button
+              key={stat.name}
+              onClick={() => handleStatCardClick(stat.route)}
+              className="p-6 bg-white rounded-2xl border border-brand-brown/5 shadow-sm hover:shadow-md hover:border-brand-brown/10 cursor-pointer flex items-center space-x-4 transition-all duration-200 ease-in-out hover:-translate-y-0.5 text-left"
+              aria-label={`Navigate to ${stat.label} - ${stat.name}`}
+            >
               <div className={`p-3 rounded-xl border ${stat.color.split(' ').slice(1).join(' ')}`}>
                 <Icon className={`w-6 h-6 ${stat.color.split(' ')[0]}`} />
               </div>
@@ -290,7 +301,7 @@ export default function AdminDashboard() {
                 <p className="text-xs font-semibold text-brand-text-secondary uppercase tracking-wider">{stat.name}</p>
                 <p className="text-2xl font-bold text-brand-text-primary mt-1 font-serif">{stat.value}</p>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>

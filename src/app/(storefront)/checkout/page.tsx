@@ -6,17 +6,27 @@ import { useRouter } from "next/navigation";
 import { CheckCircle2, ChevronRight, CreditCard, Truck, MapPin, Tag } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
+import { usePromoStore } from "@/store/promoStore";
+import { useSettingsStore } from "@/store/settingsStore";
+import { toast } from "sonner";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const { items, getCartTotal, clearCart } = useCartStore();
+  const { items, getCartTotal, clearCart, appliedPromoCode, setAppliedPromoCode, clearAppliedPromoCode } = useCartStore();
   const { isAuthenticated, user, addOrder } = useAuthStore();
+  const validatePromoCode = usePromoStore((state) => state.validatePromoCode);
+  const incrementUsage = usePromoStore((state) => state.incrementUsage);
+  const [promoInput, setPromoInput] = useState("");
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    setPromoInput(appliedPromoCode || "");
+  }, [appliedPromoCode]);
 
   useEffect(() => {
     if (mounted && !isAuthenticated) {
@@ -25,13 +35,32 @@ export default function CheckoutPage() {
   }, [mounted, isAuthenticated, router]);
 
   const subtotal = getCartTotal();
-  const shipping = subtotal > 1000 ? 0 : 99;
-  const total = subtotal + shipping;
+  const { shippingCharge, freeShippingThreshold } = useSettingsStore();
+  const shipping = subtotal > freeShippingThreshold ? 0 : shippingCharge;
+  const promoValidation = appliedPromoCode
+    ? validatePromoCode(appliedPromoCode, subtotal)
+    : { success: false, message: "", amount: 0 };
+  const discountAmount = promoValidation.success ? promoValidation.amount : 0;
+  const total = subtotal + shipping - discountAmount;
 
   const handleNext = () => setStep(step + 1);
   
+  const applyPromo = (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = validatePromoCode(promoInput, subtotal);
+    if (!result.success) {
+      toast.error(result.message);
+      return;
+    }
+    setAppliedPromoCode(result.promo?.code || promoInput.trim().toUpperCase());
+    toast.success(`Promo code ${result.promo?.code || promoInput.trim().toUpperCase()} applied.`);
+  };
+
   const handlePlaceOrder = () => {
-    // Generate an order
+    if (promoValidation.success && promoValidation.promo) {
+      incrementUsage(promoValidation.promo.code);
+    }
+
     const orderId = `ORD-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
     
     addOrder({
@@ -49,8 +78,8 @@ export default function CheckoutPage() {
     });
 
     clearCart();
+    clearAppliedPromoCode();
     
-    // Navigate to order ID confirmation
     router.push(`/orders/${orderId}`);
   };
 

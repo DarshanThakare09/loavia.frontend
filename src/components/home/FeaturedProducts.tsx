@@ -23,7 +23,11 @@ export default function FeaturedProducts() {
   const products = mounted
     ? storeProducts
         .filter((product) => product.isFeatured)
-        .sort((a, b) => (a.featuredOrder || 999) - (b.featuredOrder || 999))
+        .sort((a, b) => {
+          const orderA = Number(a.featuredOrder) || 999;
+          const orderB = Number(b.featuredOrder) || 999;
+          return orderA - orderB;
+        })
     : [];
 
   return (

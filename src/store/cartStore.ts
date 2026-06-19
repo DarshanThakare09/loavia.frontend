@@ -13,10 +13,13 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   isMiniCartOpen: boolean;
+  appliedPromoCode: string | null;
   addItem: (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
+  setAppliedPromoCode: (code: string | null) => void;
+  clearAppliedPromoCode: () => void;
   openMiniCart: () => void;
   closeMiniCart: () => void;
   getCartTotal: () => number;
@@ -58,6 +61,7 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
       isMiniCartOpen: false,
+      appliedPromoCode: null,
 
       addItem: (newItem) => {
         set((state) => {
@@ -93,6 +97,9 @@ export const useCartStore = create<CartState>()(
 
       clearCart: () => set({ items: [] }),
 
+      setAppliedPromoCode: (code) => set({ appliedPromoCode: code }),
+      clearAppliedPromoCode: () => set({ appliedPromoCode: null }),
+
       openMiniCart: () => set({ isMiniCartOpen: true }),
       
       closeMiniCart: () => set({ isMiniCartOpen: false }),
@@ -104,7 +111,7 @@ export const useCartStore = create<CartState>()(
     {
       name: 'loavia-cart-storage',
       storage: createJSONStorage(() => safeStorage),
-      partialize: (state) => ({ items: state.items }),
+      partialize: (state) => ({ items: state.items, appliedPromoCode: state.appliedPromoCode }),
     }
   )
 );

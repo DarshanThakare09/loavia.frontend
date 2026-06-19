@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, ShoppingBag, Users, Settings, Tag, LogOut, Menu, X, ArrowLeft } from "lucide-react";
+import { useSettingsStore } from "@/store/settingsStore";
 import { useAdminAuthStore } from "@/store/adminAuthStore";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -12,6 +13,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { isAdminAuthenticated, logout } = useAdminAuthStore();
+  const { adminName } = useSettingsStore();
 
   const isLoginPage = pathname?.startsWith('/admin/login');
 
@@ -35,7 +37,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Products", href: "/admin/products", icon: ShoppingBag },
     { name: "Orders", href: "/admin/orders", icon: Tag },
     { name: "Customers", href: "/admin/users", icon: Users },
-    { name: "Settings", href: "#", icon: Settings },
+    { name: "Promo Codes", href: "/admin/promo-codes", icon: Tag },
+    { name: "Settings", href: "/admin/settings", icon: Settings },
   ];
 
   if (!mounted) {
@@ -134,10 +137,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
           
           <div className="ml-auto flex items-center space-x-4">
-            <div className="w-8 h-8 rounded-full bg-brand-gold text-brand-brown flex items-center justify-center font-bold">
-              AD
-            </div>
-            <span className="font-medium text-brand-brown hidden sm:block">Admin User</span>
+                <div className="w-8 h-8 rounded-full bg-brand-gold text-brand-brown flex items-center justify-center font-bold">
+                  AD
+                </div>
+                <span className="font-medium text-brand-brown hidden sm:block">{adminName}</span>
           </div>
         </header>
 

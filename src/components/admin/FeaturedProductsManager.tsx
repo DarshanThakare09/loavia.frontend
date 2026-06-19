@@ -9,7 +9,7 @@ import { Product, useProductStore } from "@/store/productStore";
 import { useSiteStore } from "@/store/siteStore";
 
 export default function FeaturedProductsManager() {
-  const { products, updateProduct } = useProductStore();
+  const { products, updateProduct, updateFeaturedProductOrder } = useProductStore();
   const {
     featuredProductsTitle,
     featuredProductsSubtitle,
@@ -19,12 +19,17 @@ export default function FeaturedProductsManager() {
   const [selectedProductId, setSelectedProductId] = useState("");
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [productDraft, setProductDraft] = useState<Partial<Product>>({});
+  const [orderError, setOrderError] = useState<string>("");
 
   const featuredProducts = useMemo(
     () =>
       products
         .filter((product) => product.isFeatured)
-        .sort((a, b) => (a.featuredOrder || 999) - (b.featuredOrder || 999)),
+        .sort((a, b) => {
+          const orderA = Number(a.featuredOrder) || 999;
+          const orderB = Number(b.featuredOrder) || 999;
+          return orderA - orderB;
+        }),
     [products]
   );
 
@@ -83,24 +88,64 @@ export default function FeaturedProductsManager() {
   };
 
   const handleSaveProduct = (product: Product) => {
+    const newOrder = productDraft.featuredOrder;
+
+    // Validate order
+    if (newOrder === undefined || newOrder === null) {
+      setOrderError("Display order is required");
+      toast.error("Display order is required");
+      return;
+    }
+
+    if (!Number.isInteger(newOrder) || newOrder < 1) {
+      setOrderError("Display order must be a positive integer");
+      toast.error("Display order must be a positive integer");
+      return;
+    }
+
+    // Update basic product info
     updateProduct(product.id, {
-      ...productDraft,
+      name: productDraft.name,
+      description: productDraft.description,
+      image: productDraft.image,
+      featuredBadgeText: productDraft.featuredBadgeText,
       images: productDraft.image ? [productDraft.image] : product.images,
     });
+
+    // Update featured order with conflict resolution
+    const result = updateFeaturedProductOrder(product.id, newOrder);
+    if (!result.success) {
+      setOrderError(result.error || "Failed to update order");
+      toast.error(result.error || "Failed to update order");
+      return;
+    }
+
+    setOrderError("");
     setEditingProductId(null);
     setProductDraft({});
     toast.success("Featured product updated.");
   };
 
   const handleMove = (product: Product, direction: "up" | "down") => {
-    const currentIndex = featuredProducts.findIndex((item) => item.id === product.id);
-    const swapIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
-    const swapProduct = featuredProducts[swapIndex];
+    const currentOrder = product.featuredOrder || 1;
+    const newOrder = direction === "up" ? currentOrder - 1 : currentOrder + 1;
 
-    if (!swapProduct) return;
+    if (newOrder < 1) {
+      toast.error("Cannot move product above position 1");
+      return;
+    }
 
-    updateProduct(product.id, { featuredOrder: swapProduct.featuredOrder || swapIndex + 1 });
-    updateProduct(swapProduct.id, { featuredOrder: product.featuredOrder || currentIndex + 1 });
+    if (newOrder > featuredProducts.length) {
+      toast.error("Cannot move product below the last position");
+      return;
+    }
+
+    const result = updateFeaturedProductOrder(product.id, newOrder);
+    if (!result.success) {
+      toast.error(result.error || "Failed to reorder products");
+      return;
+    }
+
     toast.success("Featured product order updated.");
   };
 
@@ -256,13 +301,30 @@ export default function FeaturedProductsManager() {
                             placeholder="Image URL"
                           />
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <input
-                              type="number"
-                              min="1"
-                              className="w-full px-3 py-2 border border-brand-brown/20 rounded-xl text-sm"
-                              value={productDraft.featuredOrder ?? 1}
-                              onChange={(e) => setProductDraft({...productDraft, featuredOrder: Number(e.target.value)})}
-                            />
+                            <div>
+                              <input
+                                type="number"
+                                min="1"
+                                step="1"
+                                className="w-full px-3 py-2 border border-brand-brown/20 rounded-xl text-sm"
+                                value={productDraft.featuredOrder ?? 1}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  const num = value === "" ? undefined : parseInt(value, 10);
+                                  setProductDraft({...productDraft, featuredOrder: num});
+                                  setOrderError("");
+                                }}
+                                onBlur={(e) => {
+                                  const value = parseInt(e.target.value, 10);
+                                  if (!Number.isInteger(value) || value < 1) {
+                                    setOrderError("Must be a positive integer");
+                                  }
+                                }}
+                              />
+                              {orderError && editingProductId === product.id && (
+                                <p className="text-xs text-red-600 mt-1">{orderError}</p>
+                              )}
+                            </div>
                             <input
                               type="text"
                               className="w-full px-3 py-2 border border-brand-brown/20 rounded-xl text-sm"

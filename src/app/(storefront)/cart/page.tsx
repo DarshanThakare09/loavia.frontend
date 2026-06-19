@@ -6,31 +6,46 @@ import Link from "next/link";
 import { Minus, Plus, X, ArrowRight, Tag, Heart } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
+import { useSettingsStore } from "@/store/settingsStore";
+import { usePromoStore } from "@/store/promoStore";
 import { toast } from "sonner";
 
 export default function CartPage() {
-  const { items: cart, updateQuantity, removeItem, getCartTotal } = useCartStore();
+  const { items: cart, updateQuantity, removeItem, getCartTotal, appliedPromoCode, setAppliedPromoCode, clearAppliedPromoCode } = useCartStore();
   const { user, toggleWishlist } = useAuthStore();
-  const [promoCode, setPromoCode] = useState("");
-  const [discount, setDiscount] = useState(0);
+  const [promoInput, setPromoInput] = useState("");
+  const validatePromoCode = usePromoStore((state) => state.validatePromoCode);
 
   // Prevent hydration mismatch
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    setPromoInput(appliedPromoCode || "");
+  }, [appliedPromoCode]);
 
   const applyPromo = (e: React.FormEvent) => {
     e.preventDefault();
-    if (promoCode.toUpperCase() === "WELCOME10") {
-      setDiscount(0.1); // 10% off
-    } else {
-      alert("Invalid promo code");
-      setDiscount(0);
+    const result = validatePromoCode(promoInput, getCartTotal());
+
+    if (!result.success) {
+      toast.error(result.message);
+      return;
     }
+
+    setAppliedPromoCode(result.promo?.code || promoInput.trim().toUpperCase());
+    toast.success(`Promo code ${result.promo?.code || promoInput.trim().toUpperCase()} applied.`);
   };
 
   const subtotal = getCartTotal();
-  const shipping = subtotal > 1000 ? 0 : 99; // Free shipping over ₹1000
-  const discountAmount = subtotal * discount;
+  const { shippingCharge, freeShippingThreshold } = useSettingsStore();
+  const shipping = subtotal > freeShippingThreshold ? 0 : shippingCharge;
+  const promoValidation = appliedPromoCode
+    ? validatePromoCode(appliedPromoCode, subtotal)
+    : { success: false, message: "", amount: 0 };
+  const discountAmount = promoValidation.success ? promoValidation.amount : 0;
   const total = subtotal + shipping - discountAmount;
 
   if (!mounted) return null;
@@ -131,9 +146,9 @@ export default function CartPage() {
                     <span className="text-brand-text-secondary">Shipping</span>
                     <span className="font-bold">{shipping === 0 ? "Free" : `₹${shipping.toFixed(2)}`}</span>
                   </div>
-                  {discount > 0 && (
+                  {promoValidation.success && discountAmount > 0 && (
                     <div className="flex justify-between text-green-600">
-                      <span>Discount (10%)</span>
+                      <span>Promo Discount</span>
                       <span className="font-bold">-₹{discountAmount.toFixed(2)}</span>
                     </div>
                   )}
@@ -151,8 +166,8 @@ export default function CartPage() {
                     <input 
                       type="text" 
                       placeholder="Promo Code" 
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
+                      value={promoInput}
+                      onChange={(e) => setPromoInput(e.target.value)}
                       className="w-full bg-white border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-full py-4 pl-12 pr-24 outline-none font-medium text-brand-brown shadow-sm transition-all duration-300"
                     />
                     <button 
@@ -162,7 +177,14 @@ export default function CartPage() {
                       Apply
                     </button>
                   </div>
-                  {discount > 0 && <p className="text-green-600 text-sm font-medium mt-2 ml-4">Promo code applied!</p>}
+                  {appliedPromoCode && promoValidation.success && (
+                    <p className="text-green-600 text-sm font-medium mt-2 ml-4">
+                      {appliedPromoCode} applied for ₹{discountAmount.toFixed(2)} discount.
+                    </p>
+                  )}
+                  {appliedPromoCode && !promoValidation.success && promoValidation.message && (
+                    <p className="text-rose-600 text-sm font-medium mt-2 ml-4">{promoValidation.message}</p>
+                  )}
                 </form>
 
                 <button

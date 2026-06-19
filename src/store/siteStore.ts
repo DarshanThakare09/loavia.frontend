@@ -148,7 +148,7 @@ Today, LOAVIA™ proudly brings you premium millet cookies crafted with love, fr
 
 export const useSiteStore = create<SiteState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       // Hero & Header Default Values
       announcementText: "✨ Free shipping on all orders over ₹999! Taste the magic of Nashik. ✨    |    100% Organic, Zero Preservatives    |    Use code LOAVIA10 for 10% off your first order! ✨",
       heroTitle: "Healthy Inside,\nYummy Outside.",
@@ -162,6 +162,7 @@ export const useSiteStore = create<SiteState>()(
       featuredProductsTitle: "Featured Products",
       featuredProductsSubtitle: "Explore our most loved millet cookies crafted for tea-time indulgence, healthy snacking, and premium gifting.",
       featuredProductsCtaText: "Explore Products",
+      
       
       // Why Choose Default Values
       whyChooseTitle: "Why Choose LOAVIA™",
@@ -242,6 +243,8 @@ export const useSiteStore = create<SiteState>()(
         aboutStat2Number: s2Num, aboutStat2Title: s2Title, aboutStat2Desc: s2Desc,
         aboutStat3Number: s3Num, aboutStat3Title: s3Title, aboutStat3Desc: s3Desc
       }),
+
+      
 
       // Testimonial Actions
       addTestimonial: (newTestimonial) => set((state) => ({

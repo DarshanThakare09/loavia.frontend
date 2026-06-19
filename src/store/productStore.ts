@@ -36,6 +36,7 @@ interface ProductState {
   updateProduct: (id: string, productData: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
   toggleFeatured: (id: string) => void;
+  updateFeaturedProductOrder: (id: string, newOrder: number) => { success: boolean; error?: string };
   setProducts: (products: Product[]) => void;
 }
 
@@ -54,7 +55,7 @@ const defaultProducts: Product[] = initialProducts.map((p, index) => ({
 
 export const useProductStore = create<ProductState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       products: defaultProducts,
       addProduct: (productData) => set((state) => {
         const newProduct: Product = {
@@ -88,6 +89,62 @@ export const useProductStore = create<ProductState>()(
           }),
         };
       }),
+      updateFeaturedProductOrder: (id, newOrder) => {
+        // Validation
+        if (!Number.isInteger(newOrder) || newOrder < 1) {
+          return { success: false, error: "Display order must be a positive integer" };
+        }
+
+        const state = get();
+        const product = state.products.find(p => p.id === id);
+        
+        if (!product || !product.isFeatured) {
+          return { success: false, error: "Product not found or not featured" };
+        }
+
+        // Get all featured products
+        const featuredProducts = state.products
+          .filter(p => p.isFeatured && p.id !== id)
+          .sort((a, b) => {
+            const orderA = Number(a.featuredOrder) || 999;
+            const orderB = Number(b.featuredOrder) || 999;
+            return orderA - orderB;
+          });
+
+        // Check if newOrder already exists
+        const orderExists = featuredProducts.some(p => p.featuredOrder === newOrder);
+
+        if (!orderExists) {
+          // No conflict, just update the order
+          set((state) => ({
+            products: state.products.map(p =>
+              p.id === id ? { ...p, featuredOrder: newOrder } : p
+            )
+          }));
+          return { success: true };
+        }
+
+        // Conflict detected: reindex all featured products sequentially starting from 1
+        const updatedProducts = state.products.map(p => {
+          if (!p.isFeatured) return p;
+          
+          if (p.id === id) {
+            // Target product gets the requested order
+            return { ...p, featuredOrder: newOrder };
+          }
+
+          // Other featured products: get current index and adjust
+          const currentIndex = featuredProducts.findIndex(fp => fp.id === p.id);
+          // If this product's order is >= newOrder, shift it up by 1
+          if ((p.featuredOrder || 0) >= newOrder) {
+            return { ...p, featuredOrder: (p.featuredOrder || 0) + 1 };
+          }
+          return p;
+        });
+
+        set({ products: updatedProducts });
+        return { success: true };
+      },
       setProducts: (products) => set({ products }),
     }),
     {
