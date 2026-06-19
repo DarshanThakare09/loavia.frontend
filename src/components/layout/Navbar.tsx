@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { Search, User, ShoppingCart, Menu, X } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
@@ -15,7 +15,9 @@ export function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchRef = useRef<HTMLDivElement>(null);
+  const navbarRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   const { items, openMiniCart } = useCartStore();
   const { isAuthenticated } = useAuthStore();
@@ -25,6 +27,104 @@ export function Navbar() {
   // Prevent hydration mismatch
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // Layout refs to avoid layout thrashing on scroll
+  const transitionStartRef = useRef(15 * 800);
+  const heroEndRef = useRef(16.8 * 800);
+
+  // Update navbar height CSS variable and layout dimensions on mount and resize (avoids layout thrashing on scroll)
+  useEffect(() => {
+    const updateLayout = () => {
+      const rect = navbarRef.current?.getBoundingClientRect();
+      if (rect) {
+        document.documentElement.style.setProperty("--navbar-height", `${rect.height}px`);
+      }
+      
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
+      
+      // Starting scroll animation is exactly 15vh (1500vh scroll spacer)
+      transitionStartRef.current = 15 * vh;
+      
+      if (vw >= 1024) {
+        // Desktop: HeroSection is h-[180vh], so sticky wrapper holds it for 80vh.
+        // It starts at 15vh + navbar height (112px) and finishes scrolling away at 16.8vh.
+        // The Announcement Bar stays sticky until the HeroSection has completely scrolled off-screen.
+        heroEndRef.current = 16.8 * vh;
+      } else {
+        // Mobile/Tablet: HeroSection is not sticky, so announcement bar scrolls away immediately
+        heroEndRef.current = 15 * vh;
+      }
+    };
+
+    updateLayout();
+    window.addEventListener("resize", updateLayout);
+
+    return () => {
+      window.removeEventListener("resize", updateLayout);
+    };
+  }, [pathname]);
+
+  // High performance direct DOM scroll positioning (avoids React re-renders and lag/jitter)
+  useEffect(() => {
+    const handleScroll = () => {
+      const navbarEl = navbarRef.current;
+      if (!navbarEl) return;
+
+      const currentScrollY = window.scrollY;
+      const vh = window.innerHeight;
+      const isHomepage = window.location.pathname === "/";
+      
+      const transitionStart = transitionStartRef.current;
+      const heroEnd = heroEndRef.current; 
+
+      if (isHomepage) {
+        if (currentScrollY < transitionStart - vh) {
+          navbarEl.style.position = "sticky";
+          navbarEl.style.top = "0px";
+          navbarEl.style.opacity = "0";
+          navbarEl.style.pointerEvents = "none";
+          navbarEl.style.transition = "opacity 0.2s ease";
+        } else if (currentScrollY >= transitionStart - vh && currentScrollY < heroEnd) {
+          navbarEl.style.position = "sticky";
+          navbarEl.style.top = "0px";
+          navbarEl.style.opacity = "1";
+          navbarEl.style.pointerEvents = "auto";
+          navbarEl.style.transition = "opacity 0.2s ease"; // Smooth opacity fade, instant top
+        } else {
+          navbarEl.style.position = "sticky";
+          navbarEl.style.opacity = "1";
+          navbarEl.style.pointerEvents = "auto";
+          // Scroll-driven top position: the announcement bar (32px) scrolls away dynamically in sync with scroll position
+          const dY = currentScrollY - heroEnd;
+          const topVal = Math.max(-32, -dY);
+          navbarEl.style.top = `${topVal}px`;
+          navbarEl.style.transition = "none"; // Direct scroll tracking, no transition delay
+        }
+      } else {
+        navbarEl.style.opacity = "1";
+        navbarEl.style.pointerEvents = "auto";
+        if (currentScrollY < 32) {
+          navbarEl.style.position = "sticky";
+          navbarEl.style.top = `${-currentScrollY}px`;
+          navbarEl.style.transition = "none";
+        } else {
+          navbarEl.style.position = "sticky";
+          navbarEl.style.top = "-32px";
+          navbarEl.style.transition = "none";
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("resize", handleScroll);
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -52,7 +152,14 @@ export function Navbar() {
   ];
 
   return (
-    <>
+    <div 
+      ref={navbarRef}
+      className="left-0 right-0 z-40 sticky-nav-container"
+      style={{
+        position: "sticky",
+        top: 0,
+      }}
+    >
       {/* Announcement Bar */}
       {announcementText && (
         <div className="bg-brand-brown text-brand-gold text-[11px] sm:text-xs font-medium py-1.5 tracking-wider flex w-full relative z-50">
@@ -62,7 +169,7 @@ export function Navbar() {
         </div>
       )}
 
-      <header className="sticky top-0 left-0 right-0 z-40 bg-brand-cream/60 backdrop-blur-md border-b border-brand-brown/10 shadow-sm">
+      <header className="bg-brand-cream/60 backdrop-blur-md border-b border-brand-brown/10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           
@@ -272,6 +379,6 @@ export function Navbar() {
         </div>
       )}
       </header>
-    </>
+    </div>
   );
 }

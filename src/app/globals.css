@@ -12,6 +12,7 @@
 
   --font-sans: var(--font-inter);
   --font-serif: var(--font-playfair);
+  --font-proxima: var(--font-proxima);
 
   --animate-marquee: marquee 25s linear infinite;
   
@@ -26,4 +27,30 @@
     background-color: var(--color-brand-cream);
     color: var(--color-brand-text-primary);
   }
+}
+
+@font-face {
+  font-family: 'Almanta';
+  src: url('/fonts/almanta.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Amsterdam Signature';
+  src: url('/fonts/Amsterdam Signature.otf') format('opentype'),
+       url('/fonts/Amsterdam Signature.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Exclude hero section and landing animation from Proxima Nova */
+#hero-section-wrapper,
+.landing-container,
+.scroll-animation-wrapper,
+.canvas-container,
+.scroll-spacer {
+  font-family: var(--font-sans);
 }
