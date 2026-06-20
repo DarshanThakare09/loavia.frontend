@@ -22,12 +22,20 @@ interface SettingsState {
   // Admin
   adminName: string;
   adminEmail: string;
+  adminPhone: string;
+  adminAvatar: string;
+  adminStatus: string;
+  adminPassword: string;
+
+  // Hydration
+  hasHydrated: boolean;
+  setHasHydrated: (hydrated: boolean) => void;
 
   // Setters
   updateGeneral: (websiteName: string, supportEmail: string, contactPhone: string, businessAddress: string) => void;
   updateStore: (shippingCharge: number, freeShippingThreshold: number, currency: string) => void;
   updateSocial: (instagramUrl: string, facebookUrl: string, linkedinUrl: string, youtubeUrl: string) => void;
-  updateAdminProfile: (adminName: string, adminEmail: string) => void;
+  updateAdminProfile: (adminName: string, adminEmail: string, adminPhone: string, adminAvatar: string) => void;
   changePassword: (current: string, next: string) => boolean;
 }
 
@@ -50,22 +58,36 @@ export const useSettingsStore = create<SettingsState>()(
 
       adminName: 'Admin User',
       adminEmail: 'admin@loavia.com',
+      adminPhone: '+91-9000000000',
+      adminAvatar: '',
+      adminStatus: 'Active',
+      adminPassword: '123',
+      hasHydrated: false,
 
+      setHasHydrated: (hydrated) => set({ hasHydrated: hydrated }),
       updateGeneral: (websiteName, supportEmail, contactPhone, businessAddress) => set({ websiteName, supportEmail, contactPhone, businessAddress }),
       updateStore: (shippingCharge, freeShippingThreshold, currency) => set({ shippingCharge, freeShippingThreshold, currency }),
       updateSocial: (instagramUrl, facebookUrl, linkedinUrl, youtubeUrl) => set({ instagramUrl, facebookUrl, linkedinUrl, youtubeUrl }),
-      updateAdminProfile: (adminName, adminEmail) => set({ adminName, adminEmail }),
+      updateAdminProfile: (adminName, adminEmail, adminPhone, adminAvatar) => set({ adminName, adminEmail, adminPhone, adminAvatar }),
       changePassword: (current, next) => {
-        // For demo: store a simple password in localStorage under this store's key
         const state = get() as any;
-        const stored = (state as any)._password || 'admin';
-        if (current === stored) {
-          set({ ...(state as any), _password: next });
+        const stored = state.adminPassword;
+        console.debug('[settingsStore] changePassword called', { current, stored, hasHydrated: state.hasHydrated });
+        if (stored !== undefined && current === stored) {
+          set((s: any) => ({ ...s, adminPassword: next }));
+          console.debug('[settingsStore] password updated to', next);
           return true;
         }
+        console.debug('[settingsStore] password mismatch');
         return false;
       }
     }),
-    { name: 'loavia-settings-storage' }
+    {
+      name: 'loavia-settings-storage',
+      onRehydrateStorage: () => (state) => {
+        set({ hasHydrated: true });
+        console.debug('[settingsStore] rehydrated', { state });
+      }
+    }
   )
 );

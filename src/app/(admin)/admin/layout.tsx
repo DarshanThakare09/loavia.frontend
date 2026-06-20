@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, ShoppingBag, Users, Settings, Tag, LogOut, Menu, X, ArrowLeft } from "lucide-react";
@@ -13,7 +13,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { isAdminAuthenticated, logout } = useAdminAuthStore();
-  const { adminName } = useSettingsStore();
+  const { adminName, adminAvatar } = useSettingsStore();
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
   const isLoginPage = pathname?.startsWith('/admin/login');
 
@@ -31,6 +33,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     return () => cancelAnimationFrame(frame);
   }, [isAdminAuthenticated, isLoginPage, router]);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
 
   const navItems = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -137,10 +150,77 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
           
           <div className="ml-auto flex items-center space-x-4">
-                <div className="w-8 h-8 rounded-full bg-brand-gold text-brand-brown flex items-center justify-center font-bold">
-                  AD
+                <div className="relative" ref={profileMenuRef}>
+                  <div className="inline-flex items-center gap-3 rounded-full border border-brand-brown/10 bg-white px-3 py-2 text-left shadow-sm hover:bg-brand-light transition-colors cursor-pointer">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setProfileMenuOpen((open) => !open);
+                      }}
+                      aria-haspopup="true"
+                      aria-expanded={profileMenuOpen}
+                      className="w-8 h-8 rounded-full overflow-hidden border border-brand-brown/10 bg-brand-gold text-brand-brown flex items-center justify-center font-bold focus:outline-none"
+                    >
+                      {adminAvatar ? (
+                        <img src={adminAvatar} alt="Admin avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        (adminName || "").split(' ').map((part) => part[0] || '').slice(0, 2).join('').toUpperCase()
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setProfileMenuOpen(false);
+                        router.push('/admin/profile');
+                      }}
+                      className="font-medium text-brand-brown hidden sm:block hover:underline"
+                    >
+                      {adminName}
+                    </button>
+                  </div>
+
+                  {profileMenuOpen && (
+                    <div className="absolute right-0 z-10 mt-3 w-56 overflow-hidden rounded-3xl border border-brand-brown/10 bg-white shadow-lg">
+                      <div className="flex flex-col py-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProfileMenuOpen(false);
+                            router.push('/admin/profile');
+                          }}
+                          className="text-left px-4 py-3 text-sm text-brand-brown hover:bg-brand-light"
+                        >
+                          My Profile
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProfileMenuOpen(false);
+                            router.push('/admin/settings');
+                          }}
+                          className="text-left px-4 py-3 text-sm text-brand-brown hover:bg-brand-light"
+                        >
+                          Settings
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProfileMenuOpen(false);
+                            localStorage.removeItem('mockAdminAuth');
+                            logout();
+                            router.push('/admin/login');
+                          }}
+                          className="text-left px-4 py-3 text-sm text-brand-brown hover:bg-brand-light"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <span className="font-medium text-brand-brown hidden sm:block">{adminName}</span>
           </div>
         </header>
 

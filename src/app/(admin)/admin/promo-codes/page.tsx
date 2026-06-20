@@ -384,6 +384,7 @@ export default function AdminPromoCodesPage() {
                     className="w-full min-h-[120px] rounded-2xl border border-brand-brown/10 px-4 py-3 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 outline-none text-sm resize-none"
                     placeholder="Add an optional description for this promo code"
                   />
+                  
                 </label>
               </div>
 

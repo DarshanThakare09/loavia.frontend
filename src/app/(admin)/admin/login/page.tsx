@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useAdminAuthStore } from "@/store/adminAuthStore";
+import { useSettingsStore } from "@/store/settingsStore";
 
 export default function AdminLogin() {
   const [username, setUsername] = useState("");
@@ -11,10 +12,20 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const { login } = useAdminAuthStore();
+  const adminPassword = useSettingsStore((state) => state.adminPassword);
+  const hasHydrated = useSettingsStore((state) => state.hasHydrated);
   const router = useRouter();
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (username.trim() === "admin@123" && password.trim() === "123") {
+    if (!hasHydrated) {
+      setError("Please wait while settings load.");
+      return;
+    }
+    // For demo: username is fixed; password is read from settings store to stay consistent
+    console.debug('[admin login] entered', { username, password });
+    console.debug('[admin login] stored adminPassword', adminPassword, 'hasHydrated', hasHydrated);
+    if (username.trim() === "admin@123" && password.trim() === adminPassword) {
       login();
       try {
         localStorage.setItem("mockAdminAuth", "true");

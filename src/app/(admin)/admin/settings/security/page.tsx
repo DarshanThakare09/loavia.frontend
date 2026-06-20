@@ -3,25 +3,39 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useAdminAuthStore } from "@/store/adminAuthStore";
+import { useRouter } from "next/navigation";
 
 export default function SecuritySettingsPage() {
   const { changePassword } = useSettingsStore();
+  const hasHydrated = useSettingsStore((state) => state.hasHydrated);
+  const { logout } = useAdminAuthStore();
+  const router = useRouter();
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [loading, setLoading] = useState(false);
 
   const save = () => {
     if (!form.currentPassword || !form.newPassword || !form.confirmPassword) return toast.error('All fields are required');
+    if (!hasHydrated) return toast.error('Please wait while settings load before updating password');
     if (form.newPassword !== form.confirmPassword) return toast.error('New password and confirm do not match');
+    if (form.newPassword.length < 6) return toast.error('New password must be at least 6 characters');
+    console.debug('[security] save: entered current=', form.currentPassword, 'new=', form.newPassword, 'hasHydrated=', hasHydrated);
+    console.debug('[security] store adminPassword=', (useSettingsStore.getState() as any).adminPassword);
     setLoading(true);
     try {
-      const ok = changePassword(form.currentPassword, form.newPassword);
+      const ok = changePassword(form.currentPassword.trim(), form.newPassword.trim());
+      console.debug('[security] changePassword result=', ok);
       if (!ok) {
         toast.error('Current password is incorrect');
       } else {
         toast.success('Password updated.');
         setForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        try { localStorage.removeItem('mockAdminAuth'); } catch {}
+        logout();
+        router.push('/admin/login');
       }
-    } catch {
+    } catch (err) {
+      console.error('[security] changePassword threw', err);
       toast.error('Failed to change password');
     } finally { setLoading(false); }
   };

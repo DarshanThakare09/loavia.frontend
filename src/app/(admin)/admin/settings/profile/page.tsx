@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import { useSettingsStore } from "@/store/settingsStore";
 
 export default function ProfileSettingsPage() {
-  const { adminName, adminEmail, updateAdminProfile } = useSettingsStore();
-  const [form, setForm] = useState({ adminName: adminName || '', adminEmail: adminEmail || '' });
+  const { adminName, adminEmail, adminPhone, adminAvatar, updateAdminProfile } = useSettingsStore();
+  const [form, setForm] = useState({ adminName: adminName || '', adminEmail: adminEmail || '', adminPhone: adminPhone || '' });
   const [loading, setLoading] = useState(false);
 
   const validateEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
@@ -16,7 +16,7 @@ export default function ProfileSettingsPage() {
     if (!validateEmail(form.adminEmail)) return toast.error('Admin email is invalid');
     setLoading(true);
     try {
-      updateAdminProfile(form.adminName, form.adminEmail);
+      updateAdminProfile(form.adminName, form.adminEmail, form.adminPhone, adminAvatar);
       toast.success('Admin profile updated.');
     } catch {
       toast.error('Failed to update admin profile.');
@@ -44,6 +44,10 @@ export default function ProfileSettingsPage() {
           <div>
             <label className="block text-sm font-medium text-brand-text-secondary">Admin Email</label>
             <input value={form.adminEmail} onChange={(e) => setForm(f => ({ ...f, adminEmail: e.target.value }))} className="mt-1 w-full rounded-lg border p-3" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-brand-text-secondary">Phone Number</label>
+            <input value={form.adminPhone} onChange={(e) => setForm(f => ({ ...f, adminPhone: e.target.value }))} className="mt-1 w-full rounded-lg border p-3" />
           </div>
         </div>
       </div>
