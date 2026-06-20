@@ -1,36 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useAdminAuthStore } from "@/store/adminAuthStore";
 import { useSettingsStore } from "@/store/settingsStore";
+import Link from "next/link";
 
 export default function AdminLogin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const { login } = useAdminAuthStore();
   const adminPassword = useSettingsStore((state) => state.adminPassword);
-  const hasHydrated = useSettingsStore((state) => state.hasHydrated);
   const router = useRouter();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!mounted || !hasHydrated) {
-      setError("Please wait while settings load.");
-      return;
-    }
     // For demo: username is fixed; password is read from settings store to stay consistent
     console.debug('[admin login] entered', { username, password });
-    console.debug('[admin login] stored adminPassword', adminPassword, 'hasHydrated', hasHydrated);
+    console.debug('[admin login] stored adminPassword', adminPassword);
     if (username.trim() === "admin@123" && password.trim() === adminPassword) {
       login();
       try {
@@ -38,9 +29,9 @@ export default function AdminLogin() {
       } catch (err) {
         console.warn("localStorage not available", err);
       }
-      
+
       router.push("/admin/dashboard");
-      
+
       // Fallback for robust redirect
       setTimeout(() => {
         if (window.location.pathname !== "/admin/dashboard") {
@@ -106,6 +97,15 @@ export default function AdminLogin() {
           </div>
 
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
+          <div className="flex justify-end">
+            <Link
+              href="/admin/forgot-password"
+              className="text-sm text-brand-text-secondary hover:text-brand-brown transition-colors"
+            >
+              Forgot Password?
+            </Link>
+          </div>
 
           <div>
             <button

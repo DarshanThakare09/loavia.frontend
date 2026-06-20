@@ -93,7 +93,7 @@ export function BestSellers() {
               
               <Link href={`/product/${product.id}`} className="block relative aspect-square overflow-hidden bg-brand-light">
                 <Image
-                  src={product.image}
+                  src={product.primaryImage || product.images?.[0] || product.image}
                   alt={product.name}
                   fill
                   className="object-cover transform group-hover:scale-105 transition-transform duration-500"

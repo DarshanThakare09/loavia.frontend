@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 
 export default function SecuritySettingsPage() {
   const { changePassword } = useSettingsStore();
-  const hasHydrated = useSettingsStore((state) => state.hasHydrated);
   const { logout } = useAdminAuthStore();
   const router = useRouter();
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -16,10 +15,9 @@ export default function SecuritySettingsPage() {
 
   const save = () => {
     if (!form.currentPassword || !form.newPassword || !form.confirmPassword) return toast.error('All fields are required');
-    if (!hasHydrated) return toast.error('Please wait while settings load before updating password');
     if (form.newPassword !== form.confirmPassword) return toast.error('New password and confirm do not match');
     if (form.newPassword.length < 6) return toast.error('New password must be at least 6 characters');
-    console.debug('[security] save: entered current=', form.currentPassword, 'new=', form.newPassword, 'hasHydrated=', hasHydrated);
+    console.debug('[security] save: entered current=', form.currentPassword, 'new=', form.newPassword);
     console.debug('[security] store adminPassword=', (useSettingsStore.getState() as any).adminPassword);
     setLoading(true);
     try {

@@ -126,14 +126,14 @@ export default function FeaturedProducts() {
               >
                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-white flex-shrink-0">
                   <Image
-                    src={product.image || "/premium_cookie.png"}
+                    src={product.primaryImage || product.images?.[0] || product.image || "/premium_cookie.png"}
                     alt={product.name}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                  {product.featuredBadgeText && (
+                  {(product.featuredBadgeText || product.isFeatured) && (
                     <span className="absolute left-1.5 top-1.5 rounded-full bg-brand-brown px-2 py-0.5 text-[9px] font-semibold text-white">
-                      {product.featuredBadgeText}
+                      {product.featuredBadgeText || "Featured"}
                     </span>
                   )}
                 </div>

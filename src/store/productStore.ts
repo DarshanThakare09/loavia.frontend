@@ -14,6 +14,8 @@ export interface Product {
   discountPrice?: number | null;
   image: string;
   images: string[];
+  primaryImage?: string;
+  coverImage?: string;
   rating: number;
   reviews: number;
   category: string;
@@ -148,7 +150,7 @@ export const useProductStore = create<ProductState>()(
       setProducts: (products) => set({ products }),
     }),
     {
-      name: 'loavia-product-storage-v2',
+      name: 'loavia-product-storage-v3',
     }
   )
 );

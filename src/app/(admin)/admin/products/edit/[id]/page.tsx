@@ -29,6 +29,13 @@ export default function EditProduct() {
 
   if (!formData) return <div>Loading...</div>;
 
+  const images = formData.images || [];
+  const coverImage = images.includes(formData.coverImage || "") ? formData.coverImage! : (images[0] || "");
+
+  const handleSetCoverImage = (url: string) => {
+    setFormData({ ...formData, coverImage: url, primaryImage: url, image: url });
+  };
+
   const handleAddTag = () => {
     if (newTag && !formData.tags?.includes(newTag)) {
       setFormData({ ...formData, tags: [...(formData.tags || []), newTag] });
@@ -68,10 +75,13 @@ export default function EditProduct() {
       toast.error("Name and Price are required.");
       return;
     }
-    const productData = formData.isFeatured
-      ? formData
-      : { ...formData, featuredOrder: undefined };
-
+    const cover = coverImage || formData.images?.[0] || formData.image || "";
+    const productData = {
+      ...(formData.isFeatured ? formData : { ...formData, featuredOrder: undefined }),
+      coverImage: cover,
+      primaryImage: cover,
+      image: cover,
+    };
     updateProduct(params.id as string, productData);
     toast.success("Product updated successfully.");
     router.push('/admin/products');
@@ -155,10 +165,40 @@ export default function EditProduct() {
                 </div>
               </>
             )}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-brand-text-primary mb-1">Image URL</label>
-              <input type="text" className="w-full px-4 py-2 border rounded-xl" value={formData.image || ''} onChange={e => setFormData({...formData, image: e.target.value, images: [e.target.value]})} />
-            </div>
+            {images.length > 0 && (
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-brand-text-primary mb-2">Product Images</label>
+                <div className="flex flex-wrap gap-4">
+                  {images.map((img, idx) => {
+                    const isCover = img === coverImage;
+                    return (
+                      <div key={idx} className="flex flex-col items-center gap-1.5">
+                        <div
+                          className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0"
+                          style={{ border: `2px solid ${isCover ? '#5C4033' : '#e5e7eb'}` }}
+                        >
+                          <img src={img} alt={`Image ${idx + 1}`} className="w-full h-full object-cover" />
+                          {isCover && (
+                            <span className="absolute top-1 left-1 text-[9px] font-bold bg-brand-brown text-white px-1.5 py-0.5 rounded">Cover</span>
+                          )}
+                        </div>
+                        {isCover ? (
+                          <span className="text-[11px] font-semibold text-brand-brown">Cover Image</span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleSetCoverImage(img)}
+                            className="text-[11px] font-medium text-brand-text-secondary border border-brand-brown/20 rounded-lg px-2 py-0.5 hover:bg-brand-brown hover:text-white transition-colors cursor-pointer"
+                          >
+                            Set as Cover
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

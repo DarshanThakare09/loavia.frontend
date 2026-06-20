@@ -18,7 +18,6 @@ const getInitials = (name: string) => {
 
 export default function AdminProfilePage() {
   const { adminName, adminEmail, adminPhone, adminAvatar, adminStatus, updateAdminProfile, changePassword } = useSettingsStore();
-  const hasHydrated = useSettingsStore((state) => state.hasHydrated);
   const { logout } = useAdminAuthStore();
   const router = useRouter();
   const [form, setForm] = useState({
@@ -81,9 +80,6 @@ export default function AdminProfilePage() {
     if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
       return toast.error("All password fields are required.");
     }
-    if (!hasHydrated) {
-      return toast.error("Please wait while settings load before updating password.");
-    }
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       return toast.error("New password and confirmation must match.");
     }
@@ -91,7 +87,7 @@ export default function AdminProfilePage() {
       return toast.error("New password must be at least 6 characters.");
     }
 
-    console.debug('[profile] updatePassword: enteredCurrent=', passwordForm.currentPassword, 'new=', passwordForm.newPassword, 'hasHydrated=', hasHydrated);
+    console.debug('[profile] updatePassword: enteredCurrent=', passwordForm.currentPassword, 'new=', passwordForm.newPassword);
     console.debug('[profile] store adminPassword before change=', (useSettingsStore.getState() as any).adminPassword);
 
     setPasswordLoading(true);

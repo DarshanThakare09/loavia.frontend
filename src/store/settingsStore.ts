@@ -27,10 +27,6 @@ interface SettingsState {
   adminStatus: string;
   adminPassword: string;
 
-  // Hydration
-  hasHydrated: boolean;
-  setHasHydrated: (hydrated: boolean) => void;
-
   // Setters
   updateGeneral: (websiteName: string, supportEmail: string, contactPhone: string, businessAddress: string) => void;
   updateStore: (shippingCharge: number, freeShippingThreshold: number, currency: string) => void;
@@ -62,9 +58,7 @@ export const useSettingsStore = create<SettingsState>()(
       adminAvatar: '',
       adminStatus: 'Active',
       adminPassword: '123',
-      hasHydrated: false,
 
-      setHasHydrated: (hydrated) => set({ hasHydrated: hydrated }),
       updateGeneral: (websiteName, supportEmail, contactPhone, businessAddress) => set({ websiteName, supportEmail, contactPhone, businessAddress }),
       updateStore: (shippingCharge, freeShippingThreshold, currency) => set({ shippingCharge, freeShippingThreshold, currency }),
       updateSocial: (instagramUrl, facebookUrl, linkedinUrl, youtubeUrl) => set({ instagramUrl, facebookUrl, linkedinUrl, youtubeUrl }),
@@ -72,8 +66,8 @@ export const useSettingsStore = create<SettingsState>()(
       changePassword: (current, next) => {
         const state = get() as any;
         const stored = state.adminPassword;
-        console.debug('[settingsStore] changePassword called', { current, stored, hasHydrated: state.hasHydrated });
-        if (stored !== undefined && current === stored) {
+        console.debug('[settingsStore] changePassword called', { current, stored });
+        if (current === stored) {
           set((s: any) => ({ ...s, adminPassword: next }));
           console.debug('[settingsStore] password updated to', next);
           return true;
@@ -82,18 +76,6 @@ export const useSettingsStore = create<SettingsState>()(
         return false;
       }
     }),
-    {
-      name: 'loavia-settings-storage',
-      partialize: (state) => {
-        const { hasHydrated, ...rest } = state;
-        return rest;
-      },
-      onRehydrateStorage: () => (state, error) => {
-        if (!error && state) {
-          state.setHasHydrated(true);
-          console.debug('[settingsStore] rehydrated', state);
-        }
-      }
-    }
+    { name: 'loavia-settings-storage' }
   )
 );
