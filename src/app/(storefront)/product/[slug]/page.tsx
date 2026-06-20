@@ -18,7 +18,8 @@ export default function ProductDetail() {
   const [activeTab, setActiveTab] = useState<'description' | 'ingredients'>('description');
   
   const product = products.find(p => p.id === params.slug);
-  const [selectedImage, setSelectedImage] = useState(product ? (product.image || "/premium_cookie.png") : "");
+  const getDisplayImage = (p: typeof product) => p?.coverImage || p?.primaryImage || p?.images?.[0] || p?.image || "/premium_cookie.png";
+  const [selectedImage, setSelectedImage] = useState(product ? getDisplayImage(product) : "");
 
   useEffect(() => {
     setMounted(true);
@@ -27,7 +28,7 @@ export default function ProductDetail() {
   // Update selected image once product is loaded or changed
   useEffect(() => {
     if (product) {
-      setSelectedImage(product.image || "/premium_cookie.png");
+      setSelectedImage(getDisplayImage(product));
     }
   }, [product]);
 

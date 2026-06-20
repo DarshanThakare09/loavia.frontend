@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useAdminAuthStore } from "@/store/adminAuthStore";
 import { useSettingsStore } from "@/store/settingsStore";
+import Link from "next/link";
 
 export default function AdminLogin() {
   const [username, setUsername] = useState("");
@@ -95,6 +96,15 @@ export default function AdminLogin() {
           </div>
 
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
+          <div className="flex justify-end">
+            <Link
+              href="/admin/forgot-password"
+              className="text-sm text-brand-text-secondary hover:text-brand-brown transition-colors"
+            >
+              Forgot Password?
+            </Link>
+          </div>
 
           <div>
             <button

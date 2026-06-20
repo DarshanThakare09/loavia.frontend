@@ -51,7 +51,7 @@ export default function FeaturedProducts() {
                 <div>
                   <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-white mb-5">
                     <Image
-                      src={product.image || "/premium_cookie.png"}
+                      src={product.primaryImage || product.images?.[0] || product.image || "/premium_cookie.png"}
                       alt={product.name}
                       fill
                       className="object-cover"
