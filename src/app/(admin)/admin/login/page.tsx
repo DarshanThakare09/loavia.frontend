@@ -12,6 +12,7 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+
   const { login } = useAdminAuthStore();
   const adminPassword = useSettingsStore((state) => state.adminPassword);
   const router = useRouter();
@@ -28,9 +29,9 @@ export default function AdminLogin() {
       } catch (err) {
         console.warn("localStorage not available", err);
       }
-      
+
       router.push("/admin/dashboard");
-      
+
       // Fallback for robust redirect
       setTimeout(() => {
         if (window.location.pathname !== "/admin/dashboard") {

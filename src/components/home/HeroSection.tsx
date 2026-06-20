@@ -157,10 +157,10 @@ export function HeroSection() {
               className="object-contain drop-shadow-2xl"
               priority
             />
-            
+
             {/* Speech Bubble */}
             <div className="absolute -top-5 -right-8 bg-white rounded-3xl px-6 py-3 shadow-lg" style={{ minWidth: '200px', fontFamily: "'Outfit', 'Proxima Nova', 'Montserrat', sans-serif", fontWeight: 100 }}>
-              <p className="text-black text-sm text-center">Looking for cart it's up there</p>
+              <p className="text-black text-sm text-center">looking for cart it's up there</p>
               {/* Speech bubble tail - left side */}
               <div className="absolute bottom--2 left-8 w-0 h-0" style={{
                 bottom: '-8px',
