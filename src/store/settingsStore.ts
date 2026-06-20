@@ -84,9 +84,15 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'loavia-settings-storage',
-      onRehydrateStorage: () => (state) => {
-        set({ hasHydrated: true });
-        console.debug('[settingsStore] rehydrated', { state });
+      partialize: (state) => {
+        const { hasHydrated, ...rest } = state;
+        return rest;
+      },
+      onRehydrateStorage: () => (state, error) => {
+        if (!error && state) {
+          state.setHasHydrated(true);
+          console.debug('[settingsStore] rehydrated', state);
+        }
       }
     }
   )

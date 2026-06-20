@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useAdminAuthStore } from "@/store/adminAuthStore";
@@ -11,6 +11,12 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const { login } = useAdminAuthStore();
   const adminPassword = useSettingsStore((state) => state.adminPassword);
   const hasHydrated = useSettingsStore((state) => state.hasHydrated);
@@ -18,7 +24,7 @@ export default function AdminLogin() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!hasHydrated) {
+    if (!mounted || !hasHydrated) {
       setError("Please wait while settings load.");
       return;
     }
