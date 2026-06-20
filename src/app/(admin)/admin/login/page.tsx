@@ -13,18 +13,13 @@ export default function AdminLogin() {
   const [error, setError] = useState("");
   const { login } = useAdminAuthStore();
   const adminPassword = useSettingsStore((state) => state.adminPassword);
-  const hasHydrated = useSettingsStore((state) => state.hasHydrated);
   const router = useRouter();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!hasHydrated) {
-      setError("Please wait while settings load.");
-      return;
-    }
     // For demo: username is fixed; password is read from settings store to stay consistent
     console.debug('[admin login] entered', { username, password });
-    console.debug('[admin login] stored adminPassword', adminPassword, 'hasHydrated', hasHydrated);
+    console.debug('[admin login] stored adminPassword', adminPassword);
     if (username.trim() === "admin@123" && password.trim() === adminPassword) {
       login();
       try {
