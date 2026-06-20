@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
-import { Search, User, ShoppingCart, Menu, X } from "lucide-react";
+import { Search, User, ShoppingCart, Menu, X, ArrowRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
@@ -32,7 +32,7 @@ export function Navbar() {
   const transitionStartRef = useRef(15 * 800);
   const heroEndRef = useRef(16.8 * 800);
 
-  // Update navbar height CSS variable and layout dimensions on mount and resize (avoids layout thrashing on scroll)
+  // Update navbar height CSS variable and layout dimensions on mount and resize
   useEffect(() => {
     const updateLayout = () => {
       const rect = navbarRef.current?.getBoundingClientRect();
@@ -43,16 +43,11 @@ export function Navbar() {
       const vh = window.innerHeight;
       const vw = window.innerWidth;
 
-      // Starting scroll animation is exactly 15vh (1500vh scroll spacer)
       transitionStartRef.current = 15 * vh;
 
       if (vw >= 1024) {
-        // Desktop: HeroSection is h-[180vh], so sticky wrapper holds it for 80vh.
-        // It starts at 15vh + navbar height (112px) and finishes scrolling away at 16.8vh.
-        // The Announcement Bar stays sticky until the HeroSection has completely scrolled off-screen.
         heroEndRef.current = 16.8 * vh;
       } else {
-        // Mobile/Tablet: HeroSection is not sticky, so announcement bar scrolls away immediately
         heroEndRef.current = 15 * vh;
       }
     };
@@ -65,7 +60,7 @@ export function Navbar() {
     };
   }, [pathname]);
 
-  // High performance direct DOM scroll positioning (avoids React re-renders and lag/jitter)
+  // High performance direct DOM scroll positioning
   useEffect(() => {
     const handleScroll = () => {
       const navbarEl = navbarRef.current;
@@ -90,16 +85,15 @@ export function Navbar() {
           navbarEl.style.top = "0px";
           navbarEl.style.opacity = "1";
           navbarEl.style.pointerEvents = "auto";
-          navbarEl.style.transition = "opacity 0.2s ease"; // Smooth opacity fade, instant top
+          navbarEl.style.transition = "opacity 0.2s ease";
         } else {
           navbarEl.style.position = "sticky";
           navbarEl.style.opacity = "1";
           navbarEl.style.pointerEvents = "auto";
-          // Scroll-driven top position: the announcement bar (32px) scrolls away dynamically in sync with scroll position
           const dY = currentScrollY - heroEnd;
           const topVal = Math.max(-32, -dY);
           navbarEl.style.top = `${topVal}px`;
-          navbarEl.style.transition = "none"; // Direct scroll tracking, no transition delay
+          navbarEl.style.transition = "none";
         }
       } else {
         navbarEl.style.opacity = "1";
@@ -162,20 +156,25 @@ export function Navbar() {
     >
       {/* Announcement Bar */}
       {announcementText && (
-        <div className="bg-brand-brown text-brand-gold text-[11px] sm:text-xs font-medium py-1.5 tracking-wider flex w-full relative z-50">
-          <marquee scrollamount="10" className="w-full" onMouseOver={(e: any) => e.target.stop()} onMouseOut={(e: any) => e.target.start()}>
+        <div className="bg-[#2E190E] text-brand-gold text-[11px] sm:text-xs font-semibold py-1.5 tracking-widest flex w-full relative z-50 border-b border-brand-gold/10">
+          <marquee scrollamount="6" className="w-full font-sans" onMouseOver={(e: any) => e.target.stop()} onMouseOut={(e: any) => e.target.start()}>
             {announcementText}
           </marquee>
         </div>
       )}
 
-      <header className="bg-brand-cream/60 backdrop-blur-md border-b border-brand-brown/10 shadow-sm">
+      {/* Main Glassmorphic Header */}
+      <header className="relative bg-[#FDFBF7]/85 backdrop-blur-md border-b border-brand-brown/10 shadow-[0_4px_30px_rgba(92,51,23,0.03)] transition-all duration-300">
+
+        {/* Subtle decorative bottom glow line */}
+        <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-brand-gold/25 to-transparent pointer-events-none" />
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
 
-            {/* Logo */}
+            {/* Left Brand Logo */}
             <div className="flex-1 flex justify-start items-center">
-              <Link href="/" className="relative w-70 h-35">
+              <Link href="/" className="relative w-[290px] h-[110px] transition-transform duration-500 hover:scale-103 block">
                 <Image
                   src="/loavia-logo.png"
                   alt="LOAVIA Logo"
@@ -186,78 +185,83 @@ export function Navbar() {
               </Link>
             </div>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex justify-center space-x-8 shrink-0">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className="text-brand-text-primary hover:text-brand-gold font-medium transition-colors relative group"
-                >
-                  {link.name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-gold transition-all group-hover:w-full"></span>
-                </Link>
-              ))}
+            {/* Center Navigation Links (Pill Style) */}
+            <nav className="hidden md:flex justify-center space-x-2 shrink-0">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className={`px-4 py-2 text-sm font-sans font-medium rounded-full transition-all duration-300 relative group flex items-center justify-center ${isActive
+                      ? "text-[#5C3317] bg-[#5C3317]/5 font-semibold"
+                      : "text-[#5C3317]/80 hover:text-[#5C3317] hover:bg-[#5C3317]/5"
+                      }`}
+                  >
+                    {link.name}
+                    {isActive && (
+                      <span className="absolute bottom-1.5 w-1 h-1 bg-brand-gold rounded-full"></span>
+                    )}
+                  </Link>
+                );
+              })}
             </nav>
 
-            {/* Icons & Mobile Menu */}
+            {/* Right Action Icons */}
             <div className="flex-1 flex justify-end items-center">
-              {/* Desktop Icons */}
-              <div className="hidden md:flex items-center space-x-6 text-brand-text-primary">
+              <div className="flex items-center space-x-2 md:space-x-4 text-brand-brown">
 
-                {/* Search */}
+                {/* Search Toggle */}
                 <div className="relative" ref={searchRef}>
                   <button
                     aria-label="Search"
-                    className="hover:text-brand-gold transition-colors"
                     onClick={() => setIsSearchOpen(!isSearchOpen)}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#5C3317]/5 transition-all duration-300 ${isSearchOpen ? "text-brand-gold bg-[#5C3317]/5" : "text-brand-brown hover:text-brand-gold"
+                      }`}
                   >
                     <Search className="w-5 h-5" />
                   </button>
 
-                  {/* Search Dropdown */}
+                  {/* Glassmorphic Search Dropdown */}
                   {isSearchOpen && (
-                    <div className="absolute right-0 top-full mt-6 w-80 bg-white shadow-xl rounded-2xl border border-brand-brown/10 overflow-hidden">
-                      <div className="p-4 border-b border-brand-brown/10">
-                        <div className="relative">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-brand-text-secondary" />
-                          <input
-                            type="text"
-                            placeholder="Search cookies..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2 bg-brand-light border-none rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-sm"
-                            autoFocus
-                          />
-                        </div>
+                    <div className="absolute right-0 top-full mt-4 w-80 bg-white/95 backdrop-blur-md shadow-2xl rounded-3xl border border-brand-brown/10 overflow-hidden z-50 p-4 transform origin-top-right transition-all duration-300">
+                      <div className="relative mb-3">
+                        <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-brand-text-secondary" />
+                        <input
+                          type="text"
+                          placeholder="Search cookies..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2.5 bg-brand-brown/5 border border-brand-brown/10 rounded-2xl focus:ring-1 focus:ring-brand-gold focus:border-brand-gold outline-none text-sm font-sans"
+                          autoFocus
+                        />
                       </div>
-                      <div className="max-h-80 overflow-y-auto">
+
+                      <div className="max-h-72 overflow-y-auto space-y-1">
                         {searchResults.length > 0 ? (
-                          <ul className="py-2">
-                            {searchResults.map(product => (
-                              <li key={product.id}>
-                                <button
-                                  onClick={() => {
-                                    setIsSearchOpen(false);
-                                    setSearchQuery("");
-                                    router.push(`/product/${product.id}`);
-                                  }}
-                                  className="w-full text-left px-4 py-2 hover:bg-brand-brown/5 flex items-center space-x-3 transition-colors"
-                                >
-                                  <div className="relative w-10 h-10 rounded-md overflow-hidden bg-brand-light flex-shrink-0">
-                                    <Image src={product.image} alt={product.name} fill className="object-cover" />
-                                  </div>
-                                  <div>
-                                    <p className="text-sm font-medium text-brand-text-primary line-clamp-1">{product.name}</p>
-                                    <p className="text-xs text-brand-text-secondary">₹{product.price}</p>
-                                  </div>
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
+                          searchResults.map(product => (
+                            <button
+                              key={product.id}
+                              onClick={() => {
+                                setIsSearchOpen(false);
+                                setSearchQuery("");
+                                router.push(`/product/${product.id}`);
+                              }}
+                              className="w-full text-left p-2 hover:bg-[#5C3317]/5 rounded-xl flex items-center space-x-3 transition-colors duration-200"
+                            >
+                              <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-brand-light flex-shrink-0 border border-brand-brown/5">
+                                <Image src={product.image} alt={product.name} fill className="object-cover" />
+                              </div>
+                              <div className="flex-grow min-w-0">
+                                <p className="text-sm font-semibold text-[#5C3317] truncate">{product.name}</p>
+                                <p className="text-xs text-brand-gold font-medium mt-0.5">₹{product.price}</p>
+                              </div>
+                              <ArrowRight className="w-4 h-4 text-brand-brown/40" />
+                            </button>
+                          ))
                         ) : (
-                          <div className="p-4 text-center text-sm text-brand-text-secondary">
-                            No products found.
+                          <div className="py-6 text-center text-xs text-brand-text-secondary italic">
+                            No cookies found.
                           </div>
                         )}
                       </div>
@@ -265,120 +269,163 @@ export function Navbar() {
                   )}
                 </div>
 
-                <Link href={authLink} aria-label="Account" className="hover:text-brand-gold transition-colors">
+                {/* Account Button */}
+                <Link
+                  href={authLink}
+                  aria-label="Account"
+                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#5C3317]/5 text-brand-brown hover:text-brand-gold transition-all duration-300"
+                >
                   <User className="w-5 h-5" />
                 </Link>
+
+                {/* Cart Button */}
                 <button
                   onClick={openMiniCart}
-                  className="relative hover:text-brand-gold transition-colors"
+                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#5C3317]/5 text-brand-brown hover:text-brand-gold transition-all duration-300 relative"
                   aria-label="Cart"
                 >
                   <ShoppingCart className="w-5 h-5" />
                   {totalItems > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-brand-brown text-brand-cream text-xs font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                    <span className="absolute top-1.5 right-1.5 bg-brand-gold text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-md animate-pulse">
                       {totalItems}
                     </span>
                   )}
                 </button>
-              </div>
 
-              {/* Mobile menu button */}
-              <div className="md:hidden flex items-center ml-4">
+                {/* Mobile Menu Toggle */}
                 <button
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="text-brand-text-primary hover:text-brand-gold"
-                  aria-label="Toggle menu"
+                  onClick={() => setIsMobileMenuOpen(true)}
+                  className="md:hidden w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#5C3317]/5 text-brand-brown hover:text-brand-gold transition-all duration-300"
+                  aria-label="Open menu"
                 >
-                  {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                  <Menu className="w-5 h-5" />
                 </button>
+
               </div>
             </div>
           </div>
         </div>
+      </header>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden bg-brand-cream border-b border-brand-brown/10">
+      {/* Mobile Drawer Menu (Slide-in right drawer) */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 md:hidden transition-opacity duration-300"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
-            {/* Mobile Search */}
-            <div className="px-4 py-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-brand-text-secondary" />
-                <input
-                  type="text"
-                  placeholder="Search cookies..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-white border border-brand-brown/10 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-sm"
-                />
+      <div className={`fixed top-0 right-0 bottom-0 w-[300px] bg-[#FDFBF7] z-50 shadow-2xl p-6 flex flex-col justify-between transition-transform duration-500 ease-out md:hidden transform ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+        }`}>
+        <div>
+          {/* Drawer Header */}
+          <div className="flex justify-between items-center pb-6 border-b border-brand-brown/10 mb-6">
+            <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="relative w-[130px] h-[45px]">
+              <Image src="/loavia-logo.png" alt="LOAVIA Logo" fill className="object-contain" />
+            </Link>
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#5C3317]/5 text-brand-brown transition-colors"
+              aria-label="Close menu"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Drawer Search */}
+          <div className="relative mb-6">
+            <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-brand-text-secondary" />
+            <input
+              type="text"
+              placeholder="Search cookies..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-brand-brown/5 border border-brand-brown/10 rounded-2xl focus:ring-1 focus:ring-brand-gold focus:border-brand-gold outline-none text-sm font-sans"
+            />
+            {searchQuery.trim() !== "" && (
+              <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-xl border border-brand-brown/10 overflow-hidden z-50 max-h-60 overflow-y-auto">
+                {searchResults.length > 0 ? (
+                  searchResults.map(product => (
+                    <button
+                      key={product.id}
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        setSearchQuery("");
+                        router.push(`/product/${product.id}`);
+                      }}
+                      className="w-full text-left p-2.5 hover:bg-[#5C3317]/5 flex items-center space-x-3 transition-colors duration-200"
+                    >
+                      <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-brand-light flex-shrink-0">
+                        <Image src={product.image} alt={product.name} fill className="object-cover" />
+                      </div>
+                      <div className="flex-grow min-w-0">
+                        <p className="text-xs font-semibold text-[#5C3317] truncate">{product.name}</p>
+                        <p className="text-[10px] text-brand-gold font-medium">₹{product.price}</p>
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="p-3 text-center text-xs text-brand-text-secondary italic">No cookies found.</div>
+                )}
               </div>
-              {searchQuery.trim() !== "" && (
-                <div className="mt-2 bg-white rounded-xl shadow-sm border border-brand-brown/10 overflow-hidden max-h-60 overflow-y-auto">
-                  {searchResults.length > 0 ? (
-                    <ul className="py-2">
-                      {searchResults.map(product => (
-                        <li key={product.id}>
-                          <button
-                            onClick={() => {
-                              setIsMobileMenuOpen(false);
-                              setSearchQuery("");
-                              router.push(`/product/${product.id}`);
-                            }}
-                            className="w-full text-left px-4 py-2 hover:bg-brand-brown/5 flex items-center space-x-3 transition-colors"
-                          >
-                            <div className="relative w-8 h-8 rounded-md overflow-hidden bg-brand-light flex-shrink-0">
-                              <Image src={product.image} alt={product.name} fill className="object-cover" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-brand-text-primary line-clamp-1">{product.name}</p>
-                              <p className="text-xs text-brand-text-secondary">₹{product.price}</p>
-                            </div>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <div className="p-3 text-center text-sm text-brand-text-secondary">No products found.</div>
-                  )}
-                </div>
-              )}
-            </div>
+            )}
+          </div>
 
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              {navLinks.map((link) => (
+          {/* Drawer Link List */}
+          <nav className="flex flex-col space-y-2">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="block px-3 py-2 text-base font-medium text-brand-text-primary hover:text-brand-gold hover:bg-brand-brown/5 rounded-md"
+                  className={`px-4 py-3 rounded-2xl text-base font-sans font-medium transition-all duration-200 flex justify-between items-center ${isActive
+                    ? "text-[#5C3317] bg-[#5C3317]/5 font-semibold"
+                    : "text-[#5C3317]/80 hover:text-[#5C3317] hover:bg-[#5C3317]/5"
+                    }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  {link.name}
+                  <span>{link.name}</span>
+                  <ArrowRight className={`w-4 h-4 transition-transform duration-300 ${isActive ? "text-brand-gold translate-x-0.5" : "text-brand-brown/20"}`} />
                 </Link>
-              ))}
-              <div className="flex items-center space-x-6 px-3 py-4 mt-4 border-t border-brand-brown/10 text-brand-text-primary">
-                <Link href={authLink} aria-label="Account" className="hover:text-brand-gold" onClick={() => setIsMobileMenuOpen(false)}>
-                  <User className="w-6 h-6" />
-                </Link>
-                <button
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    openMiniCart();
-                  }}
-                  className="relative hover:text-brand-gold"
-                  aria-label="Cart"
-                >
-                  <ShoppingCart className="w-6 h-6" />
-                  {totalItems > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-brand-brown text-brand-cream text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                      {totalItems}
-                    </span>
-                  )}
-                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Drawer Bottom Actions */}
+        <div className="border-t border-brand-brown/10 pt-6 mt-auto">
+          <div className="flex justify-between items-center">
+            <Link
+              href={authLink}
+              className="flex items-center space-x-2 text-[#5C3317] hover:text-brand-gold transition-colors font-sans font-medium text-sm"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <User className="w-5 h-5" />
+              <span>{mounted && isAuthenticated ? "My Account" : "Login / Signup"}</span>
+            </Link>
+
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                openMiniCart();
+              }}
+              className="flex items-center space-x-2 text-[#5C3317] hover:text-brand-gold transition-colors font-sans font-medium text-sm"
+            >
+              <div className="relative">
+                <ShoppingCart className="w-5 h-5" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-brand-gold text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                    {totalItems}
+                  </span>
+                )}
               </div>
-            </div>
+              <span>Cart</span>
+            </button>
           </div>
-        )}
-      </header>
+        </div>
+
+      </div>
     </div>
   );
 }

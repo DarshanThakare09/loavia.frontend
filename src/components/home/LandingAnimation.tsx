@@ -405,6 +405,9 @@ export default function LandingAnimation() {
           >
             <canvas ref={canvasRef} className="animation-canvas"></canvas>
 
+            {/* Global Vignette Overlay */}
+            <div className="global-vignette"></div>
+
             {/* Landing Logo Page (Overlays the animation) */}
             {showLanding && (
               <div
