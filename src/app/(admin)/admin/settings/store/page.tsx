@@ -6,7 +6,7 @@ import { useSettingsStore } from "@/store/settingsStore";
 
 export default function StoreSettingsPage() {
   const { shippingCharge, freeShippingThreshold, currency, updateStore } = useSettingsStore();
-  const [form, setForm] = useState({ shippingCharge: shippingCharge ?? 0, freeShippingThreshold: freeShippingThreshold ?? 0, currency: currency || 'INR' });
+  const [form, setForm] = useState({ shippingCharge: String(shippingCharge ?? 0), freeShippingThreshold: String(freeShippingThreshold ?? 0), currency: currency || 'INR' });
   const [loading, setLoading] = useState(false);
 
   const save = () => {

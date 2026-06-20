@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -53,12 +54,6 @@ export function ShopByMood() {
     return () => mediaQuery.removeEventListener("change", handler);
   }, []);
 
-  const currentBg = selectedMood 
-    ? moods.find(m => m.id === selectedMood)?.hoverBg 
-    : hoveredMood 
-      ? moods.find(m => m.id === hoveredMood)?.hoverBg 
-      : "#F5ECD7";
-
   useGSAP(() => {
     if (prefersReducedMotion) {
       gsap.set(".mood-heading-word, .mood-subtitle, .mood-card", { opacity: 1, y: 0, scale: 1 });
@@ -99,23 +94,114 @@ export function ShopByMood() {
     <section 
       ref={containerRef} 
       id="mood-section"
-      className="py-24 relative transition-colors duration-[600ms] ease-in-out"
-      style={{ backgroundColor: currentBg }}
+      className="py-24 relative transition-colors duration-500 ease-in-out"
+      style={{
+        backgroundColor: hoveredMood ? '#F9F8F6' : 'var(--color-brand-cream)'
+      }}
     >
       <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none mix-blend-multiply" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
 
       <FloatingParticles />
 
+      <style>{`
+        .mood-glass-card {
+          position: relative;
+          overflow: hidden;
+          background-size: cover;
+          background-position: center;
+          border: none;
+          transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+        }
+        .mood-glass-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to top, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.1) 40%, transparent);
+          pointer-events: none;
+          z-index: 1;
+        }
+        .sheen-sweep {
+          position: absolute;
+          top: 0;
+          left: -150%;
+          width: 50%;
+          height: 100%;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0) 30%,
+            rgba(160, 119, 42, 0.25) 70%,
+            transparent 100%
+          );
+          transform: skewX(-25deg);
+          pointer-events: none;
+          z-index: 2;
+        }
+        .mood-text-container {
+          position: relative;
+          z-index: 10;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 236, 215, 0.7) 100%);
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          border: 1px solid rgba(160, 119, 42, 0.35);
+          border-top: 1px solid rgba(255, 255, 255, 0.6);
+          border-left: 1px solid rgba(255, 255, 255, 0.4);
+          border-radius: 1.25rem;
+          padding: 0.875rem 1.25rem;
+          margin: 0.75rem 1rem 1rem 1rem;
+          text-align: center;
+          transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: 
+            0 2px 8px rgba(92, 51, 23, 0.08),
+            0 8px 24px rgba(92, 51, 23, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+        .mood-card:hover .mood-text-container {
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 236, 215, 0.85) 100%);
+          border-color: rgba(160, 119, 42, 0.5);
+          border-top: 1px solid rgba(255, 255, 255, 0.8);
+          border-left: 1px solid rgba(255, 255, 255, 0.6);
+          box-shadow: 
+            0 4px 12px rgba(92, 51, 23, 0.12),
+            0 12px 32px rgba(92, 51, 23, 0.16),
+            inset 0 1px 0 rgba(255, 255, 255, 0.7);
+          transform: translateY(-2px);
+        }
+        .mood-explore-btn {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mood-card:hover .mood-explore-btn,
+        .mood-card:focus-within .mood-explore-btn {
+          max-height: 2rem;
+        }
+        .mood-card:hover .sheen-sweep {
+          left: 150%;
+          transition: left 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mood-card:hover .mood-glass-card {
+          transform: translateY(-8px) scale(1.02);
+          box-shadow: 0 30px 60px rgba(92, 51, 23, 0.2);
+        }
+      `}</style>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-brand-brown mb-6 flex justify-center space-x-3">
-            <span className="mood-heading-word opacity-0 inline-block">What's</span>
-            <span className="mood-heading-word opacity-0 inline-block">your</span>
-            <span className="mood-heading-word opacity-0 inline-block relative">
-              mood<span className="mood-question-mark inline-block">?</span>
+          <h2 
+            style={{ fontFamily: "'Amsterdam Signature', serif" }}
+            className="font-normal leading-none mb-6 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:justify-center sm:flex-wrap gap-x-4 gap-y-2 text-center"
+          >
+            <span className="mood-heading-word opacity-0 inline-block text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">What's</span>
+            <span className="mood-heading-word opacity-0 inline-block text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">your</span>
+            <span className="mood-heading-word opacity-0 inline-block relative text-brand-brown text-7xl md:text-8xl lg:text-[8rem]">
+              mood<span className="mood-question-mark inline-block text-brand-brown">?</span>
             </span>
           </h2>
-          <p className="mood-subtitle opacity-0 text-brand-text-secondary max-w-2xl mx-auto text-lg leading-relaxed">
+          <p className="mood-subtitle opacity-0 font-sans text-brand-text-secondary max-w-2xl mx-auto text-sm md:text-base lg:text-lg font-light leading-relaxed">
             Whether you need a mid-day energy boost or a decadent midnight snack, we have a cookie crafted just for how you feel.
           </p>
         </div>
@@ -146,7 +232,6 @@ export function ShopByMood() {
                       { scale: 1.2, duration: 0.2, yoyo: true, repeat: 1, ease: "power2.out" }
                     );
                   }
-                  // Route to the shop page with the filter applied
                   setTimeout(() => router.push(mood.link), 350);
                 }}
                 tabIndex={0}
@@ -154,49 +239,58 @@ export function ShopByMood() {
               >
                 <div 
                   className={`
-                    ${mood.bgColor} rounded-[2rem] p-6 md:p-8 h-full flex flex-col items-center justify-center text-center 
-                    transition-all duration-[350ms] ease-out relative overflow-hidden
-                    ${isSelected ? 'ring-2 ring-brand-gold shadow-xl scale-105 filter brightness-95' : 'border-2 border-transparent'}
-                    ${!isSelected ? 'hover:-translate-y-2 hover:scale-105 hover:shadow-[0_20px_60px_rgba(0,0,0,0.12)]' : ''}
+                    mood-glass-card rounded-[2.5rem] h-80 sm:h-[22rem] w-full flex flex-col justify-end p-3 sm:p-4 relative overflow-hidden
+                    ${isSelected ? 'ring-2 ring-brand-gold shadow-2xl scale-105 filter brightness-95' : ''}
                     focus:ring-2 focus:ring-brand-gold
                   `}
-                  style={{
-                    backgroundImage: `url('${mood.image}')`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  }}
                 >
-                  {/* Overlay for better text readability */}
-                  <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-b from-transparent via-transparent to-black/30 pointer-events-none" />
+                  {/* Card Background Image (the cookie PNG) */}
+                  <div className="absolute inset-0 z-0 transition-transform duration-700 ease-out group-hover:scale-110">
+                    <Image
+                      src={mood.image}
+                      alt={mood.name}
+                      fill
+                      className="object-cover"
+                    />
+                    {/* Subtle overlay gradient to blend the PNG background */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
+                  </div>
                   
+                  {/* Sweeping sheen */}
+                  <div className="sheen-sweep z-10" />
+                  
+                  {/* Icon Header */}
                   <div 
                     id={`icon-${mood.id}`}
                     className={`
-                      bg-white/80 p-5 rounded-full mb-6 
-                      transition-all duration-300 ease-out relative z-10
-                      ${!isSelected ? 'group-hover:scale-[1.15] group-hover:rotate-[8deg]' : ''}
+                      absolute top-4 right-4 z-10 bg-white/90 p-2.5 rounded-full border border-brand-gold/20 shadow-sm
+                      transition-all duration-300 ease-out
+                      ${!isSelected ? 'group-hover:scale-110 group-hover:bg-brand-gold group-hover:text-white' : ''}
                     `}
                   >
-                    <Icon className="w-8 h-8 text-brand-brown" />
+                    <Icon className="w-4 h-4 text-brand-gold transition-colors duration-300 group-hover:text-inherit" />
                   </div>
                   
-                  <h3 
-                    className={`
-                      text-lg md:text-xl font-bold transition-colors duration-[250ms] relative z-10
-                      ${isSelected || (!isSelected && isHovered) ? 'text-brand-gold' : 'text-brand-brown'}
-                    `}
-                  >
-                    {mood.name}
-                  </h3>
+                  {/* Curved-corner rectangle for text overlay */}
+                  <div className="relative z-10 w-full bg-white/90 backdrop-blur-md border border-[#5C3317]/10 p-4 rounded-2xl shadow-lg transition-all duration-300 group-hover:bg-white group-hover:border-brand-gold/40 transform group-hover:translate-y-[-4px]">
+                    <h3 
+                      className={`
+                        text-sm sm:text-base font-bold transition-colors duration-[250ms]
+                        ${isSelected || (!isSelected && isHovered) ? 'text-brand-gold' : 'text-brand-brown'}
+                      `}
+                    >
+                      {mood.name}
+                    </h3>
 
-                  <div 
-                    className={`
-                      mt-4 text-[10px] md:text-xs font-bold uppercase tracking-widest text-brand-brown
-                      transition-all duration-300 ease-out delay-100 h-4 relative z-10
-                      ${isSelected || (!isSelected && isHovered) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
-                    `}
-                  >
-                    Explore &rarr;
+                    <div 
+                      className={`
+                        mt-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-[#A0772A]/70
+                        transition-all duration-300 ease-out flex items-center justify-between
+                      `}
+                    >
+                      <span>Explore</span>
+                      <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+                    </div>
                   </div>
                 </div>
               </button>
