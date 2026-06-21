@@ -31,6 +31,7 @@ export function BestSellers() {
     : [];
 
   useGSAP(() => {
+    if (!mounted || products.length === 0) return;
     gsap.fromTo(
       ".product-card",
       { y: 50, opacity: 0 },
@@ -46,7 +47,7 @@ export function BestSellers() {
         },
       }
     );
-  }, { scope: containerRef });
+  }, { scope: containerRef, dependencies: [mounted, products.length] });
 
   return (
     <section ref={containerRef} className="py-24 bg-brand-light relative">
@@ -97,6 +98,7 @@ export function BestSellers() {
                   alt={product.name}
                   fill
                   className="object-cover transform group-hover:scale-105 transition-transform duration-500"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />
               </Link>
 

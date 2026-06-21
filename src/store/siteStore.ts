@@ -137,6 +137,7 @@ interface SiteState {
   addTestimonial: (testimonial: Omit<TestimonialItem, 'id'>) => void;
   updateTestimonial: (id: number, data: Partial<TestimonialItem>) => void;
   deleteTestimonial: (id: number) => void;
+  setReviews: (reviews: ReviewItem[]) => void;
 }
 
 const defaultCategories: CategoryItem[] = [
@@ -373,6 +374,7 @@ export const useSiteStore = create<SiteState>()(
         testimonialsList: state.testimonialsList.filter(r => r.id !== id),
         reviewsList: state.testimonialsList.filter(r => r.id !== id),
       })),
+      setReviews: (reviews) => set({ testimonialsList: reviews, reviewsList: reviews }),
     }),
     {
       name: 'loavia-site-storage',

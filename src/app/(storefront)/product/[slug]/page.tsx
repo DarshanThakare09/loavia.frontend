@@ -116,6 +116,7 @@ export default function ProductDetail() {
                 fill 
                 className="object-cover hover:scale-105 transition-transform duration-500"
                 priority
+                sizes="(max-width: 1024px) 100vw, 50vw"
               />
               {product.inStock === false && (
                 <div className="absolute inset-0 bg-black/40 z-10 flex items-center justify-center">
@@ -142,6 +143,7 @@ export default function ProductDetail() {
                       alt={`${product.name} preview ${idx + 1}`}
                       fill
                       className="object-cover"
+                      sizes="80px"
                     />
                   </button>
                 ))}

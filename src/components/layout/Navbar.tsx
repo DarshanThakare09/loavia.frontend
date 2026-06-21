@@ -181,6 +181,7 @@ export function Navbar() {
                   fill
                   className="object-contain"
                   priority
+                  sizes="(max-width: 768px) 150px, 290px"
                 />
               </Link>
             </div>
@@ -250,7 +251,7 @@ export function Navbar() {
                               className="w-full text-left p-2 hover:bg-[#5C3317]/5 rounded-xl flex items-center space-x-3 transition-colors duration-200"
                             >
                               <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-brand-light flex-shrink-0 border border-brand-brown/5">
-                                <Image src={product.image} alt={product.name} fill className="object-cover" />
+                                <Image src={product.image} alt={product.name} fill className="object-cover" sizes="40px" />
                               </div>
                               <div className="flex-grow min-w-0">
                                 <p className="text-sm font-semibold text-[#5C3317] truncate">{product.name}</p>
@@ -321,7 +322,7 @@ export function Navbar() {
           {/* Drawer Header */}
           <div className="flex justify-between items-center pb-6 border-b border-brand-brown/10 mb-6">
             <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="relative w-[130px] h-[45px]">
-              <Image src="/loavia-logo.png" alt="LOAVIA Logo" fill className="object-contain" />
+              <Image src="/loavia-logo.png" alt="LOAVIA Logo" fill className="object-contain" sizes="130px" />
             </Link>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
@@ -356,7 +357,7 @@ export function Navbar() {
                       className="w-full text-left p-2.5 hover:bg-[#5C3317]/5 flex items-center space-x-3 transition-colors duration-200"
                     >
                       <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-brand-light flex-shrink-0">
-                        <Image src={product.image} alt={product.name} fill className="object-cover" />
+                        <Image src={product.image} alt={product.name} fill className="object-cover" sizes="32px" />
                       </div>
                       <div className="flex-grow min-w-0">
                         <p className="text-xs font-semibold text-[#5C3317] truncate">{product.name}</p>

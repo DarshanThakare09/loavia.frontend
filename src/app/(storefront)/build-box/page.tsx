@@ -4,10 +4,14 @@ import { useState } from "react";
 import Image from "next/image";
 import { Package, Minus, Plus, ShoppingCart, CheckCircle } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
+import { useProductStore } from "@/store/productStore";
 import { toast } from "sonner";
 import { PRODUCTS } from "@/lib/mockData";
 
 export default function BuildBoxPage() {
+  const { products: storeProducts } = useProductStore();
+  const productsList = storeProducts.length > 0 ? storeProducts : PRODUCTS;
+
   const [boxSize, setBoxSize] = useState(6);
   const [selections, setSelections] = useState<{ [id: string]: number }>({});
   
@@ -105,12 +109,12 @@ export default function BuildBoxPage() {
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {PRODUCTS.slice(0, 6).map(cookie => {
+                {productsList.slice(0, 6).map(cookie => {
                   const count = selections[cookie.id] || 0;
                   return (
                     <div key={cookie.id} className="flex items-center space-x-4 p-4 border border-brand-brown/10 rounded-2xl hover:border-brand-gold/30 hover:shadow-sm transition-all duration-300 bg-[#FDFBF7]/40 group">
                       <div className="relative w-20 h-20 bg-brand-light rounded-xl overflow-hidden flex-shrink-0 border border-brand-brown/5 group-hover:scale-95 transition-transform duration-300">
-                        <Image src={cookie.image} alt={cookie.name} fill className="object-cover" />
+                        <Image src={cookie.image} alt={cookie.name} fill className="object-cover" sizes="80px" />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-extrabold text-sm text-brand-brown mb-3 line-clamp-2 leading-tight">{cookie.name}</h3>
@@ -158,12 +162,12 @@ export default function BuildBoxPage() {
                 {Array.from({ length: boxSize }).map((_, i) => {
                   const flatSelections = Object.entries(selections).flatMap(([id, count]) => Array(count).fill(id));
                   const cookieId = flatSelections[i];
-                  const cookie = PRODUCTS.find(c => c.id === cookieId);
+                  const cookie = productsList.find(c => c.id === cookieId);
 
                   return (
                     <div key={i} className="aspect-square rounded-2xl bg-[#FDFBF7] border-2 border-dashed border-brand-brown/15 flex items-center justify-center relative overflow-hidden group shadow-inner">
-                      {cookie ? (
-                        <Image src={cookie.image} alt={cookie.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                       {cookie ? (
+                        <Image src={cookie.image} alt={cookie.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="90px" />
                       ) : (
                         <span className="text-brand-brown/25 font-bold text-xs select-none">Empty</span>
                       )}

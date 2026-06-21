@@ -89,7 +89,7 @@ export default function CartPage() {
                       {/* Product Info */}
                       <div className="col-span-6 flex items-center space-x-4 mb-4 sm:mb-0">
                         <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-brand-light flex-shrink-0">
-                          <Image src={item.image || "/premium_cookie.png"} alt={item.name} fill className="object-cover" />
+                          <Image src={item.image || "/premium_cookie.png"} alt={item.name} fill className="object-cover" sizes="96px" />
                         </div>
                         <div>
                           <h3 className="font-bold text-lg text-brand-brown line-clamp-2">{item.name}</h3>

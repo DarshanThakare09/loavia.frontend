@@ -130,6 +130,7 @@ export default function FeaturedProducts() {
                     alt={product.name}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    sizes="(max-width: 640px) 80px, 96px"
                   />
                   {(product.featuredBadgeText || product.isFeatured) && (
                     <span className="absolute left-1.5 top-1.5 rounded-full bg-brand-brown px-2 py-0.5 text-[9px] font-semibold text-white">

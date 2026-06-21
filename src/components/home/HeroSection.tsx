@@ -137,12 +137,14 @@ export function HeroSection() {
               Shop Now
             </Link>
 
-            <Link
-              href="/whatsapp"
+            <a
+              href="https://wa.me/917796116622"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-green-500 rounded-full hover:bg-green-700 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
               Order on WhatsApp
-            </Link>
+            </a>
           </div>
         </div>
 

@@ -18,7 +18,7 @@ export default function GiftPage() {
         {/* Header */}
         <div className="relative rounded-[3rem] overflow-hidden bg-brand-brown mb-12 shadow-xl border border-brand-brown/10">
           <div className="absolute inset-0 z-0">
-            <Image src="/cookie_gift_box.png" alt="Gifting" fill className="object-cover opacity-40 mix-blend-overlay" />
+            <Image src="/cookie_gift_box.png" alt="Gifting" fill className="object-cover opacity-40 mix-blend-overlay" sizes="(max-width: 1024px) 100vw, 70vw" />
             <div className="absolute inset-0 bg-gradient-to-r from-brand-brown via-brand-brown/85 to-transparent"></div>
           </div>
           <div className="relative z-10 p-12 md:p-20 lg:w-2/3">
@@ -91,7 +91,7 @@ export default function GiftPage() {
             </form>
           </div>
           <div className="md:w-1/2 relative min-h-[400px] rounded-r-[3rem] overflow-hidden">
-            <Image src="/cookie_gift_box.png" alt="Corporate Gifts" fill className="object-cover" />
+            <Image src="/cookie_gift_box.png" alt="Corporate Gifts" fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
           </div>
         </div>
       </div>

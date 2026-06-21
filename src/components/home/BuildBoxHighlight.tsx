@@ -63,6 +63,7 @@ export function BuildBoxHighlight() {
                 alt="Custom Cookie Box"
                 fill
                 className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
               />
             </div>
             

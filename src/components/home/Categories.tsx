@@ -231,6 +231,7 @@ export function Categories() {
               ))}
             </span>
           </h2>
+          <div className="cat-underline h-[2px] bg-brand-gold mt-3 mx-auto" style={{ width: prefersReducedMotion ? "60%" : "0%" }}></div>
 
           <p className="mt-5 max-w-2xl font-sans text-brand-text-secondary text-sm md:text-base lg:text-lg font-light leading-relaxed">
             Explore our carefully curated collections, each designed to delight your taste buds and satisfy your cravings.
@@ -260,6 +261,7 @@ export function Categories() {
                       fill
                       className="object-cover"
                       priority={false}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     />
                     {/* Subtle overlay gradient to blend background */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10 z-10" />
