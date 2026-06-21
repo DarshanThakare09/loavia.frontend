@@ -1,12 +1,14 @@
 "use client";
 
-import { useSiteStore, CategoryItem, TestimonialItem } from "@/store/siteStore";
+import { useSiteStore, CategoryItem } from "@/store/siteStore";
 import { useAuthStore } from "@/store/authStore";
 import { useProductStore } from "@/store/productStore";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Save, IndianRupee, ShoppingBag, Users, Cookie, Settings, Trash2, Plus, Star } from "lucide-react";
+import { Save, IndianRupee, ShoppingBag, Users, Cookie, Settings } from "lucide-react";
 import FeaturedProductsManager from "@/components/admin/FeaturedProductsManager";
+import GiftingSectionAdmin from "@/components/admin/GiftingSectionAdmin";
+import ReviewManagement from "@/components/admin/ReviewManagement";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -17,7 +19,6 @@ export default function AdminDashboard() {
     whyChooseTitle, whyChooseDescription, whyChooseFeatures,
     categoriesList,
     giftingTitle, giftingDescription,
-    testimonialsList,
 
     // About Page state values from store
     aboutStoryTitle, aboutStorySubtitle,
@@ -32,7 +33,6 @@ export default function AdminDashboard() {
     // Setters
     updateAnnouncement, updateHero, updateBestSellers, updateWhyChoose, updateCategories, updateGifting,
     updateAboutStory, updateAboutFounder, updateAboutMeaning, updateAboutRoots, updateAboutStats,
-    addTestimonial, updateTestimonial, deleteTestimonial
   } = useSiteStore();
 
   const { allOrders, allUsers } = useAuthStore();
@@ -84,14 +84,6 @@ export default function AdminDashboard() {
   const [abS3Num, setAbS3Num] = useState(aboutStat3Number);
   const [abS3Title, setAbS3Title] = useState(aboutStat3Title);
   const [abS3Desc, setAbS3Desc] = useState(aboutStat3Desc);
-
-  // Testimonial Form Modal/Editor state
-  const [editingTestimonial, setEditingTestimonial] = useState<TestimonialItem | null>(null);
-  const [isAddingTestimonial, setIsAddingTestimonial] = useState(false);
-  const [tName, setTName] = useState("");
-  const [tRole, setTRole] = useState("");
-  const [tContent, setTContent] = useState("");
-  const [tRating, setTRating] = useState(5);
 
   // Sync state if store updates in background
   useEffect(() => {
@@ -169,6 +161,7 @@ export default function AdminDashboard() {
     alert("Gifting settings saved successfully!");
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleSaveAbout = () => {
     updateAboutStory(abStoryTitle, abStorySubtitle);
     updateAboutFounder(abFounderName, abFounderText);
@@ -199,54 +192,6 @@ export default function AdminDashboard() {
     setCats(updatedCats);
   };
 
-  const handleAddTestimonial = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!tName || !tContent) return;
-    addTestimonial({ name: tName, role: tRole || "Verified Buyer", content: tContent, rating: tRating });
-    setTName("");
-    setTRole("");
-    setTContent("");
-    setTRating(5);
-    setIsAddingTestimonial(false);
-    alert("Testimonial added successfully!");
-  };
-
-  const handleUpdateTestimonial = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingTestimonial || !tName || !tContent) return;
-    updateTestimonial(editingTestimonial.id, { name: tName, role: tRole, content: tContent, rating: tRating });
-    setEditingTestimonial(null);
-    setTName("");
-    setTRole("");
-    setTContent("");
-    setTRating(5);
-    alert("Testimonial updated successfully!");
-  };
-
-  const startEditTestimonial = (t: TestimonialItem) => {
-    setEditingTestimonial(t);
-    setIsAddingTestimonial(false);
-    setTName(t.name);
-    setTRole(t.role);
-    setTContent(t.content);
-    setTRating(t.rating);
-  };
-
-  const cancelTestimonialForm = () => {
-    setEditingTestimonial(null);
-    setIsAddingTestimonial(false);
-    setTName("");
-    setTRole("");
-    setTContent("");
-    setTRating(5);
-  };
-
-  const handleDeleteTestimonial = (id: number) => {
-    if (confirm("Are you sure you want to delete this testimonial?")) {
-      deleteTestimonial(id);
-    }
-  };
-
   // Calculate live analytics
   const activeOrders = allOrders.filter(o => o.status !== "Cancelled");
   const totalRevenue = activeOrders.reduce((acc, curr) => acc + curr.total, 0);
@@ -272,7 +217,7 @@ export default function AdminDashboard() {
     { id: "categories", label: "Featured Categories" },
     { id: "featuredproducts", label: "Featured Products" },
     { id: "gifting", label: "Gifting Section" },
-    { id: "testimonials", label: "Customer Reviews" },
+    { id: "testimonials", label: "Review Management" },
     { id: "about", label: "About & Brand Story" },
   ];
 
@@ -316,10 +261,7 @@ export default function AdminDashboard() {
           {sections.map(sec => (
             <button
               key={sec.id}
-              onClick={() => {
-                setActiveSection(sec.id);
-                cancelTestimonialForm();
-              }}
+              onClick={() => setActiveSection(sec.id)}
               className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                 activeSection === sec.id
                   ? "bg-brand-brown text-white shadow-sm"
@@ -574,178 +516,15 @@ export default function AdminDashboard() {
 
           {/* Gifting Section */}
           {activeSection === "gifting" && (
-            <div className="space-y-6 animate-in fade-in duration-300">
-              <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">Gifting Section</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-brand-text-primary mb-1">
-                    Gifting Heading (Title)
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-sm font-semibold"
-                    value={gTitle}
-                    onChange={(e) => setGTitle(e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-brand-text-primary mb-1">
-                    Gifting Description Text
-                  </label>
-                  <textarea
-                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none min-h-[110px] text-sm"
-                    value={gDescription}
-                    onChange={(e) => setGDescription(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end pt-2">
-                <button 
-                  onClick={handleSaveGifting}
-                  className="flex items-center space-x-2 px-6 py-2.5 bg-brand-brown text-white rounded-xl hover:bg-brand-gold transition-colors font-semibold cursor-pointer text-sm"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>Save Gifting</span>
-                </button>
-              </div>
+            <div className="animate-in fade-in duration-300">
+              <GiftingSectionAdmin />
             </div>
           )}
 
-          {/* Customer Reviews (Testimonials CRUD) */}
+          {/* Review Management */}
           {activeSection === "testimonials" && (
-            <div className="space-y-6 animate-in fade-in duration-300">
-              
-              {/* Testimonials List view */}
-              {!isAddingTestimonial && !editingTestimonial && (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center border-b border-brand-brown/10 pb-2">
-                    <h2 className="text-xl font-bold text-brand-brown font-serif">Customer Testimonials</h2>
-                    <button
-                      onClick={() => setIsAddingTestimonial(true)}
-                      className="flex items-center space-x-1 px-3 py-1.5 bg-brand-brown text-white hover:bg-brand-gold rounded-xl transition-all text-xs font-semibold cursor-pointer"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Add Review</span>
-                    </button>
-                  </div>
-
-                  <div className="space-y-3">
-                    {testimonialsList.map(t => (
-                      <div key={t.id} className="p-4 bg-brand-light/40 border border-brand-brown/5 rounded-2xl flex justify-between items-start shadow-sm">
-                        <div className="space-y-2 flex-1 min-w-0 pr-4">
-                          <div className="flex items-center space-x-2">
-                            <span className="font-bold text-sm text-brand-brown">{t.name}</span>
-                            <span className="text-[10px] bg-brand-gold/10 text-brand-gold border border-brand-gold/20 px-2 py-0.5 rounded font-bold">{t.role}</span>
-                          </div>
-                          <p className="text-xs text-brand-text-secondary leading-relaxed italic">"{t.content}"</p>
-                          <div className="flex text-amber-500">
-                            {[...Array(t.rating)].map((_, i) => (
-                              <Star key={i} className="w-3.5 h-3.5 fill-current" />
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="flex space-x-2 flex-shrink-0">
-                          <button
-                            onClick={() => startEditTestimonial(t)}
-                            className="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                            title="Edit"
-                          >
-                            <Settings className="w-4.5 h-4.5" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteTestimonial(t.id)}
-                            className="text-rose-500 hover:text-rose-700 p-2 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4.5 h-4.5" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                    {testimonialsList.length === 0 && (
-                      <p className="text-xs text-brand-text-secondary italic text-center py-6">No testimonials available. Add some reviews above!</p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Add / Edit Testimonial Form */}
-              {(isAddingTestimonial || editingTestimonial) && (
-                <form 
-                  onSubmit={isAddingTestimonial ? handleAddTestimonial : handleUpdateTestimonial}
-                  className="space-y-4 p-5 border border-brand-brown/10 rounded-2xl bg-brand-light/35 shadow-inner"
-                >
-                  <h3 className="font-serif font-bold text-lg text-brand-brown">
-                    {isAddingTestimonial ? "Add New Review" : "Edit Review Info"}
-                  </h3>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-brand-text-primary mb-1">Customer Name *</label>
-                      <input
-                        type="text"
-                        required
-                        className="w-full px-4.5 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-xs font-semibold"
-                        value={tName}
-                        onChange={(e) => setTName(e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-brand-text-primary mb-1">Badge Role (e.g. Verified Buyer)</label>
-                      <input
-                        type="text"
-                        className="w-full px-4.5 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-xs"
-                        value={tRole}
-                        onChange={(e) => setTRole(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-brand-text-primary mb-1">Rating Stars</label>
-                    <select
-                      className="px-4.5 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-xs"
-                      value={tRating}
-                      onChange={(e) => setTRating(Number(e.target.value))}
-                    >
-                      {[5, 4, 3, 2, 1].map(n => (
-                        <option key={n} value={n}>{n} Stars</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-brand-text-primary mb-1">Review Content *</label>
-                    <textarea
-                      required
-                      className="w-full px-4.5 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none min-h-[90px] text-xs leading-relaxed"
-                      value={tContent}
-                      onChange={(e) => setTContent(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="flex justify-end space-x-3 pt-3">
-                    <button
-                      type="button"
-                      onClick={cancelTestimonialForm}
-                      className="px-4 py-2 bg-white text-brand-text-secondary border border-brand-brown/15 rounded-xl hover:bg-brand-light font-semibold text-xs cursor-pointer"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="flex items-center space-x-1.5 px-5 py-2 bg-brand-brown text-white hover:bg-brand-gold rounded-xl transition-colors font-bold text-xs cursor-pointer"
-                    >
-                      <Save className="w-4 h-4" />
-                      <span>{isAddingTestimonial ? "Add Testimonial" : "Update Testimonial"}</span>
-                    </button>
-                  </div>
-                </form>
-              )}
+            <div className="animate-in fade-in duration-300">
+              <ReviewManagement />
             </div>
           )}
 

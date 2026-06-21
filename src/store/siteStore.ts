@@ -7,13 +7,26 @@ export interface CategoryItem {
   link: string;
 }
 
-export interface TestimonialItem {
+export type ReviewStatus = 'pending' | 'approved' | 'rejected' | 'hidden';
+
+export interface ReviewItem {
   id: number;
+  customerName: string;
+  customerEmail: string;
+  reviewText: string;
+  rating: number;
+  status: ReviewStatus;
+  featured: boolean;
+  pinned: boolean;
+  createdAt: string; // ISO string
+  // Legacy compat — kept so storefront Testimonials component still works
   name: string;
   role: string;
   content: string;
-  rating: number;
 }
+
+/** @deprecated use ReviewItem */
+export type TestimonialItem = ReviewItem;
 
 interface SiteState {
   // Hero & Header
@@ -41,9 +54,24 @@ interface SiteState {
   // Gifting Section
   giftingTitle: string;
   giftingDescription: string;
+
+  // Gifting Config
+  giftingEnabled: boolean;
+  giftingCustomBoxEnabled: boolean;
+  giftingPersonalizedMessageEnabled: boolean;
+  giftingGreetingCardsEnabled: boolean;
+  giftingWrapEnabled: boolean;
+  giftingPremiumPackagingEnabled: boolean;
+  giftBoxTypes: string[];
+  giftingMinProducts: number;
+  giftingMaxProducts: number;
+  giftingMaxMessageLength: number;
+  giftingAllowCustomMessage: boolean;
+  giftingAllowEmoji: boolean;
   
-  // Testimonials Section
-  testimonialsList: TestimonialItem[];
+  // Reviews (formerly Testimonials)
+  testimonialsList: ReviewItem[];
+  reviewsList: ReviewItem[];
 
   // About Page settings
   aboutStoryTitle: string;
@@ -76,6 +104,20 @@ interface SiteState {
   updateWhyChoose: (title: string, description: string, features: string[]) => void;
   updateCategories: (categories: CategoryItem[]) => void;
   updateGifting: (title: string, description: string) => void;
+  updateGiftingConfig: (config: {
+    giftingEnabled: boolean;
+    giftingCustomBoxEnabled: boolean;
+    giftingPersonalizedMessageEnabled: boolean;
+    giftingGreetingCardsEnabled: boolean;
+    giftingWrapEnabled: boolean;
+    giftingPremiumPackagingEnabled: boolean;
+    giftBoxTypes: string[];
+    giftingMinProducts: number;
+    giftingMaxProducts: number;
+    giftingMaxMessageLength: number;
+    giftingAllowCustomMessage: boolean;
+    giftingAllowEmoji: boolean;
+  }) => void;
   updateAboutStory: (title: string, subtitle: string) => void;
   updateAboutFounder: (name: string, text: string) => void;
   updateAboutMeaning: (title: string, subtitle: string, t1: string, t2: string, t3: string) => void;
@@ -86,9 +128,14 @@ interface SiteState {
     s3Num: string, s3Title: string, s3Desc: string
   ) => void;
   
-  // Testimonial Actions (CRUD)
+  // Review Moderation Actions
+  moderateReview: (id: number, status: ReviewStatus) => void;
+  toggleReviewFeatured: (id: number) => void;
+  toggleReviewPinned: (id: number) => void;
+  deleteReview: (id: number) => void;
+  // Legacy compat
   addTestimonial: (testimonial: Omit<TestimonialItem, 'id'>) => void;
-  updateTestimonial: (id: number, testimonialData: Partial<TestimonialItem>) => void;
+  updateTestimonial: (id: number, data: Partial<TestimonialItem>) => void;
   deleteTestimonial: (id: number) => void;
 }
 
@@ -99,29 +146,53 @@ const defaultCategories: CategoryItem[] = [
   { name: "Stuffed Cookies", image: "/stuffed_cookie.png", link: "/shop?category=stuffed" },
 ];
 
-const defaultTestimonials: TestimonialItem[] = [
+const defaultReviews: ReviewItem[] = [
   {
     id: 1,
+    customerName: "Sarah Jenkins",
+    customerEmail: "sarah@example.com",
+    reviewText: "These are genuinely the best cookies I've ever had. The Double Dark Chocolate is incredibly rich, and the packaging makes it feel so premium. Worth every penny!",
+    rating: 5,
+    status: "approved",
+    featured: true,
+    pinned: false,
+    createdAt: "2024-01-15T10:30:00Z",
     name: "Sarah Jenkins",
     role: "Verified Buyer",
     content: "These are genuinely the best cookies I've ever had. The Double Dark Chocolate is incredibly rich, and the packaging makes it feel so premium. Worth every penny!",
-    rating: 5
   },
   {
     id: 2,
+    customerName: "Michael Chen",
+    customerEmail: "michael@example.com",
+    reviewText: "I sent the 12-pack custom box to my team for the holidays. They arrived fresh and everyone loved them. The UI for building the box was super easy to use.",
+    rating: 5,
+    status: "approved",
+    featured: false,
+    pinned: false,
+    createdAt: "2024-02-03T14:15:00Z",
     name: "Michael Chen",
     role: "Verified Buyer",
     content: "I sent the 12-pack custom box to my team for the holidays. They arrived fresh and everyone loved them. The UI for building the box was super easy to use.",
-    rating: 5
   },
   {
     id: 3,
+    customerName: "Emma Roberts",
+    customerEmail: "emma@example.com",
+    reviewText: "I'm obsessed with the healthy alternatives. They actually taste like real, indulgent cookies without the guilt. LOAVIA has a customer for life.",
+    rating: 5,
+    status: "approved",
+    featured: true,
+    pinned: true,
+    createdAt: "2024-02-20T09:00:00Z",
     name: "Emma Roberts",
     role: "Verified Buyer",
     content: "I'm obsessed with the healthy alternatives. They actually taste like real, indulgent cookies without the guilt. LOAVIA has a customer for life.",
-    rating: 5
-  }
+  },
 ];
+
+/** @deprecated use defaultReviews */
+const defaultTestimonials = defaultReviews;
 
 const defaultWhyChooseFeatures = [
   "No Maida in Millet Cookies",
@@ -175,9 +246,24 @@ export const useSiteStore = create<SiteState>()(
       // Gifting Default Values
       giftingTitle: "Healthy gifting made Delicious",
       giftingDescription: "Celebrate special moments with beautifully crafted LOAVIA™ cookie hampers. Our premium millet cookies make thoughtful gifts for festivals, corporate events, family celebrations, and special occasions.",
+
+      // Gifting Config Defaults
+      giftingEnabled: true,
+      giftingCustomBoxEnabled: true,
+      giftingPersonalizedMessageEnabled: true,
+      giftingGreetingCardsEnabled: true,
+      giftingWrapEnabled: true,
+      giftingPremiumPackagingEnabled: false,
+      giftBoxTypes: ["Premium Gift Box", "Luxury Gift Box", "Festive Gift Box", "Corporate Gift Box"],
+      giftingMinProducts: 2,
+      giftingMaxProducts: 12,
+      giftingMaxMessageLength: 150,
+      giftingAllowCustomMessage: true,
+      giftingAllowEmoji: true,
       
-      // Testimonials Default Values
-      testimonialsList: defaultTestimonials,
+      // Reviews Default Values
+      testimonialsList: defaultReviews,
+      reviewsList: defaultReviews,
 
       // About Page Defaults
       aboutStoryTitle: "Our Story",
@@ -218,6 +304,7 @@ export const useSiteStore = create<SiteState>()(
       }),
       updateCategories: (categoriesList) => set({ categoriesList }),
       updateGifting: (title, description) => set({ giftingTitle: title, giftingDescription: description }),
+      updateGiftingConfig: (config) => set(config),
       updateAboutStory: (title, subtitle) => set({ 
         aboutStoryTitle: title, 
         aboutStorySubtitle: subtitle 
@@ -246,18 +333,45 @@ export const useSiteStore = create<SiteState>()(
 
       
 
-      // Testimonial Actions
-      addTestimonial: (newTestimonial) => set((state) => ({
-        testimonialsList: [
-          ...state.testimonialsList,
-          { ...newTestimonial, id: Date.now() }
-        ]
+      // Review Moderation Actions
+      moderateReview: (id, status) => set((state) => ({
+        testimonialsList: state.testimonialsList.map(r => r.id === id ? { ...r, status } : r),
+        reviewsList: state.testimonialsList.map(r => r.id === id ? { ...r, status } : r),
       })),
-      updateTestimonial: (id, testimonialData) => set((state) => ({
-        testimonialsList: state.testimonialsList.map(t => t.id === id ? { ...t, ...testimonialData } : t)
+      toggleReviewFeatured: (id) => set((state) => ({
+        testimonialsList: state.testimonialsList.map(r => r.id === id ? { ...r, featured: !r.featured } : r),
+        reviewsList: state.testimonialsList.map(r => r.id === id ? { ...r, featured: !r.featured } : r),
+      })),
+      toggleReviewPinned: (id) => set((state) => ({
+        testimonialsList: state.testimonialsList.map(r => r.id === id ? { ...r, pinned: !r.pinned } : r),
+        reviewsList: state.testimonialsList.map(r => r.id === id ? { ...r, pinned: !r.pinned } : r),
+      })),
+      deleteReview: (id) => set((state) => ({
+        testimonialsList: state.testimonialsList.filter(r => r.id !== id),
+        reviewsList: state.testimonialsList.filter(r => r.id !== id),
+      })),
+      // Legacy compat actions
+      addTestimonial: (newT) => set((state) => {
+        const r: ReviewItem = {
+          ...newT,
+          id: Date.now(),
+          customerName: newT.name,
+          customerEmail: '',
+          reviewText: newT.content,
+          status: 'pending',
+          featured: false,
+          pinned: false,
+          createdAt: new Date().toISOString(),
+        };
+        return { testimonialsList: [...state.testimonialsList, r], reviewsList: [...state.testimonialsList, r] };
+      }),
+      updateTestimonial: (id, data) => set((state) => ({
+        testimonialsList: state.testimonialsList.map(r => r.id === id ? { ...r, ...data } : r),
+        reviewsList: state.testimonialsList.map(r => r.id === id ? { ...r, ...data } : r),
       })),
       deleteTestimonial: (id) => set((state) => ({
-        testimonialsList: state.testimonialsList.filter(t => t.id !== id)
+        testimonialsList: state.testimonialsList.filter(r => r.id !== id),
+        reviewsList: state.testimonialsList.filter(r => r.id !== id),
       })),
     }),
     {

@@ -1,71 +1,100 @@
 "use client";
 
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useAdminAuthStore } from "@/store/adminAuthStore";
 import { useRouter } from "next/navigation";
+import { Camera, Trash2, User, Mail, Phone, ShieldCheck, Loader2 } from "lucide-react";
 
-const getInitials = (name: string) => {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase();
-};
+const MAX_FILE_SIZE_MB = 2;
+
+const getInitials = (name: string) =>
+  name.split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
 
 export default function AdminProfilePage() {
-  const { adminName, adminEmail, adminPhone, adminAvatar, adminStatus, updateAdminProfile, changePassword } = useSettingsStore();
+  const {
+    adminName, adminEmail, adminPhone, adminAvatar, adminStatus,
+    updateAdminProfile, changePassword,
+  } = useSettingsStore();
   const { logout } = useAdminAuthStore();
   const router = useRouter();
-  const [form, setForm] = useState({
-    adminName: adminName || "",
-    adminEmail: adminEmail || "",
-    adminPhone: adminPhone || "",
-  });
+
+  // Hydration guard — avoids reading stale SSR values
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  const [form, setForm] = useState({ adminName: "", adminEmail: "", adminPhone: "" });
   const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
-  const [avatarPreview, setAvatarPreview] = useState(adminAvatar || "");
   const [loading, setLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Sync form from store after hydration
   useEffect(() => {
+    if (!mounted) return;
     setForm({ adminName: adminName || "", adminEmail: adminEmail || "", adminPhone: adminPhone || "" });
-    setAvatarPreview(adminAvatar || "");
-  }, [adminName, adminEmail, adminPhone, adminAvatar]);
+  }, [mounted, adminName, adminEmail, adminPhone]);
 
-  const profileInitials = useMemo(() => getInitials(adminName || "Admin"), [adminName]);
+  const initials = useMemo(() => getInitials(adminName || "Admin"), [adminName]);
 
-  const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  // ── Avatar ────────────────────────────────────────────────────────────────
+
+  const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
+
     if (!file.type.startsWith("image/")) {
-      toast.error("Please upload a valid image file.");
+      toast.error("Please select a valid image file.");
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      toast.error(`Image must be smaller than ${MAX_FILE_SIZE_MB} MB.`);
       return;
     }
 
     const reader = new FileReader();
     reader.onload = () => {
-      const result = reader.result;
-      if (typeof result === "string") {
-        setAvatarPreview(result);
-      }
+      if (typeof reader.result !== "string") return;
+      // Persist immediately — avatar is saved as base64 in the store
+      updateAdminProfile(
+        adminName || form.adminName,
+        adminEmail || form.adminEmail,
+        adminPhone || form.adminPhone,
+        reader.result,
+      );
+      toast.success("Profile photo updated.");
     };
     reader.readAsDataURL(file);
+
+    // Reset input so the same file can be re-selected if needed
+    e.target.value = "";
   };
 
+  const handleRemoveAvatar = () => {
+    updateAdminProfile(
+      adminName || form.adminName,
+      adminEmail || form.adminEmail,
+      adminPhone || form.adminPhone,
+      "",
+    );
+    toast.success("Profile photo removed.");
+  };
+
+  // ── Profile save ──────────────────────────────────────────────────────────
+
   const saveProfile = () => {
-    if (!form.adminName.trim()) return toast.error("Full name is required.");
-    if (!/\S+@\S+\.\S+/.test(form.adminEmail)) return toast.error("Valid email is required.");
-    if (!form.adminPhone.trim()) return toast.error("Phone number is required.");
+    if (!form.adminName.trim()) { toast.error("Full name is required."); return; }
+    if (!/\S+@\S+\.\S+/.test(form.adminEmail)) { toast.error("Valid email is required."); return; }
+    if (!form.adminPhone.trim()) { toast.error("Phone number is required."); return; }
 
     setLoading(true);
     try {
-      updateAdminProfile(form.adminName.trim(), form.adminEmail.trim(), form.adminPhone.trim(), avatarPreview || "");
-      toast.success("Profile information saved.");
-    } catch (error) {
-      toast.error("Unable to save profile information.");
+      // Preserve the already-persisted avatar when saving other fields
+      updateAdminProfile(form.adminName.trim(), form.adminEmail.trim(), form.adminPhone.trim(), adminAvatar || "");
+      toast.success("Profile saved successfully.");
+    } catch {
+      toast.error("Unable to save profile.");
     } finally {
       setLoading(false);
     }
@@ -73,131 +102,162 @@ export default function AdminProfilePage() {
 
   const cancelChanges = () => {
     setForm({ adminName: adminName || "", adminEmail: adminEmail || "", adminPhone: adminPhone || "" });
-    setAvatarPreview(adminAvatar || "");
   };
 
-  const updatePassword = () => {
-    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
-      return toast.error("All password fields are required.");
-    }
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      return toast.error("New password and confirmation must match.");
-    }
-    if (passwordForm.newPassword.length < 6) {
-      return toast.error("New password must be at least 6 characters.");
-    }
+  // ── Password ──────────────────────────────────────────────────────────────
 
-    console.debug('[profile] updatePassword: enteredCurrent=', passwordForm.currentPassword, 'new=', passwordForm.newPassword);
-    console.debug('[profile] store adminPassword before change=', (useSettingsStore.getState() as any).adminPassword);
+  const updatePassword = () => {
+    const { currentPassword, newPassword, confirmPassword } = passwordForm;
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("All password fields are required."); return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("New passwords do not match."); return;
+    }
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters."); return;
+    }
 
     setPasswordLoading(true);
     try {
-      const ok = changePassword(passwordForm.currentPassword.trim(), passwordForm.newPassword.trim());
-      console.debug('[profile] changePassword result=', ok);
+      const ok = changePassword(currentPassword.trim(), newPassword.trim());
       if (!ok) {
         toast.error("Current password is incorrect.");
       } else {
-        toast.success("Password updated successfully.");
+        toast.success("Password updated. Please log in again.");
         setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-        try { localStorage.removeItem('mockAdminAuth'); } catch {}
+        try { localStorage.removeItem("mockAdminAuth"); } catch { /* */ }
         logout();
-        router.push('/admin/login');
+        router.push("/admin/login");
       }
-    } catch (err) {
-      console.error('[profile] changePassword threw', err);
+    } catch {
       toast.error("Unable to update password.");
     } finally {
       setPasswordLoading(false);
     }
   };
 
+  // ── Render ────────────────────────────────────────────────────────────────
+
+  if (!mounted) return null;
+
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-brand-brown">Admin Profile</h1>
-          <p className="text-sm text-brand-text-secondary mt-1">Your profile details and account settings.</p>
-        </div>
+    <div className="space-y-8 max-w-5xl">
+
+      {/* Page header */}
+      <div>
+        <h1 className="text-2xl font-semibold text-brand-brown">My Profile</h1>
+        <p className="mt-1 text-sm text-brand-text-secondary">Manage your account details and security settings.</p>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <section className="space-y-5 rounded-3xl bg-white p-6 shadow-sm border border-brand-brown/10">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">Profile Information</p>
-              <h2 className="mt-3 text-xl font-semibold text-brand-brown">Administrator details</h2>
-              <p className="text-sm text-brand-text-secondary mt-1">Review your account photo, name, and status.</p>
-            </div>
-            <div className="rounded-3xl border border-brand-brown/10 bg-brand-light px-4 py-3 text-sm text-brand-brown">
-              <p className="font-semibold">Account Status</p>
-              <p className="mt-1 text-brand-text-secondary">{adminStatus || "Active"}</p>
-            </div>
-          </div>
+      {/* ── Profile card ── */}
+      <div className="rounded-2xl bg-white border border-brand-brown/10 shadow-sm overflow-hidden">
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-3 rounded-3xl bg-brand-light/80 p-4">
-              <p className="text-sm text-brand-text-secondary">Profile Photo</p>
-              <div className="flex items-center gap-4">
-                <div className="relative h-20 w-20 overflow-hidden rounded-full border border-brand-brown/10 bg-brand-gold text-brand-brown flex items-center justify-center text-xl font-bold">
-                  {avatarPreview ? (
-                    <img src={avatarPreview} alt="Admin avatar" className="h-full w-full object-cover" />
-                  ) : (
-                    profileInitials
-                  )}
-                </div>
-                <label className="cursor-pointer rounded-full border border-brand-brown/10 bg-white px-4 py-2 text-sm font-medium text-brand-brown shadow-sm transition-colors hover:border-brand-gold hover:text-brand-brown">
-                  Upload image
-                  <input type="file" accept="image/*" className="sr-only" onChange={handleAvatarChange} />
-                </label>
+        {/* Hero band */}
+        <div className="h-24 bg-gradient-to-r from-brand-brown to-brand-brown/70" />
+
+        <div className="px-6 pb-6">
+          {/* Avatar row */}
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 -mt-10 mb-6">
+            <div className="relative w-20 h-20 shrink-0">
+              <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white bg-brand-gold text-brand-brown flex items-center justify-center text-2xl font-bold shadow-md">
+                {adminAvatar ? (
+                  <img src={adminAvatar} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <span>{initials}</span>
+                )}
               </div>
+              {/* Camera overlay */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-brand-brown border-2 border-white text-white flex items-center justify-center shadow hover:bg-brand-gold transition-colors"
+                title="Change photo"
+              >
+                <Camera className="w-3.5 h-3.5" />
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={handleAvatarChange}
+              />
             </div>
-            <div className="space-y-3 rounded-3xl bg-brand-light/80 p-4">
-              <p className="text-sm text-brand-text-secondary">Admin Role</p>
-              <p className="text-sm text-brand-brown">Admin</p>
-              <p className="text-sm text-brand-text-secondary">Email Address</p>
-              <p className="text-sm text-brand-brown">{adminEmail}</p>
+
+            <div className="flex items-center gap-2 pb-1">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded-xl border border-brand-brown/20 bg-white px-4 py-2 text-sm font-medium text-brand-brown hover:bg-brand-light transition-colors"
+              >
+                Change Photo
+              </button>
+              {adminAvatar && (
+                <button
+                  type="button"
+                  onClick={handleRemoveAvatar}
+                  className="rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50 transition-colors flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Remove
+                </button>
+              )}
             </div>
           </div>
-        </section>
 
-        <section className="space-y-5 rounded-3xl bg-white p-6 shadow-sm border border-brand-brown/10">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">Editable Fields</p>
-            <h2 className="mt-3 text-xl font-semibold text-brand-brown">Update profile details</h2>
-          </div>
+          <p className="text-xs text-brand-text-secondary mb-6">
+            JPG, PNG or GIF · max {MAX_FILE_SIZE_MB} MB
+          </p>
 
-          <div className="grid gap-4">
+          {/* Info fields */}
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             <div>
-              <label className="block text-sm font-medium text-brand-text-secondary">Full Name</label>
+              <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-text-secondary mb-1.5">
+                <User className="w-3.5 h-3.5" /> Full Name
+              </label>
               <input
                 value={form.adminName}
-                onChange={(e) => setForm((prev) => ({ ...prev, adminName: e.target.value }))}
-                className="mt-2 w-full rounded-3xl border border-brand-brown/10 bg-brand-light p-3 text-sm text-brand-brown"
+                onChange={(e) => setForm((p) => ({ ...p, adminName: e.target.value }))}
+                className="w-full rounded-xl border border-brand-brown/15 bg-brand-light px-3 py-2.5 text-sm text-brand-brown focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-brand-text-secondary">Email Address</label>
+              <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-text-secondary mb-1.5">
+                <Mail className="w-3.5 h-3.5" /> Email Address
+              </label>
               <input
+                type="email"
                 value={form.adminEmail}
-                onChange={(e) => setForm((prev) => ({ ...prev, adminEmail: e.target.value }))}
-                className="mt-2 w-full rounded-3xl border border-brand-brown/10 bg-brand-light p-3 text-sm text-brand-brown"
+                onChange={(e) => setForm((p) => ({ ...p, adminEmail: e.target.value }))}
+                className="w-full rounded-xl border border-brand-brown/15 bg-brand-light px-3 py-2.5 text-sm text-brand-brown focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-brand-text-secondary">Phone Number</label>
+              <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-text-secondary mb-1.5">
+                <Phone className="w-3.5 h-3.5" /> Phone Number
+              </label>
               <input
+                type="tel"
                 value={form.adminPhone}
-                onChange={(e) => setForm((prev) => ({ ...prev, adminPhone: e.target.value }))}
-                className="mt-2 w-full rounded-3xl border border-brand-brown/10 bg-brand-light p-3 text-sm text-brand-brown"
+                onChange={(e) => setForm((p) => ({ ...p, adminPhone: e.target.value }))}
+                className="w-full rounded-xl border border-brand-brown/15 bg-brand-light px-3 py-2.5 text-sm text-brand-brown focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
               />
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+          {/* Status badge */}
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-green-50 border border-green-200 px-3 py-1">
+            <span className="w-2 h-2 rounded-full bg-green-500" />
+            <span className="text-xs font-medium text-green-700">{adminStatus || "Active"}</span>
+          </div>
+
+          {/* Save row */}
+          <div className="mt-6 flex justify-end gap-3 border-t border-brand-brown/8 pt-5">
             <button
               type="button"
               onClick={cancelChanges}
-              className="rounded-3xl border border-brand-brown/10 bg-white px-5 py-3 text-sm font-medium text-brand-brown hover:bg-brand-light"
+              className="rounded-xl border border-brand-brown/15 bg-white px-5 py-2.5 text-sm font-medium text-brand-brown hover:bg-brand-light transition-colors"
             >
               Cancel
             </button>
@@ -205,63 +265,59 @@ export default function AdminProfilePage() {
               type="button"
               onClick={saveProfile}
               disabled={loading}
-              className="rounded-3xl bg-brand-brown px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-brand-gold disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-brown px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-gold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loading ? "Saving..." : "Save Changes"}
-            </button>
-          </div>
-        </section>
-      </div>
-
-      <section className="rounded-3xl bg-white p-6 shadow-sm border border-brand-brown/10">
-        <div className="space-y-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-gold">Change Password</p>
-            <h2 className="mt-3 text-xl font-semibold text-brand-brown">Update your password</h2>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            <div>
-              <label className="block text-sm font-medium text-brand-text-secondary">Current Password</label>
-              <input
-                type="password"
-                value={passwordForm.currentPassword}
-                onChange={(e) => setPasswordForm((prev) => ({ ...prev, currentPassword: e.target.value }))}
-                className="mt-2 w-full rounded-3xl border border-brand-brown/10 bg-brand-light p-3 text-sm text-brand-brown"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-brand-text-secondary">New Password</label>
-              <input
-                type="password"
-                value={passwordForm.newPassword}
-                onChange={(e) => setPasswordForm((prev) => ({ ...prev, newPassword: e.target.value }))}
-                className="mt-2 w-full rounded-3xl border border-brand-brown/10 bg-brand-light p-3 text-sm text-brand-brown"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-brand-text-secondary">Confirm Password</label>
-              <input
-                type="password"
-                value={passwordForm.confirmPassword}
-                onChange={(e) => setPasswordForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
-                className="mt-2 w-full rounded-3xl border border-brand-brown/10 bg-brand-light p-3 text-sm text-brand-brown"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={updatePassword}
-              disabled={passwordLoading}
-              className="rounded-3xl bg-brand-brown px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-brand-gold disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {passwordLoading ? "Updating..." : "Update Password"}
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {loading ? "Saving…" : "Save Changes"}
             </button>
           </div>
         </div>
-      </section>
+      </div>
+
+      {/* ── Change password ── */}
+      <div className="rounded-2xl bg-white border border-brand-brown/10 shadow-sm p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <ShieldCheck className="w-5 h-5 text-brand-gold" />
+          <h2 className="text-lg font-semibold text-brand-brown">Change Password</h2>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          {[
+            { label: "Current Password", key: "currentPassword" },
+            { label: "New Password",     key: "newPassword" },
+            { label: "Confirm Password", key: "confirmPassword" },
+          ].map(({ label, key }) => (
+            <div key={key}>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-brand-text-secondary mb-1.5">
+                {label}
+              </label>
+              <input
+                type="password"
+                value={passwordForm[key as keyof typeof passwordForm]}
+                onChange={(e) => setPasswordForm((p) => ({ ...p, [key]: e.target.value }))}
+                className="w-full rounded-xl border border-brand-brown/15 bg-brand-light px-3 py-2.5 text-sm text-brand-brown focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
+              />
+            </div>
+          ))}
+        </div>
+
+        <p className="mt-3 text-xs text-brand-text-secondary">
+          Minimum 6 characters. After update you will be signed out.
+        </p>
+
+        <div className="mt-5 flex justify-end">
+          <button
+            type="button"
+            onClick={updatePassword}
+            disabled={passwordLoading}
+            className="inline-flex items-center gap-2 rounded-xl bg-brand-brown px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-gold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {passwordLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+            {passwordLoading ? "Updating…" : "Update Password"}
+          </button>
+        </div>
+      </div>
+
     </div>
   );
 }
