@@ -519,8 +519,8 @@ export default function LandingAnimation() {
 
             {/* Fourth Animation Second Phase Text & Shadow Overlay */}
             {showFourthOverlayPhase2 && (
-              <div 
-                className="fourth-anim-phase2-overlay" 
+              <div
+                className="fourth-anim-phase2-overlay"
                 style={{ opacity: fourthOverlayPhase2Opacity }}
               >
                 <div className="bottom-left-shadow"></div>
@@ -540,6 +540,23 @@ export default function LandingAnimation() {
               </div>
             )}
 
+            {/* Skip Animation Button */}
+            <button
+              onClick={() => {
+                window.scrollTo({
+                  top: 15 * window.innerHeight,
+                  behavior: "smooth"
+                });
+              }}
+              className="fixed right-8 top-8 md:right-12 md:top-12 z-[50] px-5 py-2.5 rounded-full border border-brand-brown/10 bg-brand-brown text-[#FDFBF7] font-sans font-bold text-xs uppercase tracking-[2px] hover:bg-brand-gold hover:border-brand-gold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer select-none"
+              style={{
+                opacity: scrollIndicatorOpacity,
+                pointerEvents: scrollIndicatorOpacity < 0.2 ? 'none' : 'auto'
+              }}
+            >
+              Skip Intro
+            </button>
+
             {/* Vertical Scroll Down Indicator */}
             <div
               className={`scroll-indicator ${(showFirstOverlay || showSecondOverlay || showThirdOverlay || showFourthOverlay || showFourthOverlayPhase2) ? 'off-white' : ''}`}
@@ -550,7 +567,6 @@ export default function LandingAnimation() {
                 <div className="scroll-dot"></div>
               </div>
             </div>
-
 
           </div>
 
