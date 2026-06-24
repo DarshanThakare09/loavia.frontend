@@ -5,19 +5,35 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useProductStore } from "@/store/productStore";
 import { useSiteStore } from "@/store/siteStore";
+import { catalogService } from "@/services/catalogService";
 
 export default function FeaturedProducts() {
-  const { products: storeProducts } = useProductStore();
   const {
     featuredProductsTitle,
     featuredProductsSubtitle,
     featuredProductsCtaText,
   } = useSiteStore();
+  const [products, setProducts] = useState<any[]>([]);
   const [mounted, setMounted] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    async function loadFeatured() {
+      try {
+        const res = await catalogService.getProducts({ isFeatured: true, limit: 6 });
+        // Sort by featuredOrder if present
+        const sorted = res.products.sort((a, b) => {
+          const orderA = Number(a.featuredOrder) || 999;
+          const orderB = Number(b.featuredOrder) || 999;
+          return orderA - orderB;
+        });
+        setProducts(sorted);
+      } catch (err) {
+        console.error("Failed to load featured products", err);
+      }
+    }
+    loadFeatured();
     setMounted(true);
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -30,16 +46,6 @@ export default function FeaturedProducts() {
     }
     return () => observer.disconnect();
   }, []);
-
-  const products = mounted
-    ? storeProducts
-        .filter((product) => product.isFeatured)
-        .sort((a, b) => {
-          const orderA = Number(a.featuredOrder) || 999;
-          const orderB = Number(b.featuredOrder) || 999;
-          return orderA - orderB;
-        })
-    : [];
 
   const titleText = featuredProductsTitle || "Featured Products";
   const words = titleText.trim().split(/\s+/);
@@ -121,7 +127,7 @@ export default function FeaturedProducts() {
             {mounted && products.map((product) => (
               <Link
                 key={product.id}
-                href={`/product/${product.id}`}
+                href={`/product/${product.slug || product.id}`}
                 className="group featured-product-card rounded-2xl p-4 flex flex-row items-center space-x-4 cursor-pointer"
               >
                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-white flex-shrink-0">

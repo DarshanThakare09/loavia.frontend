@@ -2,287 +2,214 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useProductStore, Product } from "@/store/productStore";
-import { ArrowLeft, Plus, Trash2, Save } from "lucide-react";
-import Link from "next/link";
+import { ArrowLeft, Plus, Trash2, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
+import { useAdminProductStore } from "@/store/adminProductStore";
+import { ProductStatus } from "@/types/admin";
 
-export default function AddProduct() {
+type VariantForm = { name: string; sku: string; price: string; stock: string };
+
+const EMPTY_VARIANT: VariantForm = { name: "", sku: "", price: "", stock: "" };
+
+export default function AddProductPage() {
   const router = useRouter();
-  const { addProduct } = useProductStore();
+  const { createProduct, isCreating } = useAdminProductStore();
 
-  const [formData, setFormData] = useState<Partial<Product>>({
-    name: "",
-    category: "Classic",
-    price: 0,
-    discountPrice: null,
-    image: "",
-    images: [],
-    primaryImage: "",
-    coverImage: "",
-    tags: [],
-    moods: [],
-    description: "",
-    ingredients: "",
-    calories: "",
-    nutritionTable: [],
-    inStock: true,
-    isPopular: false,
-    isFeatured: false,
-    featuredOrder: 1,
-    featuredBadgeText: "Featured"
-  });
+  const [name, setName]               = useState("");
+  const [description, setDescription] = useState("");
+  const [categoryId, setCategoryId]   = useState("");
+  const [price, setPrice]             = useState("");
+  const [discountPrice, setDiscount]  = useState("");
+  const [sku, setSku]                 = useState("");
+  const [status, setStatus]           = useState<ProductStatus>("ACTIVE");
+  const [isFeatured, setFeatured]     = useState(false);
+  const [images, setImages]           = useState<string[]>(["", "", ""]);
+  const [variants, setVariants]       = useState<VariantForm[]>([{ ...EMPTY_VARIANT }]);
+  const [tags, setTags]               = useState("");
 
-  const [newTag, setNewTag] = useState("");
-  const [newMood, setNewMood] = useState("");
-
-  const images = formData.images || [];
-  const coverImage = images.includes(formData.coverImage || "") ? formData.coverImage! : (images[0] || "");
-
-  const handleSetCoverImage = (url: string) => {
-    setFormData({ ...formData, coverImage: url, primaryImage: url, image: url });
+  const updateImage = (idx: number, val: string) => {
+    const updated = [...images];
+    updated[idx] = val;
+    setImages(updated);
   };
 
-  const handleAddTag = () => {
-    if (newTag && !formData.tags?.includes(newTag)) {
-      setFormData({ ...formData, tags: [...(formData.tags || []), newTag] });
-      setNewTag("");
-    }
+  const updateVariant = (idx: number, field: keyof VariantForm, val: string) => {
+    const updated = [...variants];
+    updated[idx] = { ...updated[idx], [field]: val };
+    setVariants(updated);
   };
 
-  const handleAddMood = () => {
-    if (newMood && !formData.moods?.includes(newMood)) {
-      setFormData({ ...formData, moods: [...(formData.moods || []), newMood] });
-      setNewMood("");
-    }
-  };
+  const addVariant    = () => setVariants([...variants, { ...EMPTY_VARIANT }]);
+  const removeVariant = (idx: number) => setVariants(variants.filter((_, i) => i !== idx));
 
-  const addNutritionRow = () => {
-    setFormData({
-      ...formData,
-      nutritionTable: [...(formData.nutritionTable || []), { key: "", value: "" }]
-    });
-  };
-
-  const updateNutritionRow = (index: number, field: 'key' | 'value', val: string) => {
-    const updated = [...(formData.nutritionTable || [])];
-    updated[index][field] = val;
-    setFormData({ ...formData, nutritionTable: updated });
-  };
-
-  const removeNutritionRow = (index: number) => {
-    const updated = [...(formData.nutritionTable || [])];
-    updated.splice(index, 1);
-    setFormData({ ...formData, nutritionTable: updated });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.price) {
-      toast.error("Name and Price are required.");
-      return;
-    }
-    const productData = formData.isFeatured
-      ? formData
-      : { ...formData, featuredOrder: undefined };
+    if (!name.trim())        { toast.error("Product name is required."); return; }
+    if (!sku.trim())         { toast.error("SKU is required."); return; }
+    if (!categoryId.trim())  { toast.error("Category ID is required."); return; }
+    if (!price || Number(price) <= 0) { toast.error("Valid price is required."); return; }
+    const cleanImages = images.filter(Boolean);
+    if (cleanImages.length === 0) { toast.error("At least one image URL is required."); return; }
 
-    const cover = coverImage || productData.images?.[0] || "";
-    addProduct({ ...productData, coverImage: cover, primaryImage: cover, image: cover } as Omit<Product, 'id' | 'rating' | 'reviews'>);
-    toast.success("Product added successfully.");
-    router.push('/admin/products');
+    const validVariants = variants.filter(v => v.name && v.sku && v.price && v.stock);
+    try {
+      await createProduct({
+        name: name.trim(),
+        description: description.trim(),
+        categoryId: categoryId.trim(),
+        price: Math.round(Number(price) * 100),
+        discountPrice: discountPrice ? Math.round(Number(discountPrice) * 100) : undefined,
+        sku: sku.trim(),
+        images: cleanImages,
+        status,
+        isFeatured,
+        variants: validVariants.map(v => ({
+          name: v.name,
+          sku: v.sku,
+          price: Math.round(Number(v.price) * 100),
+          stock: Number(v.stock),
+        })),
+        tags: tags.split(",").map(t => t.trim()).filter(Boolean),
+      });
+      toast.success("Product created successfully.");
+      router.push("/admin/products");
+    } catch { /* toast shown by store */ }
   };
+
+  const inputClass = "w-full px-4 py-2.5 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-sm";
+  const labelClass = "block text-sm font-semibold text-brand-text-primary mb-1";
 
   return (
-    <div className="max-w-4xl space-y-6 pb-20">
-      <div className="flex items-center space-x-4">
-        <Link href="/admin/products" className="text-brand-text-secondary hover:text-brand-brown transition-colors">
-          <ArrowLeft className="w-6 h-6" />
-        </Link>
+    <div className="max-w-3xl space-y-6 animate-in fade-in duration-300 pb-16">
+      <div className="flex items-center gap-4">
+        <button onClick={() => router.back()} className="p-2 hover:bg-brand-light rounded-xl transition-colors text-brand-text-secondary hover:text-brand-brown">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
         <div>
-          <h1 className="text-3xl font-bold text-brand-brown font-serif">Add Product</h1>
+          <h1 className="text-2xl font-bold text-brand-brown font-serif">Add New Product</h1>
+          <p className="text-brand-text-secondary text-sm mt-0.5">All prices in ₹ (Rupees)</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-brand-brown/10 p-6 space-y-8">
-        
-        {/* Basic Info */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-brand-brown border-b border-brand-brown/10 pb-2">Basic Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-brand-text-primary mb-1">Product Name *</label>
-              <input type="text" required className="w-full px-4 py-2 border rounded-xl" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-white p-6 rounded-2xl border border-brand-brown/10 shadow-sm space-y-4">
+          <h2 className="font-bold text-brand-brown text-base">Basic Information</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
+              <label className={labelClass}>Product Name *</label>
+              <input type="text" value={name} onChange={e => setName(e.target.value)} className={inputClass} placeholder="e.g. Choco Chip Delight" required />
             </div>
             <div>
-              <label className="block text-sm font-medium text-brand-text-primary mb-1">Category *</label>
-              <input type="text" required className="w-full px-4 py-2 border rounded-xl" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} />
+              <label className={labelClass}>SKU *</label>
+              <input type="text" value={sku} onChange={e => setSku(e.target.value.toUpperCase())} className={`${inputClass} font-mono uppercase`} placeholder="CHO-CHIP-001" required />
             </div>
             <div>
-              <label className="block text-sm font-medium text-brand-text-primary mb-1">Regular Price (₹) *</label>
-              <input type="number" required min="0" className="w-full px-4 py-2 border rounded-xl" value={formData.price || ''} onChange={e => setFormData({...formData, price: Number(e.target.value)})} />
+              <label className={labelClass}>Category ID *</label>
+              <input type="text" value={categoryId} onChange={e => setCategoryId(e.target.value)} className={inputClass} placeholder="UUID from category list" required />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-brand-text-primary mb-1">Discount Price (₹) (Optional)</label>
-              <input type="number" min="0" className="w-full px-4 py-2 border rounded-xl" value={formData.discountPrice || ''} onChange={e => setFormData({...formData, discountPrice: e.target.value ? Number(e.target.value) : null})} />
+            <div className="sm:col-span-2">
+              <label className={labelClass}>Description</label>
+              <textarea value={description} onChange={e => setDescription(e.target.value)} className={`${inputClass} min-h-[100px] resize-none`} placeholder="Product description..." />
             </div>
-            <div className="md:col-span-2 flex items-center space-x-6 py-2">
-              <label className="flex items-center space-x-2 text-sm font-medium text-brand-text-primary cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="rounded border-gray-300 text-brand-brown focus:ring-brand-gold w-4 h-4 cursor-pointer"
-                  checked={formData.inStock ?? true} 
-                  onChange={e => setFormData({...formData, inStock: e.target.checked})} 
-                />
-                <span>In Stock</span>
-              </label>
-              <label className="flex items-center space-x-2 text-sm font-medium text-brand-text-primary cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="rounded border-gray-300 text-brand-brown focus:ring-brand-gold w-4 h-4 cursor-pointer"
-                  checked={formData.isPopular ?? false} 
-                  onChange={e => setFormData({...formData, isPopular: e.target.checked})} 
-                />
-                <span>Mark as Popular (Best Seller)</span>
-              </label>
-              <label className="flex items-center space-x-2 text-sm font-medium text-brand-text-primary cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="rounded border-gray-300 text-brand-brown focus:ring-brand-gold w-4 h-4 cursor-pointer"
-                  checked={formData.isFeatured ?? false}
-                  onChange={e => setFormData({
-                    ...formData,
-                    isFeatured: e.target.checked,
-                    featuredOrder: e.target.checked ? (formData.featuredOrder || 1) : undefined
-                  })}
-                />
-                <span>Mark as Featured</span>
-              </label>
-            </div>
-            {formData.isFeatured && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-brand-text-primary mb-1">Featured Display Order</label>
-                  <input type="number" min="1" className="w-full px-4 py-2 border rounded-xl" value={formData.featuredOrder ?? 1} onChange={e => setFormData({...formData, featuredOrder: Number(e.target.value)})} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-brand-text-primary mb-1">Featured Badge Text</label>
-                  <input type="text" className="w-full px-4 py-2 border rounded-xl" value={formData.featuredBadgeText || ''} onChange={e => setFormData({...formData, featuredBadgeText: e.target.value})} />
-                </div>
-              </>
-            )}
-            {images.length > 0 && (
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-brand-text-primary mb-2">Product Images</label>
-                <div className="flex flex-wrap gap-4">
-                  {images.map((img, idx) => {
-                    const isCover = img === coverImage;
-                    return (
-                      <div key={idx} className="flex flex-col items-center gap-1.5">
-                        <div
-                          className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0"
-                          style={{ border: `2px solid ${isCover ? '#5C4033' : '#e5e7eb'}` }}
-                        >
-                          <img src={img} alt={`Image ${idx + 1}`} className="w-full h-full object-cover" />
-                          {isCover && (
-                            <span className="absolute top-1 left-1 text-[9px] font-bold bg-brand-brown text-white px-1.5 py-0.5 rounded">Cover</span>
-                          )}
-                        </div>
-                        {isCover ? (
-                          <span className="text-[11px] font-semibold text-brand-brown">Cover Image</span>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleSetCoverImage(img)}
-                            className="text-[11px] font-medium text-brand-text-secondary border border-brand-brown/20 rounded-lg px-2 py-0.5 hover:bg-brand-brown hover:text-white transition-colors cursor-pointer"
-                          >
-                            Set as Cover
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Details */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-brand-brown border-b border-brand-brown/10 pb-2">Product Details</h2>
-          <div>
-            <label className="block text-sm font-medium text-brand-text-primary mb-1">Description</label>
-            <textarea className="w-full px-4 py-2 border rounded-xl min-h-[100px]" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-brand-text-primary mb-1">Ingredients</label>
-            <textarea className="w-full px-4 py-2 border rounded-xl min-h-[80px]" value={formData.ingredients} onChange={e => setFormData({...formData, ingredients: e.target.value})} />
+        <div className="bg-white p-6 rounded-2xl border border-brand-brown/10 shadow-sm space-y-4">
+          <h2 className="font-bold text-brand-brown text-base">Pricing & Status</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Price (₹) *</label>
+              <input type="number" min="0" step="0.01" value={price} onChange={e => setPrice(e.target.value)} className={inputClass} placeholder="499" required />
+            </div>
+            <div>
+              <label className={labelClass}>Discount Price (₹)</label>
+              <input type="number" min="0" step="0.01" value={discountPrice} onChange={e => setDiscount(e.target.value)} className={inputClass} placeholder="399 (optional)" />
+            </div>
+            <div>
+              <label className={labelClass}>Status</label>
+              <select value={status} onChange={e => setStatus(e.target.value as ProductStatus)} className={inputClass}>
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
+                <option value="ARCHIVED">Archived</option>
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>Tags (comma-separated)</label>
+              <input type="text" value={tags} onChange={e => setTags(e.target.value)} className={inputClass} placeholder="healthy, gift, bestseller" />
+            </div>
+            <div className="sm:col-span-2 flex items-center gap-3">
+              <input type="checkbox" id="featured" checked={isFeatured} onChange={e => setFeatured(e.target.checked)} className="w-4 h-4 accent-brand-brown" />
+              <label htmlFor="featured" className="text-sm font-semibold text-brand-text-primary cursor-pointer">Mark as Featured Product</label>
+            </div>
           </div>
         </div>
 
-        {/* Nutrition */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-brand-brown border-b border-brand-brown/10 pb-2">Nutrition & Calories</h2>
-          <div>
-            <label className="block text-sm font-medium text-brand-text-primary mb-1">Calories (e.g., &quot;120 kcal / cookie&quot;)</label>
-            <input type="text" className="w-full px-4 py-2 border rounded-xl" value={formData.calories} onChange={e => setFormData({...formData, calories: e.target.value})} />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-brand-text-primary mb-2">Nutrition Table</label>
-            {formData.nutritionTable?.map((row, index) => (
-              <div key={index} className="flex space-x-2 mb-2">
-                <input type="text" placeholder="Nutrient (e.g., Protein)" className="flex-1 px-4 py-2 border rounded-xl" value={row.key} onChange={e => updateNutritionRow(index, 'key', e.target.value)} />
-                <input type="text" placeholder="Amount (e.g., 5g)" className="flex-1 px-4 py-2 border rounded-xl" value={row.value} onChange={e => updateNutritionRow(index, 'value', e.target.value)} />
-                <button type="button" onClick={() => removeNutritionRow(index)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl"><Trash2 className="w-5 h-5"/></button>
+        <div className="bg-white p-6 rounded-2xl border border-brand-brown/10 shadow-sm space-y-4">
+          <h2 className="font-bold text-brand-brown text-base">Product Images</h2>
+          <p className="text-xs text-brand-text-secondary">First image is the primary display image.</p>
+          <div className="space-y-2">
+            {images.map((url, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <span className="text-xs font-bold text-brand-text-secondary w-6">{idx + 1}.</span>
+                <input type="url" value={url} onChange={e => updateImage(idx, e.target.value)} className={`${inputClass} flex-1`} placeholder={`Image ${idx + 1} URL`} />
               </div>
             ))}
-            <button type="button" onClick={addNutritionRow} className="flex items-center space-x-1 text-brand-gold font-medium mt-2"><Plus className="w-4 h-4"/> <span>Add Row</span></button>
+            <button type="button" onClick={() => setImages([...images, ""])} className="text-xs text-brand-gold font-semibold hover:text-brand-brown transition-colors flex items-center gap-1">
+              <Plus className="w-3.5 h-3.5" /> Add another image
+            </button>
           </div>
         </div>
 
-        {/* Tags & Moods */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-brand-brown border-b border-brand-brown/10 pb-2">Tags & Moods</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-brand-text-primary mb-1">Tags (e.g., Sweet, Nutty)</label>
-              <div className="flex space-x-2 mb-2">
-                <input type="text" className="flex-1 px-4 py-2 border rounded-xl" value={newTag} onChange={e => setNewTag(e.target.value)} />
-                <button type="button" onClick={handleAddTag} className="px-4 py-2 bg-brand-light text-brand-brown rounded-xl">Add</button>
+        <div className="bg-white p-6 rounded-2xl border border-brand-brown/10 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-bold text-brand-brown text-base">Variants</h2>
+            <button type="button" onClick={addVariant} className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-light text-brand-brown rounded-lg text-xs font-semibold hover:bg-brand-gold/15 transition-colors">
+              <Plus className="w-3.5 h-3.5" /> Add Variant
+            </button>
+          </div>
+          <div className="space-y-4">
+            {variants.map((v, idx) => (
+              <div key={idx} className="p-4 bg-brand-light/40 border border-brand-brown/5 rounded-xl">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-bold text-brand-gold">Variant {idx + 1}</span>
+                  {variants.length > 1 && (
+                    <button type="button" onClick={() => removeVariant(idx)} className="text-rose-500 hover:text-rose-700">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {(["name", "sku", "price", "stock"] as const).map(field => (
+                    <div key={field}>
+                      <label className="block text-xs font-semibold text-brand-text-secondary mb-1 capitalize">
+                        {field === "price" ? "Price (₹)" : field === "stock" ? "Stock" : field === "sku" ? "SKU" : "Name"}
+                      </label>
+                      <input
+                        type={field === "price" || field === "stock" ? "number" : "text"}
+                        min={field === "price" || field === "stock" ? "0" : undefined}
+                        step={field === "price" ? "0.01" : undefined}
+                        value={v[field]}
+                        onChange={e => updateVariant(idx, field, field === "sku" ? e.target.value.toUpperCase() : e.target.value)}
+                        className="w-full px-3 py-2 border border-brand-brown/20 rounded-lg text-xs focus:ring-2 focus:ring-brand-gold outline-none"
+                        placeholder={field === "name" ? "200g" : field === "sku" ? "200G-001" : field === "price" ? "499" : "50"}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {formData.tags?.map(t => (
-                  <span key={t} className="px-2 py-1 bg-brand-brown text-white text-xs rounded-full flex items-center">
-                    {t} <button type="button" onClick={() => setFormData({...formData, tags: formData.tags?.filter(tag => tag !== t)})} className="ml-2">&times;</button>
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-brand-text-primary mb-1">Moods (e.g., Happy, Cozy)</label>
-              <div className="flex space-x-2 mb-2">
-                <input type="text" className="flex-1 px-4 py-2 border rounded-xl" value={newMood} onChange={e => setNewMood(e.target.value)} />
-                <button type="button" onClick={handleAddMood} className="px-4 py-2 bg-brand-light text-brand-brown rounded-xl">Add</button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {formData.moods?.map(m => (
-                  <span key={m} className="px-2 py-1 bg-brand-gold text-brand-brown text-xs rounded-full flex items-center">
-                    {m} <button type="button" onClick={() => setFormData({...formData, moods: formData.moods?.filter(mood => mood !== m)})} className="ml-2">&times;</button>
-                  </span>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        <div className="flex justify-end pt-6 border-t border-brand-brown/10">
-          <button type="submit" className="flex items-center space-x-2 px-6 py-3 bg-brand-brown text-white rounded-xl hover:bg-brand-gold transition-colors font-medium">
-            <Save className="w-5 h-5" />
-            <span>Save Product</span>
+        <div className="flex justify-end gap-3">
+          <button type="button" onClick={() => router.push("/admin/products")} className="px-6 py-2.5 border border-brand-brown/10 rounded-xl text-brand-brown font-semibold text-sm hover:bg-brand-light transition-colors">
+            Cancel
+          </button>
+          <button type="submit" disabled={isCreating} className="flex items-center gap-2 px-6 py-2.5 bg-brand-brown text-white rounded-xl font-semibold text-sm hover:bg-brand-gold transition-colors disabled:opacity-50">
+            {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            {isCreating ? "Creating..." : "Create Product"}
           </button>
         </div>
-
       </form>
     </div>
   );

@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, ShoppingBag, Users, Settings, Tag, LogOut, Menu, X, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, Users, Settings, Tag, LogOut, Menu, X, ArrowLeft, Package, MessageSquare, ShoppingCart } from "lucide-react";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useAdminAuthStore } from "@/store/adminAuthStore";
+import { useAuthStore } from "@/store/authStore";
 import LogoutModal from "@/components/admin/LogoutModal";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -23,20 +24,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   const isLoginPage = pathname?.startsWith('/admin/login');
+  const hydrateSession = useAuthStore((state) => state.hydrateSession);
 
   useEffect(() => {
-    const frame = requestAnimationFrame(() => setMounted(true));
-    try {
-      if (localStorage.getItem("mockAdminAuth") === "true") {
-        useAdminAuthStore.getState().login();
-      } else if (!isAdminAuthenticated && !isLoginPage) {
-        router.push('/admin/login');
-      }
-    } catch {
-      // localStorage can be unavailable in restricted browser contexts.
+    let active = true;
+    async function checkAuth() {
+      await hydrateSession();
+      if (!active) return;
+      setMounted(true);
     }
-    return () => cancelAnimationFrame(frame);
-  }, [isAdminAuthenticated, isLoginPage, router]);
+    
+    if (!isLoginPage) {
+      checkAuth();
+    } else {
+      setMounted(true);
+    }
+
+    return () => {
+      active = false;
+    };
+  }, [isLoginPage, hydrateSession]);
+
+  useEffect(() => {
+    if (mounted && !isAdminAuthenticated && !isLoginPage) {
+      router.push('/admin/login');
+    }
+  }, [mounted, isAdminAuthenticated, isLoginPage, router]);
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -67,9 +80,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navItems = [
     { name: "Dashboard",   href: "/admin/dashboard",    icon: LayoutDashboard },
     { name: "Products",    href: "/admin/products",      icon: ShoppingBag },
-    { name: "Orders",      href: "/admin/orders",        icon: Tag },
+    { name: "Orders",      href: "/admin/orders",        icon: ShoppingCart },
     { name: "Customers",   href: "/admin/users",         icon: Users },
     { name: "Promo Codes", href: "/admin/promo-codes",   icon: Tag },
+    { name: "Inventory",   href: "/admin/inventory",     icon: Package },
+    { name: "Reviews",     href: "/admin/reviews",       icon: MessageSquare },
     { name: "Settings",    href: "/admin/settings",      icon: Settings },
   ];
 

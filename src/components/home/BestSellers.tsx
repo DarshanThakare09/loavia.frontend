@@ -11,6 +11,7 @@ import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { useProductStore } from "@/store/productStore";
 import { useSiteStore } from "@/store/siteStore";
+import { catalogService } from "@/services/catalogService";
 import { toast } from "sonner";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -18,17 +19,24 @@ gsap.registerPlugin(ScrollTrigger);
 export function BestSellers() {
   const { addItem } = useCartStore();
   const { user, toggleWishlist } = useAuthStore();
-  const { products: storeProducts } = useProductStore();
   const { bestSellersTitle, bestSellersSubtitle } = useSiteStore();
   const containerRef = useRef<HTMLDivElement>(null);
   
+  const [products, setProducts] = useState<any[]>([]);
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
-  const popularProducts = storeProducts.filter(p => p.isPopular);
-  const products = mounted 
-    ? (popularProducts.length > 0 ? popularProducts.slice(0, 4) : storeProducts.slice(0, 4)) 
-    : [];
+  useEffect(() => {
+    async function loadBestSellers() {
+      try {
+        const res = await catalogService.getProducts({ isBestSeller: true, limit: 4 });
+        setProducts(res.products);
+      } catch (err) {
+        console.error("Failed to load best sellers", err);
+      }
+    }
+    loadBestSellers();
+    setMounted(true);
+  }, []);
 
   useGSAP(() => {
     if (!mounted || products.length === 0) return;
@@ -92,7 +100,7 @@ export function BestSellers() {
                 </button>
               </div>
               
-              <Link href={`/product/${product.id}`} className="block relative aspect-square overflow-hidden bg-brand-light">
+              <Link href={`/product/${product.slug || product.id}`} className="block relative aspect-square overflow-hidden bg-brand-light">
                 <Image
                   src={product.primaryImage || product.images?.[0] || product.image}
                   alt={product.name}
@@ -104,8 +112,8 @@ export function BestSellers() {
 
               <div className="p-6">
                 <div className="flex justify-between items-start mb-2">
-                  <Link href={`/product/${product.id}`}>
-                    <h3 className="font-bold text-lg text-brand-text-primary hover:text-brand-gold transition-colors line-clamp-1">
+                  <Link href={`/product/${product.slug || product.id}`}>
+                    <h3 className="font-bold text-lg text-[#5C3317] hover:text-brand-gold transition-colors line-clamp-1">
                       {product.name}
                     </h3>
                   </Link>
@@ -130,10 +138,16 @@ export function BestSellers() {
                   </div>
                   <button 
                     onClick={() => {
+                      const defaultVariant = product.variants?.find((v: any) => v.isDefault) || product.variants?.[0];
+                      if (!defaultVariant) {
+                        toast.error("Product variant not available");
+                        return;
+                      }
                       addItem({
-                        id: product.id.toString(),
+                        id: defaultVariant.id,
+                        variantId: defaultVariant.id,
                         name: product.name,
-                        price: product.discountPrice || product.price,
+                        price: defaultVariant.discountPrice || defaultVariant.price,
                         image: product.image,
                         quantity: 1
                       });

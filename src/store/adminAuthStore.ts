@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useAuthStore } from './authStore';
 
 interface ResetToken {
   token: string;
@@ -32,7 +33,10 @@ export const useAdminAuthStore = create<AdminAuthState>()(
       resetTokens: [],
 
       login: () => set({ isAdminAuthenticated: true }),
-      logout: () => set({ isAdminAuthenticated: false }),
+      logout: () => {
+        set({ isAdminAuthenticated: false });
+        useAuthStore.getState().logout();
+      },
 
       generateResetToken: () => {
         const token = makeToken();
@@ -66,3 +70,11 @@ export const useAdminAuthStore = create<AdminAuthState>()(
     { name: 'loavia-admin-auth' }
   )
 );
+
+// Reactive synchronization: sync admin authenticated flag to centralized auth store & role constraints
+if (typeof window !== 'undefined') {
+  useAuthStore.subscribe((state) => {
+    const isAuth = state.isAuthenticated && ['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(state.user?.role || '');
+    useAdminAuthStore.setState({ isAdminAuthenticated: isAuth });
+  });
+}

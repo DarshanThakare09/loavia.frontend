@@ -1,6 +1,5 @@
 "use client";
 
-import { useProductStore } from "@/store/productStore";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { useParams } from "next/navigation";
@@ -9,25 +8,59 @@ import { ShoppingCart, Truck, RotateCw, ShieldCheck, Heart } from "lucide-react"
 import Link from "next/link";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
+import { catalogService } from "@/services/catalogService";
+import { Product } from "@/store/productStore";
 
 export default function ProductDetail() {
   const params = useParams();
-  const { products } = useProductStore();
   const addItem = useCartStore((state) => state.addItem);
   const { user, toggleWishlist } = useAuthStore();
-  const [mounted, setMounted] = useState(false);
+  
+  const [product, setProduct] = useState<Product | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
+  const [selectedImage, setSelectedImage] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'description' | 'ingredients'>('description');
   
-  const product = products.find(p => p.id === params.slug);
-  const getDisplayImage = (p: typeof product) => p?.coverImage || p?.primaryImage || p?.images?.[0] || p?.image || "/premium_cookie.png";
-  const [selectedImage, setSelectedImage] = useState(product ? getDisplayImage(product) : "");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  const getDisplayImage = (p: Product) => p?.coverImage || p?.primaryImage || p?.images?.[0] || p?.image || "/premium_cookie.png";
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Update selected image once product is loaded or changed
+  useEffect(() => {
+    async function fetchProduct() {
+      if (!params?.slug) return;
+      setIsLoading(true);
+      setError(null);
+      try {
+        const prod = await catalogService.getProductBySlug(params.slug as string);
+        setProduct(prod);
+        // Default to default variant or first variant
+        if (prod.variants && prod.variants.length > 0) {
+          const defaultVar = prod.variants.find(v => v.isDefault) || prod.variants[0];
+          setSelectedVariant(defaultVar);
+        }
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          setError("Product not found");
+        } else {
+          setError(err.response?.data?.message || err.message || "Failed to load product details");
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    if (mounted) {
+      fetchProduct();
+    }
+  }, [params?.slug, mounted]);
+
+  // Update selected image once product is loaded
   useEffect(() => {
     if (product) {
       setSelectedImage(getDisplayImage(product));
@@ -36,24 +69,53 @@ export default function ProductDetail() {
 
   if (!mounted) return null;
 
-  if (!product) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#FDFBF7] font-sans">
-        <h1 className="text-3xl font-bold text-brand-brown mb-4">Product Not Found</h1>
-        <Link href="/shop" className="text-brand-gold hover:underline font-bold">Return to Shop</Link>
+        <div className="w-12 h-12 border-4 border-brand-gold border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-brand-brown font-semibold">Loading cookie details...</p>
       </div>
     );
   }
 
+  if (error || !product) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FDFBF7] font-sans px-4">
+        <h1 className="text-3xl font-bold text-brand-brown mb-4">
+          {error === "Product not found" ? "Cookie Not Found" : "Error Loading Cookie"}
+        </h1>
+        <p className="text-brand-text-secondary mb-6 text-center max-w-sm">
+          {error === "Product not found" 
+            ? "The cookie recipe you are looking for does not exist or has been hidden by our bakers." 
+            : error}
+        </p>
+        <Link href="/shop" className="px-6 py-2.5 bg-brand-brown text-white hover:bg-brand-gold rounded-full font-bold transition-all shadow-sm">
+          Return to Shop
+        </Link>
+      </div>
+    );
+  }
+
+  // Compute pricing from selected variant or product defaults
+  const originalPrice = selectedVariant ? selectedVariant.price : product.price;
+  const currentPrice = selectedVariant 
+    ? (selectedVariant.discountPrice || selectedVariant.price) 
+    : (product.discountPrice || product.price);
+  const showDiscount = selectedVariant 
+    ? !!selectedVariant.discountPrice 
+    : !!product.discountPrice;
+
   const handleAddToCart = () => {
     addItem({
-      id: product.id,
-      name: product.name,
-      price: product.discountPrice || product.price,
+      id: selectedVariant?.id || product.id,
+      name: selectedVariant 
+        ? `${product.name} (${selectedVariant.displayLabel || selectedVariant.name})` 
+        : product.name,
+      price: currentPrice,
       image: product.image,
       quantity: quantity
     });
-    toast.success(`${quantity} ${product.name} added to cart`);
+    toast.success(`${quantity} x ${product.name} added to cart`);
   };
 
   const handleWishlistToggle = () => {
@@ -90,8 +152,6 @@ export default function ProductDetail() {
     );
   };
 
-  const currentPrice = product.discountPrice || product.price;
-
   return (
     <div className="bg-[#FDFBF7] min-h-screen py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-7xl mx-auto">
@@ -126,7 +186,7 @@ export default function ProductDetail() {
             </div>
 
             {/* Thumbnail Gallery */}
-            {product.images && product.images.length > 0 && (
+            {product.images && product.images.length > 1 && (
               <div className="flex items-center space-x-4 overflow-x-auto py-2 scrollbar-none">
                 {product.images.map((img, idx) => (
                   <button
@@ -176,17 +236,48 @@ export default function ProductDetail() {
                 </span>
               </div>
               
+              {/* Product Price */}
               <div className="flex items-baseline space-x-4 mb-6">
-                {product.discountPrice ? (
+                {showDiscount ? (
                   <>
-                    <span className="text-4xl font-black text-[#E29B52]">₹{product.discountPrice}</span>
-                    <span className="text-2xl line-through text-brand-text-secondary/50 font-bold">₹{product.price}</span>
+                    <span className="text-4xl font-black text-[#E29B52]">₹{currentPrice}</span>
+                    <span className="text-2xl line-through text-brand-text-secondary/50 font-bold">₹{originalPrice}</span>
                   </>
                 ) : (
-                  <span className="text-4xl font-black text-brand-brown">₹{product.price}</span>
+                  <span className="text-4xl font-black text-brand-brown">₹{currentPrice}</span>
                 )}
               </div>
             </div>
+
+            {/* Packaging Variant Selector */}
+            {product.variants && product.variants.length > 1 && (
+              <div className="mb-8 bg-brand-light/30 p-5 rounded-3xl border border-brand-brown/5">
+                <span className="text-xs font-bold uppercase tracking-wider text-brand-brown/70 block mb-3">
+                  Select Size & Packaging
+                </span>
+                <div className="flex flex-wrap gap-3">
+                  {product.variants.map((v) => {
+                    const isSelected = selectedVariant?.id === v.id;
+                    const vPrice = v.discountPrice || v.price;
+                    return (
+                      <button
+                        key={v.id}
+                        onClick={() => setSelectedVariant(v)}
+                        className={`px-5 py-3 text-sm font-sans font-bold rounded-2xl transition-all duration-300 border text-left cursor-pointer flex flex-col justify-center min-w-[150px] ${
+                          isSelected
+                            ? "bg-brand-brown border-brand-brown text-white shadow-md scale-102"
+                            : "bg-white border-brand-brown/10 text-brand-brown hover:border-brand-gold/50"
+                        }`}
+                      >
+                        <span className="text-xs opacity-80 font-normal">{v.weight ? `${v.weight}g` : "Standard"}</span>
+                        <span className="mt-0.5">{v.displayLabel || v.name}</span>
+                        <span className={`text-xs mt-1 font-extrabold ${isSelected ? "text-brand-gold" : "text-brand-gold"}`}>₹{vPrice}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <p className="text-brand-text-secondary text-base lg:text-lg leading-relaxed mb-8 font-light">
               {product.description}
@@ -228,7 +319,7 @@ export default function ProductDetail() {
                     className="flex-grow flex items-center justify-center space-x-2 px-8 py-4 bg-brand-brown hover:bg-brand-gold text-white font-bold rounded-full transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 h-[54px] cursor-pointer text-base"
                   >
                     <ShoppingCart className="w-5 h-5 mr-2" />
-                    <span>Add to Cart - ₹{currentPrice * quantity}</span>
+                    <span>Add to Cart - ₹{(currentPrice * quantity).toFixed(0)}</span>
                   </button>
                 )}
 

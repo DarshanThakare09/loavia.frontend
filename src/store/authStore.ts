@@ -1,31 +1,35 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { apiClient } from '@/services/apiClient';
 
 export interface OrderItem {
-  id: string;
-  name: string;
-  price: number;
+  productName: string;
+  variantName: string;
+  productImage: string | null;
   quantity: number;
-  image: string;
+  unitPrice: number;     // Paise
 }
 
 export interface Order {
   id: string;
-  date: string;
-  total: number;
+  receiptNumber: string;
   status: string;
+  totalAmount: number;   // Paise
+  createdAt: string;
   items: OrderItem[];
-  customerName?: string;
-  customerEmail?: string;
-  shippingAddress?: string;
+  shipment?: { status: string; trackingNumber: string | null } | null;
 }
 
 export interface Address {
   id: string;
   label: string;
+  recipientName?: string;
   street: string;
   city: string;
+  state?: string;
   postalCode: string;
+  country?: string;
+  phone?: string;
   isDefault: boolean;
 }
 
@@ -43,6 +47,7 @@ export interface User {
   name: string;
   email: string;
   phone?: string;
+  role?: string;
   orders: Order[];
   addresses: Address[];
   wishlist: WishlistItem[];
@@ -51,9 +56,13 @@ export interface User {
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
-  login: (userData: Omit<User, 'orders' | 'addresses' | 'wishlist'>) => void;
-  logout: () => void;
-  addOrder: (order: Order) => void;
+  isHydrating: boolean;
+  login: (email: string, password: string) => Promise<User>;
+  register: (name: string, email: string, password?: string, phone?: string) => Promise<any>;
+  logout: () => Promise<void>;
+  hydrateSession: () => Promise<User | null>;
+  forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (password: string, token: string) => Promise<void>;
   updateUser: (data: Partial<User>) => void;
   addAddress: (address: Omit<Address, 'id'>) => void;
   updateAddress: (id: string, address: Partial<Address>) => void;
@@ -68,160 +77,143 @@ interface AuthState {
   deleteUser: (userId: string) => void;
 }
 
-const defaultUsers: User[] = [
-  {
-    id: "user-1",
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "+91 9876543210",
-    orders: [
-      {
-        id: "ORD-A1B2C3",
-        date: "2026-06-10T10:30:00.000Z",
-        total: 897,
-        status: "Delivered",
-        customerName: "John Doe",
-        customerEmail: "john@example.com",
-        shippingAddress: "123 Cookie Lane, Mumbai, Maharashtra - 400001",
-        items: [
-          {
-            id: "1",
-            name: "Classic Chocolate Chip",
-            price: 299,
-            quantity: 2,
-            image: "/premium_cookie.png"
-          },
-          {
-            id: "3",
-            name: "Oatmeal Raisin Bliss",
-            price: 279,
-            quantity: 1,
-            image: "/premium_cookie.png"
-          }
-        ]
-      }
-    ],
-    addresses: [
-      {
-        id: "addr-1",
-        label: "Home",
-        street: "123 Cookie Lane",
-        city: "Mumbai",
-        postalCode: "400001",
-        isDefault: true
-      }
-    ],
-    wishlist: []
-  },
-  {
-    id: "user-2",
-    name: "Jane Smith",
-    email: "jane@example.com",
-    phone: "+91 9876543211",
-    orders: [
-      {
-        id: "ORD-D4E5F6",
-        date: "2026-06-14T15:45:00.000Z",
-        total: 698,
-        status: "Processing",
-        customerName: "Jane Smith",
-        customerEmail: "jane@example.com",
-        shippingAddress: "456 Bakery Road, Pune, Maharashtra - 411001",
-        items: [
-          {
-            id: "2",
-            name: "Double Dark Chocolate",
-            price: 349,
-            quantity: 2,
-            image: "/premium_cookie.png"
-          }
-        ]
-      }
-    ],
-    addresses: [
-      {
-        id: "addr-2",
-        label: "Office",
-        street: "456 Bakery Road",
-        city: "Pune",
-        postalCode: "411001",
-        isDefault: true
-      }
-    ],
-    wishlist: []
-  }
-];
-
-const defaultOrders: Order[] = [
-  ...defaultUsers[0].orders,
-  ...defaultUsers[1].orders
-];
+const defaultUsers: User[] = [];
+const defaultOrders: Order[] = [];
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       user: null,
       isAuthenticated: false,
+      isHydrating: true,
       allUsers: defaultUsers,
       allOrders: defaultOrders,
 
-      login: (userData) => set((state) => {
-        const email = userData.email;
-        const name = userData.name;
-        const existingUser = state.allUsers.find(u => u.email === email);
-        if (existingUser) {
-          const updatedUser = { ...existingUser, name: name || existingUser.name };
-          const updatedUsers = state.allUsers.map(u => u.id === existingUser.id ? updatedUser : u);
-          return {
-            user: updatedUser,
-            isAuthenticated: true,
-            allUsers: updatedUsers
-          };
-        } else {
-          const newUser: User = {
-            id: userData.id || `user-${Date.now()}`,
-            name: name || "John Doe",
-            email: email,
-            orders: [],
-            addresses: [],
-            wishlist: []
-          };
-          return {
-            user: newUser,
-            isAuthenticated: true,
-            allUsers: [...state.allUsers, newUser]
-          };
+      login: async (email, password) => {
+        const response = await apiClient.post('/auth/login', { email, password });
+        const userData = response.data.data.user;
+
+        let savedAddresses = [];
+        try {
+          const stored = localStorage.getItem(`loavia-addresses-${userData.id}`);
+          if (stored) savedAddresses = JSON.parse(stored);
+        } catch {}
+
+        // Fetch live wishlist from backend
+        let wishlist: any[] = [];
+        try {
+          const { wishlistService } = await import('@/services/wishlistService');
+          wishlist = await wishlistService.getWishlist();
+        } catch (err) {
+          console.error("Failed to fetch wishlist on login", err);
         }
-      }),
 
-      logout: () => set({ user: null, isAuthenticated: false }),
+        const user: User = {
+          ...userData,
+          orders: [],
+          addresses: savedAddresses,
+          wishlist
+        };
+        set({ user, isAuthenticated: true, isHydrating: false });
 
-      addOrder: (order) => set((state) => {
-        if (!state.user) return {};
+        // Trigger Cart Merge after login
+        try {
+          const { useCartStore } = await import('./cartStore');
+          await useCartStore.getState().mergeCartAction();
+        } catch (err) {
+          console.error("Failed to merge cart on login", err);
+        }
+
+        return user;
+      },
+
+      register: async (name, email, password, phone) => {
+        const response = await apiClient.post('/auth/register', { name, email, password, phone });
+        return response.data;
+      },
+
+      logout: async () => {
+        try {
+          await apiClient.post('/auth/logout');
+        } catch (err) {
+          console.error("Logout API call failed", err);
+        }
         
-        const defaultAddr = state.user.addresses.find(a => a.isDefault);
-        const addressStr = defaultAddr 
-          ? `${defaultAddr.street}, ${defaultAddr.city} - ${defaultAddr.postalCode}` 
-          : "123 Cookie Lane, Mumbai, Maharashtra - 400001";
+        // Rotate guest session ID upon logout
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("loavia_guest_session_id");
+        }
 
-        const enrichedOrder: Order = {
-          ...order,
-          customerName: state.user.name,
-          customerEmail: state.user.email,
-          shippingAddress: addressStr
-        };
+        set({ user: null, isAuthenticated: false, isHydrating: false });
 
-        const updatedUser = {
-          ...state.user,
-          orders: [enrichedOrder, ...state.user.orders]
-        };
+        // Clear local cart store
+        try {
+          const { useCartStore } = await import('./cartStore');
+          useCartStore.getState().clearCart();
+        } catch {}
+      },
 
-        return {
-          user: updatedUser,
-          allOrders: [enrichedOrder, ...state.allOrders],
-          allUsers: state.allUsers.map(u => u.id === state.user!.id ? updatedUser : u)
-        };
-      }),
+      hydrateSession: async () => {
+        set({ isHydrating: true });
+        try {
+          const response = await apiClient.get('/auth/me');
+          if (response.data?.success && response.data?.data) {
+            const userData = response.data.data;
+
+            let savedAddresses = [];
+            try {
+              const stored = localStorage.getItem(`loavia-addresses-${userData.id}`);
+              if (stored) savedAddresses = JSON.parse(stored);
+            } catch {}
+
+            // Fetch live wishlist
+            let wishlist: any[] = [];
+            try {
+              const { wishlistService } = await import('@/services/wishlistService');
+              wishlist = await wishlistService.getWishlist();
+            } catch (err) {
+              console.error("Failed to fetch wishlist on session hydration", err);
+            }
+
+            const user: User = {
+              ...userData,
+              orders: [],
+              addresses: savedAddresses,
+              wishlist
+            };
+            set({ user, isAuthenticated: true, isHydrating: false });
+
+            // Sync Cart from backend
+            try {
+              const { useCartStore } = await import('./cartStore');
+              await useCartStore.getState().hydrateCart();
+            } catch (err) {
+              console.error("Failed to hydrate cart on session hydration", err);
+            }
+
+            return user;
+          }
+        } catch (err) {
+          console.debug("Hydration failed (user not logged in)");
+        }
+        set({ user: null, isAuthenticated: false, isHydrating: false });
+        
+        // Hydrate guest cart
+        try {
+          const { useCartStore } = await import('./cartStore');
+          await useCartStore.getState().hydrateCart();
+        } catch {}
+
+        return null;
+      },
+
+      forgotPassword: async (email) => {
+        await apiClient.post('/auth/forgot-password', { email });
+      },
+
+      resetPassword: async (password, token) => {
+        await apiClient.post('/auth/reset-password', { password, token });
+      },
 
       updateUser: (data) => set((state) => {
         if (!state.user) return {};
@@ -240,6 +232,9 @@ export const useAuthStore = create<AuthState>()(
           newAddresses = newAddresses.map(a => ({ ...a, isDefault: a.id === newAddress.id }));
         }
         const updatedUser = { ...state.user, addresses: newAddresses };
+        try {
+          localStorage.setItem(`loavia-addresses-${state.user.id}`, JSON.stringify(newAddresses));
+        } catch {}
         return {
           user: updatedUser,
           allUsers: state.allUsers.map(u => u.id === state.user!.id ? updatedUser : u)
@@ -253,6 +248,9 @@ export const useAuthStore = create<AuthState>()(
           newAddresses = newAddresses.map(a => ({ ...a, isDefault: a.id === id }));
         }
         const updatedUser = { ...state.user, addresses: newAddresses };
+        try {
+          localStorage.setItem(`loavia-addresses-${state.user.id}`, JSON.stringify(newAddresses));
+        } catch {}
         return {
           user: updatedUser,
           allUsers: state.allUsers.map(u => u.id === state.user!.id ? updatedUser : u)
@@ -261,29 +259,49 @@ export const useAuthStore = create<AuthState>()(
 
       deleteAddress: (id) => set((state) => {
         if (!state.user) return {};
+        const newAddresses = state.user.addresses.filter(a => a.id !== id);
         const updatedUser = {
           ...state.user,
-          addresses: state.user.addresses.filter(a => a.id !== id)
+          addresses: newAddresses
         };
+        try {
+          localStorage.setItem(`loavia-addresses-${state.user.id}`, JSON.stringify(newAddresses));
+        } catch {}
         return {
           user: updatedUser,
           allUsers: state.allUsers.map(u => u.id === state.user!.id ? updatedUser : u)
         };
       }),
 
-      toggleWishlist: (item) => set((state) => {
-        if (!state.user) return {};
+      toggleWishlist: async (item) => {
+        const state = get();
+        if (!state.user) return;
+        
         const currentWishlist = state.user.wishlist || [];
         const exists = currentWishlist.some(w => w.id === item.id);
-        const newWishlist = exists 
-          ? currentWishlist.filter(w => w.id !== item.id)
-          : [...currentWishlist, item];
-        const updatedUser = { ...state.user, wishlist: newWishlist };
-        return {
-          user: updatedUser,
-          allUsers: state.allUsers.map(u => u.id === state.user!.id ? updatedUser : u)
-        };
-      }),
+        
+        try {
+          const { wishlistService } = await import('@/services/wishlistService');
+          if (exists) {
+            await wishlistService.removeFromWishlist(item.id);
+            const newWishlist = currentWishlist.filter(w => w.id !== item.id);
+            set({
+              user: { ...state.user, wishlist: newWishlist },
+              allUsers: state.allUsers.map(u => u.id === state.user!.id ? { ...u, wishlist: newWishlist } : u)
+            });
+          } else {
+            await wishlistService.addToWishlist(item.id);
+            const newWishlist = [...currentWishlist, item];
+            set({
+              user: { ...state.user, wishlist: newWishlist },
+              allUsers: state.allUsers.map(u => u.id === state.user!.id ? { ...u, wishlist: newWishlist } : u)
+            });
+          }
+        } catch (err: any) {
+          const msg = err.response?.data?.message || err.message || "Failed to toggle wishlist";
+          console.error(msg);
+        }
+      },
 
       updateOrderStatus: (orderId, status) => set((state) => {
         const updatedOrders = state.allOrders.map(o => o.id === orderId ? { ...o, status } : o);
@@ -336,11 +354,9 @@ export const useAuthStore = create<AuthState>()(
       }),
 
       deleteUser: (userId) => set((state) => {
-        const userToDelete = state.allUsers.find(u => u.id === userId);
         const updatedUsers = state.allUsers.filter(u => u.id !== userId);
-        const updatedOrders = state.allOrders.filter(o => {
-          return userToDelete ? o.customerEmail !== userToDelete.email : true;
-        });
+        // allOrders is empty in production (orders fetched fresh from API); filter by userId if present
+        const updatedOrders = state.allOrders.filter(o => (o as any).userId !== userId);
 
         const shouldLogout = state.user && state.user.id === userId;
 

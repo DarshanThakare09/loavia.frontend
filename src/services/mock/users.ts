@@ -1,88 +1,6 @@
 import { User, Order, Address } from "@/store/authStore";
 
-const defaultUsers: User[] = [
-  {
-    id: "user-1",
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "+91 9876543210",
-    orders: [
-      {
-        id: "ORD-A1B2C3",
-        date: "2026-06-10T10:30:00.000Z",
-        total: 897,
-        status: "Delivered",
-        customerName: "John Doe",
-        customerEmail: "john@example.com",
-        shippingAddress: "123 Cookie Lane, Mumbai, Maharashtra - 400001",
-        items: [
-          {
-            id: "1",
-            name: "Classic Chocolate Chip",
-            price: 299,
-            quantity: 2,
-            image: "/premium_cookie.png"
-          },
-          {
-            id: "3",
-            name: "Oatmeal Raisin Bliss",
-            price: 279,
-            quantity: 1,
-            image: "/premium_cookie.png"
-          }
-        ]
-      }
-    ],
-    addresses: [
-      {
-        id: "addr-1",
-        label: "Home",
-        street: "123 Cookie Lane",
-        city: "Mumbai",
-        postalCode: "400001",
-        isDefault: true
-      }
-    ],
-    wishlist: []
-  },
-  {
-    id: "user-2",
-    name: "Jane Smith",
-    email: "jane@example.com",
-    phone: "+91 9876543211",
-    orders: [
-      {
-        id: "ORD-D4E5F6",
-        date: "2026-06-14T15:45:00.000Z",
-        total: 698,
-        status: "Processing",
-        customerName: "Jane Smith",
-        customerEmail: "jane@example.com",
-        shippingAddress: "456 Bakery Road, Pune, Maharashtra - 411001",
-        items: [
-          {
-            id: "2",
-            name: "Double Dark Chocolate",
-            price: 349,
-            quantity: 2,
-            image: "/premium_cookie.png"
-          }
-        ]
-      }
-    ],
-    addresses: [
-      {
-        id: "addr-2",
-        label: "Office",
-        street: "456 Bakery Road",
-        city: "Pune",
-        postalCode: "411001",
-        isDefault: true
-      }
-    ],
-    wishlist: []
-  }
-];
+const defaultUsers: User[] = [];
 
 let usersDb = [...defaultUsers];
 
@@ -115,33 +33,6 @@ export const mockUserService = {
           resolve(newUser);
         }
       }, 200);
-    });
-  },
-
-  async addOrder(userId: string, order: Order): Promise<Order> {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const user = usersDb.find(u => u.id === userId);
-        if (!user) {
-          reject(new Error("User not found"));
-          return;
-        }
-
-        const defaultAddr = user.addresses.find(a => a.isDefault);
-        const addressStr = defaultAddr 
-          ? `${defaultAddr.street}, ${defaultAddr.city} - ${defaultAddr.postalCode}` 
-          : "123 Cookie Lane, Mumbai, Maharashtra - 400001";
-
-        const enrichedOrder: Order = {
-          ...order,
-          customerName: user.name,
-          customerEmail: user.email,
-          shippingAddress: addressStr
-        };
-
-        user.orders = [enrichedOrder, ...user.orders];
-        resolve(enrichedOrder);
-      }, 150);
     });
   },
 

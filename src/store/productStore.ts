@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { PRODUCTS as initialProducts } from '@/lib/mockData';
+import { catalogService } from '@/services/catalogService';
+import { ProductFilterInput, PaginationMeta } from '@/types/catalog';
 
 export interface NutritionFact {
   key: string;
@@ -9,6 +10,7 @@ export interface NutritionFact {
 
 export interface Product {
   id: string;
+  slug?: string;
   name: string;
   price: number;
   discountPrice?: number | null;
@@ -30,10 +32,22 @@ export interface Product {
   isFeatured?: boolean;
   featuredOrder?: number;
   featuredBadgeText?: string;
+  variants?: any[];
 }
 
 interface ProductState {
-  products: Product[];
+  products: Product[]; // Holds general storefront/admin products listing
+  paginatedProducts: Product[]; // Holds currently filtered shop products
+  pagination: PaginationMeta | null; // Currently loaded pagination meta
+  isLoading: boolean;
+  error: string | null;
+
+  // Fetch actions
+  fetchProducts: (filters?: ProductFilterInput) => Promise<void>;
+  fetchProductDetail: (slug: string) => Promise<Product | null>;
+  fetchHomeProducts: () => Promise<void>;
+
+  // Legacy/Admin compatibility actions (modified to work alongside database seeds)
   addProduct: (product: Omit<Product, 'id' | 'rating' | 'reviews'>) => void;
   updateProduct: (id: string, productData: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
@@ -42,38 +56,74 @@ interface ProductState {
   setProducts: (products: Product[]) => void;
 }
 
-// Convert mock data to new schema
-const defaultProducts: Product[] = initialProducts.map((p, index) => ({
-  ...p,
-  discountPrice: null,
-  calories: p.calories || '',
-  nutritionTable: p.nutritionTable || [],
-  inStock: true,
-  isPopular: true, // Mark default products as popular initially
-  isFeatured: index < 3,
-  featuredOrder: index + 1,
-  featuredBadgeText: "Featured",
-}));
-
 export const useProductStore = create<ProductState>()(
   persist(
     (set, get) => ({
-      products: defaultProducts,
+      products: [],
+      paginatedProducts: [],
+      pagination: null,
+      isLoading: false,
+      error: null,
+
+      fetchProducts: async (filters) => {
+        set({ isLoading: true, error: null });
+        try {
+          const { products, pagination } = await catalogService.getProducts(filters);
+          set({ paginatedProducts: products, pagination, isLoading: false });
+        } catch (err: any) {
+          set({ error: err.response?.data?.message || err.message || "Failed to fetch products", isLoading: false });
+        }
+      },
+
+      fetchProductDetail: async (slug) => {
+        set({ isLoading: true, error: null });
+        try {
+          const product = await catalogService.getProductBySlug(slug);
+          set({ isLoading: false });
+          return product;
+        } catch (err: any) {
+          set({ error: err.response?.data?.message || err.message || "Failed to fetch product detail", isLoading: false });
+          return null;
+        }
+      },
+
+      fetchHomeProducts: async () => {
+        set({ isLoading: true, error: null });
+        try {
+          // Fetch featured products
+          const featuredRes = await catalogService.getProducts({ isFeatured: true, limit: 6 });
+          // Fetch best seller products
+          const bestSellerRes = await catalogService.getProducts({ isBestSeller: true, limit: 4 });
+          // Fetch all products
+          const allRes = await catalogService.getProducts({ limit: 100 });
+
+          set({
+            products: allRes.products,
+            isLoading: false
+          });
+        } catch (err: any) {
+          set({ error: err.response?.data?.message || err.message || "Failed to load homepage products", isLoading: false });
+        }
+      },
+
       addProduct: (productData) => set((state) => {
         const newProduct: Product = {
           ...productData,
           id: Date.now().toString(),
-          rating: 5.0, // Default rating for new product
+          rating: 5.0,
           reviews: 0,
         };
         return { products: [newProduct, ...state.products] };
       }),
+
       updateProduct: (id, productData) => set((state) => ({
         products: state.products.map(p => p.id === id ? { ...p, ...productData } : p)
       })),
+
       deleteProduct: (id) => set((state) => ({
         products: state.products.filter(p => p.id !== id)
       })),
+
       toggleFeatured: (id) => set((state) => {
         const nextFeaturedOrder = Math.max(0, ...state.products.map(p => p.featuredOrder || 0)) + 1;
 
@@ -91,8 +141,8 @@ export const useProductStore = create<ProductState>()(
           }),
         };
       }),
+
       updateFeaturedProductOrder: (id, newOrder) => {
-        // Validation
         if (!Number.isInteger(newOrder) || newOrder < 1) {
           return { success: false, error: "Display order must be a positive integer" };
         }
@@ -104,7 +154,6 @@ export const useProductStore = create<ProductState>()(
           return { success: false, error: "Product not found or not featured" };
         }
 
-        // Get all featured products
         const featuredProducts = state.products
           .filter(p => p.isFeatured && p.id !== id)
           .sort((a, b) => {
@@ -113,11 +162,9 @@ export const useProductStore = create<ProductState>()(
             return orderA - orderB;
           });
 
-        // Check if newOrder already exists
         const orderExists = featuredProducts.some(p => p.featuredOrder === newOrder);
 
         if (!orderExists) {
-          // No conflict, just update the order
           set((state) => ({
             products: state.products.map(p =>
               p.id === id ? { ...p, featuredOrder: newOrder } : p
@@ -126,18 +173,13 @@ export const useProductStore = create<ProductState>()(
           return { success: true };
         }
 
-        // Conflict detected: reindex all featured products sequentially starting from 1
         const updatedProducts = state.products.map(p => {
           if (!p.isFeatured) return p;
           
           if (p.id === id) {
-            // Target product gets the requested order
             return { ...p, featuredOrder: newOrder };
           }
 
-          // Other featured products: get current index and adjust
-          const currentIndex = featuredProducts.findIndex(fp => fp.id === p.id);
-          // If this product's order is >= newOrder, shift it up by 1
           if ((p.featuredOrder || 0) >= newOrder) {
             return { ...p, featuredOrder: (p.featuredOrder || 0) + 1 };
           }
@@ -147,6 +189,7 @@ export const useProductStore = create<ProductState>()(
         set({ products: updatedProducts });
         return { success: true };
       },
+
       setProducts: (products) => set({ products }),
     }),
     {

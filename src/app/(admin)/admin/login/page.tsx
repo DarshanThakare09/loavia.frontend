@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useAdminAuthStore } from "@/store/adminAuthStore";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
 
 export default function AdminLogin() {
@@ -12,22 +13,22 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { login } = useAdminAuthStore();
-  const adminPassword = useSettingsStore((state) => state.adminPassword);
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For demo: username is fixed; password is read from settings store to stay consistent
-    console.debug('[admin login] entered', { username, password });
-    console.debug('[admin login] stored adminPassword', adminPassword);
-    if (username.trim() === "admin@123" && password.trim() === adminPassword) {
-      login();
-      try {
-        localStorage.setItem("mockAdminAuth", "true");
-      } catch (err) {
-        console.warn("localStorage not available", err);
+    setError("");
+    setIsLoading(true);
+    try {
+      const loggedUser = await useAuthStore.getState().login(username, password);
+      
+      const hasAccess = ['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(loggedUser.role || '');
+      if (!hasAccess) {
+        setError("Access denied: Admin or Staff role required");
+        await useAuthStore.getState().logout();
+        return;
       }
 
       router.push("/admin/dashboard");
@@ -38,8 +39,11 @@ export default function AdminLogin() {
           window.location.href = "/admin/dashboard";
         }
       }, 300);
-    } else {
-      setError("Invalid credentials");
+    } catch (err: any) {
+      const errMsg = err.response?.data?.message || err.message || "Invalid credentials";
+      setError(errMsg);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -100,7 +104,7 @@ export default function AdminLogin() {
 
           <div className="flex justify-end">
             <Link
-              href="/admin/forgot-password"
+              href="/auth/forgot-password"
               className="text-sm text-brand-text-secondary hover:text-brand-brown transition-colors"
             >
               Forgot Password?
@@ -110,10 +114,11 @@ export default function AdminLogin() {
           <div>
             <button
               type="button"
+              disabled={isLoading}
               onClick={handleLogin}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-brand-brown hover:bg-brand-gold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-gold"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-brand-brown hover:bg-brand-gold disabled:bg-brand-brown/50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-gold"
             >
-              Sign in
+              {isLoading ? "Signing in..." : "Sign in"}
             </button>
           </div>
         </div>

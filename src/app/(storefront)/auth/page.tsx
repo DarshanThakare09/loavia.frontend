@@ -11,11 +11,13 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
+  const register = useAuthStore((state) => state.register);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -23,22 +25,29 @@ export default function AuthPage() {
     }
   }, [isAuthenticated, router]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Mock authentication
-    login({
-      id: `user-${Date.now()}`,
-      name: isLogin ? "John Doe" : name || "New User",
-      email: email,
-    });
-    
-    toast.success(isLogin ? "Welcome back!" : "Account created successfully!");
-    
-    // Check for redirect param
-    const searchParams = new URLSearchParams(window.location.search);
-    const redirectUrl = searchParams.get("redirect") || "/profile";
-    router.push(redirectUrl);
+    setIsLoading(false); // reset state
+    setIsLoading(true);
+    try {
+      if (isLogin) {
+        await login(email, password);
+        toast.success("Welcome back!");
+        // Check for redirect param
+        const searchParams = new URLSearchParams(window.location.search);
+        const redirectUrl = searchParams.get("redirect") || "/profile";
+        router.push(redirectUrl);
+      } else {
+        await register(name, email, password);
+        toast.success("Registration successful. Please verify your email.");
+        setIsLogin(true);
+      }
+    } catch (err: any) {
+      const errMsg = err.response?.data?.message || err.message || "Authentication failed";
+      toast.error(errMsg);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -108,9 +117,9 @@ export default function AuthPage() {
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-[11px] uppercase tracking-widest font-bold text-brand-text-secondary">Password</label>
                 {isLogin && (
-                  <button type="button" onClick={() => toast.info("Password reset coming soon!")} className="text-[11px] font-bold text-brand-gold hover:text-brand-brown transition-colors">
+                  <Link href="/auth/forgot-password" className="text-[11px] font-bold text-brand-gold hover:text-brand-brown transition-colors">
                     Forgot password?
-                  </button>
+                  </Link>
                 )}
               </div>
               <div className="relative">
@@ -128,10 +137,11 @@ export default function AuthPage() {
 
             <button 
               type="submit" 
-              className="w-full flex items-center justify-center space-x-2 px-8 py-4 font-bold text-white bg-brand-brown rounded-xl hover:bg-brand-gold transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+              disabled={isLoading}
+              className="w-full flex items-center justify-center space-x-2 px-8 py-4 font-bold text-white bg-brand-brown rounded-xl hover:bg-brand-gold disabled:bg-brand-brown/50 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5"
             >
-              <span>{isLogin ? "Sign In" : "Create Account"}</span>
-              <ArrowRight className="w-5 h-5" />
+              <span>{isLoading ? "Please wait..." : (isLogin ? "Sign In" : "Create Account")}</span>
+              {!isLoading && <ArrowRight className="w-5 h-5" />}
             </button>
           </form>
           

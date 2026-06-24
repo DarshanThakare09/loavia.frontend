@@ -9,6 +9,7 @@ import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { useProductStore } from "@/store/productStore";
 import { useSiteStore } from "@/store/siteStore";
+import { catalogService } from "@/services/catalogService";
 
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -130,9 +131,25 @@ export function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const searchResults = searchQuery.trim() === ""
-    ? products.slice(0, 4)
-    : products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 4);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const query = searchQuery.trim();
+        const res = await catalogService.getProducts({
+          search: query || undefined,
+          limit: 4
+        });
+        setSearchResults(res.products);
+      } catch (err) {
+        console.error("Failed to load search results", err);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery, mounted]);
 
   const totalItems = mounted ? items.reduce((acc, item) => acc + item.quantity, 0) : 0;
   const authLink = mounted && isAuthenticated ? "/profile" : "/auth";
@@ -246,7 +263,7 @@ export function Navbar() {
                               onClick={() => {
                                 setIsSearchOpen(false);
                                 setSearchQuery("");
-                                router.push(`/product/${product.id}`);
+                                router.push(`/product/${product.slug || product.id}`);
                               }}
                               className="w-full text-left p-2 hover:bg-[#5C3317]/5 rounded-xl flex items-center space-x-3 transition-colors duration-200"
                             >
@@ -352,7 +369,7 @@ export function Navbar() {
                       onClick={() => {
                         setIsMobileMenuOpen(false);
                         setSearchQuery("");
-                        router.push(`/product/${product.id}`);
+                        router.push(`/product/${product.slug || product.id}`);
                       }}
                       className="w-full text-left p-2.5 hover:bg-[#5C3317]/5 flex items-center space-x-3 transition-colors duration-200"
                     >

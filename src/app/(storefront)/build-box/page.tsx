@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Package, Minus, Plus, ShoppingCart, CheckCircle } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
@@ -14,11 +14,25 @@ export default function BuildBoxPage() {
 
   const [boxSize, setBoxSize] = useState(6);
   const [selections, setSelections] = useState<{ [id: string]: number }>({});
+  const [byobProduct, setByobProduct] = useState<any>(null);
   
   const { addItem } = useCartStore();
 
   const totalSelected = Object.values(selections).reduce((a, b) => a + b, 0);
   const remaining = boxSize - totalSelected;
+
+  useEffect(() => {
+    async function loadByobProduct() {
+      try {
+        const { catalogService } = await import('@/services/catalogService');
+        const prod = await catalogService.getProductBySlug("build-your-own-box");
+        setByobProduct(prod);
+      } catch (err) {
+        console.error("Failed to load Build Your Own Box product from backend", err);
+      }
+    }
+    loadByobProduct();
+  }, []);
 
   const handleUpdate = (id: string, delta: number) => {
     const current = selections[id] || 0;
@@ -31,14 +45,36 @@ export default function BuildBoxPage() {
   };
 
   const handleAddToCart = () => {
-    const price = boxSize === 6 ? 1799 : boxSize === 12 ? 3499 : 6799;
+    const defaultPrice = boxSize === 6 ? 1799 : boxSize === 12 ? 3499 : 6799;
+    
+    const byobVariant = byobProduct?.variants?.find((v: any) => v.sku === `BYOB-${boxSize}` || v.name.includes(`${boxSize}`));
+    
+    if (!byobVariant) {
+      toast.error("Custom box variant not available");
+      return;
+    }
+
+    const customBoxSelections = Object.entries(selections)
+      .map(([cookieId, qty]) => {
+        const cookie = productsList.find(c => c.id === cookieId);
+        const defaultVar = (cookie as any)?.variants?.find((v: any) => v.isDefault) || (cookie as any)?.variants?.[0];
+        if (!defaultVar) return null;
+        return {
+          variantId: defaultVar.id,
+          quantity: qty
+        };
+      })
+      .filter(Boolean);
+
     addItem({
-      id: `custom-box-${Date.now()}`,
-      name: `Custom Box (${boxSize} Pack)`,
-      price: price,
+      id: byobVariant.id,
+      variantId: byobVariant.id,
+      name: byobVariant.name || `Custom Box (${boxSize} Pack)`,
+      price: byobVariant.price || defaultPrice,
       image: "/cookie_gift_box.png",
       quantity: 1,
-      isCustomBox: true
+      isCustomBox: true,
+      customBoxSelections
     });
     toast.success(`Custom ${boxSize}-Pack added to cart`);
     
@@ -90,7 +126,10 @@ export default function BuildBoxPage() {
                   >
                     <span className="block text-2xl font-black mb-1">{size} Pack</span>
                     <span className={`font-bold ${boxSize === size ? "text-brand-cream" : "text-brand-gold"}`}>
-                      ₹{size === 6 ? "1799" : size === 12 ? "3499" : "6799"}
+                      ₹{
+                        byobProduct?.variants?.find((v: any) => v.sku === `BYOB-${size}` || v.name.includes(`${size}`))?.price || 
+                        (size === 6 ? 1799 : size === 12 ? 3499 : 6799)
+                      }
                     </span>
                   </button>
                 ))}
@@ -179,7 +218,10 @@ export default function BuildBoxPage() {
               <div className="border-t border-brand-brown/5 pt-6">
                 <div className="flex justify-between items-center mb-6">
                   <span className="font-extrabold text-brand-brown text-sm uppercase tracking-wider">Total Price</span>
-                  <span className="font-black text-2xl text-brand-brown">₹{boxSize === 6 ? "1799" : boxSize === 12 ? "3499" : "6799"}</span>
+                  <span className="font-black text-2xl text-brand-brown">₹{
+                    byobProduct?.variants?.find((v: any) => v.sku === `BYOB-${boxSize}` || v.name.includes(`${boxSize}`))?.price || 
+                    (boxSize === 6 ? 1799 : boxSize === 12 ? 3499 : 6799)
+                  }</span>
                 </div>
                 <button 
                   disabled={remaining > 0}

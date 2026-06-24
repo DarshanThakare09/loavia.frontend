@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useProductStore } from "@/store/productStore";
+import { catalogService } from "@/services/catalogService";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
@@ -27,7 +28,8 @@ if (typeof window !== "undefined") {
 }
 
 export default function ProductsPage() {
-  const { products: storeProducts } = useProductStore();
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -35,10 +37,19 @@ export default function ProductsPage() {
   const { user, toggleWishlist } = useAuthStore();
 
   useEffect(() => {
+    async function loadProducts() {
+      try {
+        const res = await catalogService.getProducts({ limit: 100 });
+        setProducts(res.products);
+      } catch (err) {
+        console.error("Failed to load products from backend", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadProducts();
     setMounted(true);
   }, []);
-
-  const products = mounted ? storeProducts : [];
 
   useGSAP(() => {
     if (!mounted) return;
@@ -113,10 +124,16 @@ export default function ProductsPage() {
   const handleAddToCart = (e: React.MouseEvent, item: any) => {
     e.preventDefault();
     e.stopPropagation();
+    const defaultVariant = item.variants?.find((v: any) => v.isDefault) || item.variants?.[0];
+    if (!defaultVariant) {
+      toast.error("Product variant not available");
+      return;
+    }
     addItem({
-      id: item.id,
+      id: defaultVariant.id,
+      variantId: defaultVariant.id,
       name: item.name,
-      price: item.discountPrice || item.price,
+      price: defaultVariant.discountPrice || defaultVariant.price,
       image: item.image,
       quantity: 1
     });
@@ -228,7 +245,7 @@ export default function ProductsPage() {
                 </div>
 
                 {/* Image Section */}
-                <Link href={`/product/${item.id}`} className="relative aspect-[4/3] w-full bg-brand-light overflow-hidden block">
+                <Link href={`/product/${item.slug || item.id}`} className="relative aspect-[4/3] w-full bg-brand-light overflow-hidden block">
                   <Image
                     src={item.image || "/premium_cookie.png"}
                     alt={item.name}
@@ -253,7 +270,7 @@ export default function ProductsPage() {
                     </span>
 
                     {/* Title */}
-                    <Link href={`/product/${item.id}`}>
+                    <Link href={`/product/${item.slug || item.id}`}>
                       <h3 className="text-xl font-serif font-bold text-brand-brown hover:text-brand-gold transition-colors duration-300 line-clamp-1">
                         {item.name}
                       </h3>
