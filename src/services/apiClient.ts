@@ -61,7 +61,7 @@ apiClient.interceptors.response.use(
     ) {
       // Force instant logout on the client side
       useAuthStore.getState().logout();
-      if (typeof window !== "undefined") {
+      if (typeof window !== "undefined" && !window.location.pathname.startsWith("/auth")) {
         window.location.href = "/auth?suspended=true";
       }
       return Promise.reject(error);
@@ -103,8 +103,9 @@ apiClient.interceptors.response.use(
         isRefreshing = false;
         
         // Refresh token failed/expired/revoked -> Force logout
+        const wasAuthenticated = useAuthStore.getState().isAuthenticated;
         useAuthStore.getState().logout();
-        if (typeof window !== "undefined") {
+        if (typeof window !== "undefined" && wasAuthenticated && !window.location.pathname.startsWith("/auth")) {
           window.location.href = "/auth?session_expired=true";
         }
         return Promise.reject(refreshError);

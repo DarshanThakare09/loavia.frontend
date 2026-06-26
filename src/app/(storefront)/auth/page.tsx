@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, User, ArrowRight } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
   const register = useAuthStore((state) => state.register);
@@ -125,13 +126,21 @@ export default function AuthPage() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-brand-text-secondary w-5 h-5" />
                 <input 
-                  type="password" 
+                  type={showPassword ? "text" : "password"} 
                   required 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-xl py-3 pl-10 pr-4 outline-none font-medium text-brand-brown shadow-sm transition-all duration-300"
+                  className="w-full bg-white border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-xl py-3 pl-10 pr-10 outline-none font-medium text-brand-brown shadow-sm transition-all duration-300"
                   placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  className="absolute inset-y-0 right-0 z-20 flex items-center px-3 text-brand-text-secondary hover:text-brand-brown focus:outline-none cursor-pointer"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 
