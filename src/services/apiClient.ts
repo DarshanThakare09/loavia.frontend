@@ -75,6 +75,7 @@ apiClient.interceptors.response.use(
           failedQueue.push({ resolve, reject });
         })
           .then(() => {
+            originalRequest._retry = true;
             return apiClient(originalRequest);
           })
           .catch((err) => {
