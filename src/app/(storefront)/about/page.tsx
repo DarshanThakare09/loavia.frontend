@@ -701,8 +701,14 @@ export default function AboutPage() {
                   <Award className="w-6 h-6" />
                 </div>
                 <div className="text-5xl sm:text-6xl md:text-7xl font-serif font-bold text-brand-gold mb-4 drop-shadow-md flex items-baseline">
-                  <span className="stat-number-val" data-target={stat1.number}>0</span>
-                  <span className="text-4xl md:text-5xl ml-0.5">{stat1.suffix}</span>
+                  {stat1.number > 0 ? (
+                    <>
+                      <span className="stat-number-val" data-target={stat1.number}>0</span>
+                      <span className="text-4xl md:text-5xl ml-0.5">{stat1.suffix}</span>
+                    </>
+                  ) : (
+                    <span>{stat1.suffix}</span>
+                  )}
                 </div>
                 <p className="font-extrabold text-brand-brown text-lg md:text-xl mb-2">{stat1Title}</p>
                 <p className="text-brand-text-secondary text-sm max-w-xs leading-relaxed font-light">{stat1Desc}</p>
@@ -714,8 +720,14 @@ export default function AboutPage() {
                   <Sparkles className="w-6 h-6" />
                 </div>
                 <div className="text-5xl sm:text-6xl md:text-7xl font-serif font-bold text-brand-gold mb-4 drop-shadow-md flex items-baseline">
-                  <span className="stat-number-val" data-target={stat2.number}>0</span>
-                  <span className="text-4xl md:text-5xl ml-0.5">{stat2.suffix}</span>
+                  {stat2.number > 0 ? (
+                    <>
+                      <span className="stat-number-val" data-target={stat2.number}>0</span>
+                      <span className="text-4xl md:text-5xl ml-0.5">{stat2.suffix}</span>
+                    </>
+                  ) : (
+                    <span>{stat2.suffix}</span>
+                  )}
                 </div>
                 <p className="font-extrabold text-brand-brown text-lg md:text-xl mb-2">{stat2Title}</p>
                 <p className="text-brand-text-secondary text-sm max-w-xs leading-relaxed font-light">{stat2Desc}</p>
@@ -727,8 +739,14 @@ export default function AboutPage() {
                   <MapPin className="w-6 h-6" />
                 </div>
                 <div className="text-5xl sm:text-6xl md:text-7xl font-serif font-bold text-brand-gold mb-4 drop-shadow-md flex items-baseline">
-                  <span className="stat-number-val" data-target={stat3.number}>0</span>
-                  <span className="text-4xl md:text-5xl ml-0.5">{stat3.suffix}</span>
+                  {stat3.number > 0 ? (
+                    <>
+                      <span className="stat-number-val" data-target={stat3.number}>0</span>
+                      <span className="text-4xl md:text-5xl ml-0.5">{stat3.suffix}</span>
+                    </>
+                  ) : (
+                    <span>{stat3.suffix}</span>
+                  )}
                 </div>
                 <p className="font-extrabold text-brand-brown text-lg md:text-xl mb-2">{stat3Title}</p>
                 <p className="text-brand-text-secondary text-sm max-w-xs leading-relaxed font-light">{stat3Desc}</p>

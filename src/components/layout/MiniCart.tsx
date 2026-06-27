@@ -104,13 +104,6 @@ export function MiniCart() {
             <p className="text-xs text-brand-text-secondary text-center mb-4">Shipping and taxes calculated at checkout.</p>
             <div className="space-y-3">
               <Link 
-                href="/cart" 
-                onClick={closeMiniCart}
-                className="block w-full py-3 px-4 bg-white border border-brand-brown/20 text-brand-brown text-center font-bold rounded-xl hover:bg-brand-brown hover:text-white transition-colors"
-              >
-                View Cart
-              </Link>
-              <Link 
                 href="/checkout" 
                 onClick={closeMiniCart}
                 className="block w-full py-3 px-4 bg-brand-brown text-white text-center font-bold rounded-xl hover:bg-brand-gold hover:shadow-lg transition-all"
