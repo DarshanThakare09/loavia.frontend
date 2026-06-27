@@ -1,7 +1,16 @@
 import axios from "axios";
 import { useAuthStore } from "@/store/authStore";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+let apiBase = "http://localhost:5000/api/v1";
+
+if (typeof window !== "undefined") {
+  const hostname = window.location.hostname;
+  if (hostname !== "localhost" && hostname !== "127.0.0.1") {
+    apiBase = `http://${hostname}:5000/api/v1`;
+  }
+}
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || apiBase;
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
