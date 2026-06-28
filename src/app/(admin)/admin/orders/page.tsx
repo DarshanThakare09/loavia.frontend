@@ -26,16 +26,16 @@ const COURIER_OPTIONS = [
 
 function getStatusColor(status: string) {
   switch (status) {
-    case "DELIVERED":  return "text-emerald-700 bg-emerald-50 border-emerald-200";
-    case "SHIPPED":    return "text-blue-700 bg-blue-50 border-blue-200";
+    case "DELIVERED": return "text-emerald-700 bg-emerald-50 border-emerald-200";
+    case "SHIPPED": return "text-blue-700 bg-blue-50 border-blue-200";
     case "PROCESSING":
     case "PACKED":
-    case "PAID":       return "text-amber-700 bg-amber-50 border-amber-200";
+    case "PAID": return "text-amber-700 bg-amber-50 border-amber-200";
     case "CANCELLED":
     case "RETURNED":
-    case "REFUNDED":   return "text-rose-700 bg-rose-50 border-rose-200";
-    case "PENDING":    return "text-slate-600 bg-slate-50 border-slate-200";
-    default:           return "text-gray-700 bg-gray-50 border-gray-200";
+    case "REFUNDED": return "text-rose-700 bg-rose-50 border-rose-200";
+    case "PENDING": return "text-slate-600 bg-slate-50 border-slate-200";
+    default: return "text-gray-700 bg-gray-50 border-gray-200";
   }
 }
 
@@ -60,17 +60,17 @@ export default function AdminOrdersPage() {
   const store = useAdminOrderStore();
 
   // UI state
-  const [searchQuery, setSearchQuery]     = useState("");
-  const [statusFilter, setStatusFilter]   = useState<OrderStatus | "ALL">("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | "ALL">("ALL");
   const [selectedOrder, setSelectedOrder] = useState<OrderListDTO | null>(null);
 
   // Status update modal
-  const [statusModal, setStatusModal]     = useState(false);
+  const [statusModal, setStatusModal] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<OrderStatus | "">("");
 
   // Shipment tracking modal
   const [trackingModal, setTrackingModal] = useState(false);
-  const [trackingData, setTrackingData]   = useState({
+  const [trackingData, setTrackingData] = useState({
     trackingNumber: "",
     courierPartner: "",
     status: "IN_TRANSIT" as ShipmentStatus,
@@ -89,7 +89,8 @@ export default function AdminOrdersPage() {
   }, []);
 
   // ── Filtered view (client-side search over loaded page) ────────────────
-  const filteredOrders = store.orders.filter((order) => {
+  const orders = Array.isArray(store.orders) ? store.orders : [];
+  const filteredOrders = orders.filter((order) => {
     const q = searchQuery.toLowerCase();
     const matchSearch =
       !q ||
@@ -201,11 +202,10 @@ export default function AdminOrdersPage() {
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                statusFilter === s
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${statusFilter === s
                   ? "bg-brand-brown text-white shadow-sm"
                   : "bg-brand-light text-brand-text-secondary hover:bg-brand-gold/15 hover:text-brand-brown"
-              }`}
+                }`}
             >
               {s}
             </button>
@@ -341,11 +341,10 @@ export default function AdminOrdersPage() {
                 <button
                   key={page}
                   onClick={() => fetchPage(page)}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                    store.currentPage === page
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${store.currentPage === page
                       ? "bg-brand-brown text-white"
                       : "bg-brand-light text-brand-text-secondary hover:bg-brand-gold/20"
-                  }`}
+                    }`}
                 >
                   {page}
                 </button>

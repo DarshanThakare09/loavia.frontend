@@ -73,7 +73,7 @@ export const useAdminInventoryStore = create<AdminInventoryState>()(
         try {
           const data = await adminInventoryService.getLowStockItems(page, limit);
           set({
-            lowStockItems: data.data,
+            lowStockItems: Array.isArray(data.data) ? data.data : [],
             pagination: data.meta,
           });
         } catch (error) {
@@ -158,7 +158,11 @@ export const useAdminInventoryStore = create<AdminInventoryState>()(
     }),
     {
       name: 'admin-inventory-store',
-      version: 1,
+      version: 2,
+      migrate: (persisted: unknown) => {
+        const s = (persisted ?? {}) as Record<string, unknown>;
+        return { ...s, lowStockItems: Array.isArray(s.lowStockItems) ? s.lowStockItems : [] };
+      },
     }
   )
 );

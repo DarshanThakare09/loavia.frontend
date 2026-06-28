@@ -87,7 +87,7 @@ export const useAdminUserStore = create<AdminUserState>()(
             role: get().selectedRole || undefined,
           });
           set({
-            customers: data.data,
+            customers: Array.isArray(data.data) ? data.data : [],
             pagination: data.meta,
           });
         } catch (error) {
@@ -194,7 +194,11 @@ export const useAdminUserStore = create<AdminUserState>()(
     }),
     {
       name: 'admin-user-store',
-      version: 1,
+      version: 2,
+      migrate: (persisted: unknown) => {
+        const s = (persisted ?? {}) as Record<string, unknown>;
+        return { ...s, customers: Array.isArray(s.customers) ? s.customers : [] };
+      },
     }
   )
 );

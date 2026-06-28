@@ -83,7 +83,7 @@ export const useAdminCouponStore = create<AdminCouponState>()(
         try {
           const data = await adminCouponService.listCoupons(page, limit, search);
           set({
-            coupons: data.data,
+            coupons: Array.isArray(data.data) ? data.data : [],
             pagination: data.meta,
           });
         } catch (error) {
@@ -201,7 +201,11 @@ export const useAdminCouponStore = create<AdminCouponState>()(
     }),
     {
       name: 'admin-coupon-store',
-      version: 1,
+      version: 2,
+      migrate: (persisted: unknown) => {
+        const s = (persisted ?? {}) as Record<string, unknown>;
+        return { ...s, coupons: Array.isArray(s.coupons) ? s.coupons : [] };
+      },
     }
   )
 );

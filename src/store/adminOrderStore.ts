@@ -85,7 +85,7 @@ export const useAdminOrderStore = create<AdminOrderState>()(
         try {
           const data = await adminOrderService.listOrders(page, limit);
           set({
-            orders: data.data,
+            orders: Array.isArray(data.data) ? data.data : [],
             pagination: data.meta,
           });
         } catch (error) {
@@ -194,7 +194,11 @@ export const useAdminOrderStore = create<AdminOrderState>()(
     }),
     {
       name: 'admin-order-store',
-      version: 1,
+      version: 2,
+      migrate: (persisted: unknown) => {
+        const s = (persisted ?? {}) as Record<string, unknown>;
+        return { ...s, orders: Array.isArray(s.orders) ? s.orders : [] };
+      },
     }
   )
 );

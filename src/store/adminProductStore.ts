@@ -102,7 +102,7 @@ export const useAdminProductStore = create<AdminProductState>()(
             search
           );
           set({
-            products: data.data,
+            products: Array.isArray(data.data) ? data.data : [],
             pagination: data.meta,
           });
         } catch (error) {
@@ -232,7 +232,11 @@ export const useAdminProductStore = create<AdminProductState>()(
     }),
     {
       name: 'admin-product-store',
-      version: 1,
+      version: 2,
+      migrate: (persisted: unknown) => {
+        const s = (persisted ?? {}) as Record<string, unknown>;
+        return { ...s, products: Array.isArray(s.products) ? s.products : [] };
+      },
     }
   )
 );

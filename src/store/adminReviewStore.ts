@@ -89,7 +89,7 @@ export const useAdminReviewStore = create<AdminReviewState>()(
             productId || get().selectedProductId || undefined
           );
           set({
-            reviews: data.data,
+            reviews: Array.isArray(data.data) ? data.data : [],
             pagination: data.meta,
           });
         } catch (error) {
@@ -156,7 +156,11 @@ export const useAdminReviewStore = create<AdminReviewState>()(
     }),
     {
       name: 'admin-review-store',
-      version: 1,
+      version: 2,
+      migrate: (persisted: unknown) => {
+        const s = (persisted ?? {}) as Record<string, unknown>;
+        return { ...s, reviews: Array.isArray(s.reviews) ? s.reviews : [] };
+      },
     }
   )
 );
