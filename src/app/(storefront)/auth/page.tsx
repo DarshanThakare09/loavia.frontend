@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, User, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Eye, EyeOff, LogOut } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
 
@@ -13,7 +13,10 @@ export default function AuthPage() {
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
   const register = useAuthStore((state) => state.register);
+  const logout = useAuthStore((state) => state.logout);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+  const [mounted, setMounted] = useState(false);
 
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -21,10 +24,8 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/profile");
-    }
-  }, [isAuthenticated, router]);
+    setMounted(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +51,38 @@ export default function AuthPage() {
       setIsLoading(false);
     }
   };
+
+  if (mounted && isAuthenticated && user) {
+    return (
+      <div className="bg-brand-cream min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
+        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 text-center border border-brand-brown/10">
+          <h2 className="text-3xl font-serif font-bold text-brand-brown mb-4">Already Signed In</h2>
+          <p className="text-brand-text-secondary text-sm mb-8">
+            You are currently signed in as <span className="font-bold text-brand-brown">{user.email}</span>.
+          </p>
+          <div className="flex flex-col space-y-4 font-sans">
+            <button
+              onClick={() => router.push("/profile")}
+              className="w-full flex items-center justify-center space-x-2 px-8 py-4 font-bold text-white bg-brand-brown rounded-xl hover:bg-brand-gold transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
+            >
+              <span>Go to Profile</span>
+              <ArrowRight className="w-5 h-5 ml-1" />
+            </button>
+            <button
+              onClick={async () => {
+                await logout();
+                toast.success("Signed out successfully");
+              }}
+              className="w-full flex items-center justify-center space-x-2 px-8 py-4 font-bold text-brand-brown bg-brand-light border border-brand-brown/10 rounded-xl hover:bg-brand-brown/5 transition-all duration-300 cursor-pointer"
+            >
+              <LogOut className="w-5 h-5 mr-2" />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-brand-cream min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

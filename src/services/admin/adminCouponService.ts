@@ -8,6 +8,24 @@ import {
   ApiResponse,
 } from '@/types/admin';
 
+function mapBackendCoupon(c: any): CouponDTO {
+  return {
+    id: c.id,
+    code: c.code,
+    type: c.discountType,
+    value: c.discountType === 'FIXED' ? c.value / 100 : c.value,
+    minOrder: c.minOrderValue / 100,
+    maxDiscount: c.maxDiscount ? c.maxDiscount / 100 : undefined,
+    usageLimit: c.usageLimit || 1000,
+    timesUsed: c.timesUsed || 0,
+    expiryDate: c.expiresAt,
+    isActive: c.active,
+    description: c.description || '',
+    createdAt: c.createdAt,
+    updatedAt: c.updatedAt,
+  };
+}
+
 export const adminCouponService = {
   async listCoupons(
     page: number = 1,
@@ -15,13 +33,22 @@ export const adminCouponService = {
     search?: string
   ): Promise<PaginatedResponse<CouponDTO>> {
     try {
-      const response = await apiClient.get<PaginatedResponse<CouponDTO>>(
+      const response = await apiClient.get<any>(
         '/admin/coupons',
         {
           params: { page, limit, search },
         }
       );
-      return response.data;
+      const { data, total } = response.data.data;
+      return {
+        data: data.map(mapBackendCoupon),
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        }
+      };
     } catch (error) {
       throw handleApiError(error);
     }
@@ -29,10 +56,10 @@ export const adminCouponService = {
 
   async getCoupon(id: string): Promise<CouponDTO> {
     try {
-      const response = await apiClient.get<ApiResponse<CouponDTO>>(
+      const response = await apiClient.get<ApiResponse<any>>(
         `/admin/coupons/${id}`
       );
-      return response.data.data;
+      return mapBackendCoupon(response.data.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -40,11 +67,19 @@ export const adminCouponService = {
 
   async createCoupon(data: CreateCouponRequestDTO): Promise<CouponDTO> {
     try {
-      const response = await apiClient.post<ApiResponse<CouponDTO>>(
+      const backendPayload = {
+        code: data.code,
+        discountType: data.type,
+        value: data.type === 'FIXED' ? Math.round(data.value * 100) : Math.round(data.value),
+        minOrderValue: Math.round(data.minOrder * 100),
+        maxDiscount: data.maxDiscount ? Math.round(data.maxDiscount * 100) : undefined,
+        expiresAt: data.expiryDate,
+      };
+      const response = await apiClient.post<ApiResponse<any>>(
         '/admin/coupons',
-        data
+        backendPayload
       );
-      return response.data.data;
+      return mapBackendCoupon(response.data.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -55,11 +90,22 @@ export const adminCouponService = {
     data: UpdateCouponRequestDTO
   ): Promise<CouponDTO> {
     try {
-      const response = await apiClient.put<ApiResponse<CouponDTO>>(
+      const backendPayload: any = {};
+      if (data.isActive !== undefined) backendPayload.active = data.isActive;
+      if (data.type !== undefined) backendPayload.discountType = data.type;
+      if (data.value !== undefined) {
+        const isFixed = data.type === 'FIXED' || (data.type === undefined && data.value > 100);
+        backendPayload.value = isFixed ? Math.round(data.value * 100) : Math.round(data.value);
+      }
+      if (data.minOrder !== undefined) backendPayload.minOrderValue = Math.round(data.minOrder * 100);
+      if (data.maxDiscount !== undefined) backendPayload.maxDiscount = Math.round(data.maxDiscount * 100);
+      if (data.expiryDate !== undefined) backendPayload.expiresAt = data.expiryDate;
+
+      const response = await apiClient.put<ApiResponse<any>>(
         `/admin/coupons/${id}`,
-        data
+        backendPayload
       );
-      return response.data.data;
+      return mapBackendCoupon(response.data.data);
     } catch (error) {
       throw handleApiError(error);
     }

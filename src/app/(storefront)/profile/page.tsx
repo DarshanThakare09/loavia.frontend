@@ -217,6 +217,16 @@ export default function ProfilePage() {
                     </button>
                   );
                 })}
+                
+                <div className="border-t border-brand-brown/10 my-2 pt-2">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center space-x-3 px-5 py-3.5 transition-all duration-300 font-bold text-sm text-left rounded-[1.25rem] cursor-pointer text-brand-error hover:bg-brand-error/5 hover:text-brand-error"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
               </nav>
             </div>
           </div>

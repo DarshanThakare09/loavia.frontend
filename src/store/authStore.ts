@@ -90,7 +90,8 @@ export const useAuthStore = create<AuthState>()(
       allOrders: defaultOrders,
 
       login: async (email, password) => {
-        const response = await apiClient.post('/auth/login', { email, password });
+        const normalizedEmail = email.toLowerCase().trim();
+        const response = await apiClient.post('/auth/login', { email: normalizedEmail, password });
         const userData = response.data.data.user;
 
         let savedAddresses = [];
@@ -128,7 +129,8 @@ export const useAuthStore = create<AuthState>()(
       },
 
       register: async (name, email, password, phone) => {
-        const response = await apiClient.post('/auth/register', { name, email, password, phone });
+        const normalizedEmail = email.toLowerCase().trim();
+        const response = await apiClient.post('/auth/register', { name, email: normalizedEmail, password, phone });
         return response.data;
       },
 

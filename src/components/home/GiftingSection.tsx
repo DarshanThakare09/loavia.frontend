@@ -13,12 +13,16 @@ gsap.registerPlugin(ScrollTrigger);
 
 export function GiftingSection() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { giftingTitle, giftingDescription } = useSiteStore();
+  const { giftingTitle, giftingDescription, giftingEnabled } = useSiteStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  if (mounted && !giftingEnabled) {
+    return null;
+  }
 
   const occasions = [
     { icon: Cake, label: "Birthdays" },

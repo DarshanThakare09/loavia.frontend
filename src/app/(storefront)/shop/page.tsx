@@ -225,15 +225,15 @@ export default function ShopPage() {
         {/* Page Header */}
         <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-brand-brown/10 pb-8 relative z-20">
           <div className="text-left">
-            <span className="shop-header-el text-brand-gold font-sans font-bold text-xs uppercase tracking-[3px] mb-2 block">Freshly Baked Menu</span>
+            <span className="shop-header-el text-brand-gold font-sans font-bold text-xs uppercase tracking-[3px] mb-6 block">Freshly Baked Menu</span>
             <h1
               style={{ fontFamily: "'Amsterdam Signature', serif" }}
-              className="shop-header-el font-normal leading-none mb-4 pt-2 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2"
+              className="shop-header-el font-normal leading-tight pb-8 mb-4 pt-6 sm:pt-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2"
             >
               <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">Our Fresh</span>
               <span className="text-brand-brown text-7xl md:text-8xl lg:text-[6rem]">Menu</span>
             </h1>
-            <p className="shop-header-el text-brand-text-secondary font-sans font-light mt-2">
+            <p className="shop-header-el text-brand-text-secondary font-sans font-light mt-4">
               Freshly baked with premium, wholesome ingredients. Find your craving.
             </p>
             {searchQuery && (

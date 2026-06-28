@@ -37,9 +37,11 @@ export default function FeaturedProducts() {
     setMounted(true);
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsVisible(entry.isIntersecting);
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
       },
-      { threshold: 0.1 }
+      { threshold: 0.05 }
     );
     if (sectionRef.current) {
       observer.observe(sectionRef.current);
@@ -57,7 +59,7 @@ export default function FeaturedProducts() {
   return (
     <section 
       ref={sectionRef}
-      className="w-full relative lg:aspect-[1672/941] flex items-center py-20 lg:py-0 overflow-hidden parallax-bg"
+      className="w-full relative flex items-center py-20 lg:py-32 overflow-hidden parallax-bg"
     >
       <style>{`
         .parallax-bg {
