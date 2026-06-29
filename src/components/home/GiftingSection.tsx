@@ -20,18 +20,8 @@ export function GiftingSection() {
     setMounted(true);
   }, []);
 
-  if (mounted && !giftingEnabled) {
-    return null;
-  }
-
-  const occasions = [
-    { icon: Cake, label: "Birthdays" },
-    { icon: CalendarHeart, label: "Anniversaries" },
-    { icon: Briefcase, label: "Corporate" },
-    { icon: Gift, label: "Just Because" },
-  ];
-
   useGSAP(() => {
+    if (!mounted || !giftingEnabled) return;
     gsap.fromTo(
       ".gifting-element",
       { y: 30, opacity: 0 },
@@ -48,6 +38,17 @@ export function GiftingSection() {
       }
     );
   }, { scope: containerRef });
+
+  if (mounted && !giftingEnabled) {
+    return null;
+  }
+
+  const occasions = [
+    { icon: Cake, label: "Birthdays" },
+    { icon: CalendarHeart, label: "Anniversaries" },
+    { icon: Briefcase, label: "Corporate" },
+    { icon: Gift, label: "Just Because" },
+  ];
 
   const titleText = giftingTitle || "Healthy Gifting Made Delicious";
   const words = titleText.trim().split(/\s+/);

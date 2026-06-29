@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { useAuthStore } from './authStore';
 
 interface ResetToken {
   token: string;
@@ -35,7 +34,11 @@ export const useAdminAuthStore = create<AdminAuthState>()(
       login: () => set({ isAdminAuthenticated: true }),
       logout: () => {
         set({ isAdminAuthenticated: false });
-        useAuthStore.getState().logout();
+        // Clear the mock admin cookies
+        if (typeof document !== 'undefined') {
+          document.cookie = 'access_token=; path=/; max-age=0';
+          document.cookie = 'admin_access_token=; path=/; max-age=0';
+        }
       },
 
       generateResetToken: () => {
@@ -71,10 +74,6 @@ export const useAdminAuthStore = create<AdminAuthState>()(
   )
 );
 
-// Reactive synchronization: sync admin authenticated flag to centralized auth store & role constraints
-if (typeof window !== 'undefined') {
-  useAuthStore.subscribe((state) => {
-    const isAuth = state.isAuthenticated && ['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(state.user?.role || '');
-    useAdminAuthStore.setState({ isAdminAuthenticated: isAuth });
-  });
-}
+// NOTE: Admin authentication is intentionally decoupled from the storefront authStore.
+// A customer logging in on the storefront must NOT affect the admin session.
+

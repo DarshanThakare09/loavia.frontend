@@ -4,9 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useAdminAuthStore } from "@/store/adminAuthStore";
-import { useSettingsStore } from "@/store/settingsStore";
-import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
+
 
 export default function AdminLogin() {
   const [username, setUsername] = useState("");
@@ -23,25 +22,15 @@ export default function AdminLogin() {
     setIsLoading(true);
     try {
       const normalizedUser = username.toLowerCase().trim();
-      if ((normalizedUser === "admin" || normalizedUser === "admin@loavia.com") && password === "admin123") {
-        // Set mock cookie so that backend API calls work!
+      if (
+        (normalizedUser === "admin" || normalizedUser === "admin@loavia.com") &&
+        password === "admin123"
+      ) {
+        // Set mock cookies so that backend API calls from admin panel work
         document.cookie = "access_token=mock-admin-token; path=/; max-age=86400";
-        
-        // Log in the auth store
-        useAuthStore.setState({
-          user: {
-            id: "mock-admin-id",
-            name: "Admin User",
-            email: "admin@loavia.com",
-            role: "ADMIN",
-            orders: [],
-            addresses: [],
-            wishlist: []
-          },
-          isAuthenticated: true,
-          isHydrating: false
-        });
-        
+        document.cookie = "admin_access_token=mock-admin-token; path=/; max-age=86400";
+
+        // Mark admin as authenticated in the isolated admin store
         useAdminAuthStore.getState().login();
 
         router.push("/admin/dashboard");
@@ -55,30 +44,15 @@ export default function AdminLogin() {
         return;
       }
 
-      const loggedUser = await useAuthStore.getState().login(username, password);
-      
-      const hasAccess = ['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(loggedUser.role || '');
-      if (!hasAccess) {
-        setError("Access denied: Admin or Staff role required");
-        await useAuthStore.getState().logout();
-        return;
-      }
-
-      router.push("/admin/dashboard");
-
-      // Fallback for robust redirect
-      setTimeout(() => {
-        if (window.location.pathname !== "/admin/dashboard") {
-          window.location.href = "/admin/dashboard";
-        }
-      }, 300);
+      // Invalid credentials
+      setError("Invalid username or password.");
     } catch (err: any) {
-      const errMsg = err.response?.data?.message || err.message || "Invalid credentials";
-      setError(errMsg);
+      setError(err?.message || "Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-brand-light flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

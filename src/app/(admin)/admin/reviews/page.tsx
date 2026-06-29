@@ -198,10 +198,10 @@ export default function AdminReviewsPage() {
                   {review.title && (
                     <p className="font-bold text-brand-text-primary text-sm mb-1">"{review.title}"</p>
                   )}
-                  <p className={`text-sm text-brand-text-secondary leading-relaxed ${!isExpanded && review.content.length > 200 ? "line-clamp-3" : ""}`}>
-                    {review.content}
+                  <p className={`text-sm text-brand-text-secondary leading-relaxed ${!isExpanded && (review.content ?? '').length > 200 ? "line-clamp-3" : ""}`}>
+                    {review.content ?? ''}
                   </p>
-                  {review.content.length > 200 && (
+                  {(review.content ?? '').length > 200 && (
                     <button
                       onClick={() => setExpandedId(isExpanded ? null : review.id)}
                       className="text-xs text-brand-gold font-semibold hover:text-brand-brown mt-1 transition-colors"

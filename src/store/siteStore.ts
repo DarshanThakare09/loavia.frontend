@@ -138,6 +138,7 @@ interface SiteState {
   updateTestimonial: (id: number, data: Partial<TestimonialItem>) => void;
   deleteTestimonial: (id: number) => void;
   setReviews: (reviews: ReviewItem[]) => void;
+  addReview: (review: { customerName: string; customerEmail: string; reviewText: string; rating: number }) => void;
 }
 
 const defaultCategories: CategoryItem[] = [
@@ -370,11 +371,29 @@ export const useSiteStore = create<SiteState>()(
         testimonialsList: state.testimonialsList.map(r => r.id === id ? { ...r, ...data } : r),
         reviewsList: state.testimonialsList.map(r => r.id === id ? { ...r, ...data } : r),
       })),
-      deleteTestimonial: (id) => set((state) => ({
+          deleteTestimonial: (id) => set((state) => ({
         testimonialsList: state.testimonialsList.filter(r => r.id !== id),
         reviewsList: state.testimonialsList.filter(r => r.id !== id),
       })),
       setReviews: (reviews) => set({ testimonialsList: reviews, reviewsList: reviews }),
+      addReview: (newReview) => set((state) => {
+        const r: ReviewItem = {
+          id: Date.now(),
+          customerName: newReview.customerName,
+          customerEmail: newReview.customerEmail,
+          reviewText: newReview.reviewText,
+          rating: newReview.rating,
+          status: 'pending',
+          featured: false,
+          pinned: false,
+          createdAt: new Date().toISOString(),
+          name: newReview.customerName,
+          role: 'Verified Buyer',
+          content: newReview.reviewText,
+        };
+        const updated = [...state.testimonialsList, r];
+        return { testimonialsList: updated, reviewsList: updated };
+      }),
     }),
     {
       name: 'loavia-site-storage',

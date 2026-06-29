@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, ShoppingBag, Users, Settings, Tag, LogOut, Menu, X, ArrowLeft, Package, MessageSquare, ShoppingCart } from "lucide-react";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useAdminAuthStore } from "@/store/adminAuthStore";
-import { useAuthStore } from "@/store/authStore";
 import LogoutModal from "@/components/admin/LogoutModal";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -24,26 +23,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   const isLoginPage = pathname?.startsWith('/admin/login');
-  const hydrateSession = useAuthStore((state) => state.hydrateSession);
-
+  // Admin auth is fully self-contained — no need to hydrate the shared authStore.
   useEffect(() => {
-    let active = true;
-    async function checkAuth() {
-      await hydrateSession();
-      if (!active) return;
-      setMounted(true);
-    }
-    
-    if (!isLoginPage) {
-      checkAuth();
-    } else {
-      setMounted(true);
-    }
-
-    return () => {
-      active = false;
-    };
-  }, [isLoginPage, hydrateSession]);
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (mounted && !isAdminAuthenticated && !isLoginPage) {
