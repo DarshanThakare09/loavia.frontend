@@ -456,7 +456,7 @@ export default function AdminDashboard() {
           {/* Featured Categories */}
           {activeSection === "categories" && (
             <div className="space-y-6 animate-in fade-in duration-300">
-              <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">Featured Categories (4 circles)</h2>
+              <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">Featured Categories </h2>
               <div className="space-y-6">
                 {cats.map((cat, idx) => (
                   <div key={idx} className="p-4 bg-brand-light/30 border border-brand-brown/10 rounded-2xl space-y-3 shadow-inner">

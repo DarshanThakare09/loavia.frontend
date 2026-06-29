@@ -70,25 +70,7 @@ export function Footer() {
               </p>
             </div>
             
-            {/* Sleek Newsletter */}
-            <div className="max-w-md">
-              <h4 className="font-sans font-bold text-xs text-brand-gold uppercase tracking-widest mb-3">Join the Cookie Club</h4>
-              <p className="text-xs opacity-60 mb-4 font-sans font-light">Subscribe for fresh updates, exclusive discounts, and sweet surprises.</p>
-              <form className="relative flex items-center" onSubmit={(e) => e.preventDefault()}>
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full pl-5 pr-12 py-3 bg-white/5 border border-white/10 rounded-full text-brand-cream placeholder-brand-cream/30 text-sm focus:outline-none focus:border-brand-gold/50 focus:ring-1 focus:ring-brand-gold/50 transition-all duration-300 font-sans"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-1.5 top-1.5 p-2 bg-brand-gold hover:bg-brand-gold/80 text-white rounded-full transition-colors duration-300 flex items-center justify-center"
-                  aria-label="Subscribe"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </form>
-            </div>
+            
           </div>
 
           {/* Quick Links Column (Shop) */}
@@ -137,11 +119,7 @@ export function Footer() {
                   Contact Us
                 </Link>
               </li>
-              <li>
-                <Link href="/faq" className="opacity-75 hover:opacity-100 hover:text-brand-gold hover:translate-x-1 transition-all duration-300 inline-block">
-                  FAQs & Help
-                </Link>
-              </li>
+              
             </ul>
           </div>
 
