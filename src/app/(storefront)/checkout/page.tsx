@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { CheckCircle2, ChevronRight, CreditCard, Truck, MapPin, Tag, ArrowLeft, Gift } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
-import { checkoutService, CheckoutValidateResponse, CheckoutValidatePayload, PlaceOrderPayload } from "@/services/checkoutService";
+import { checkoutService, CheckoutValidateResponse, CheckoutValidatePayload, PlaceOrderPayload, CouponDTO } from "@/services/checkoutService";
 import { toast } from "sonner";
 
 export default function CheckoutPage() {
@@ -39,6 +39,44 @@ export default function CheckoutPage() {
   // Order Placement & Razorpay processing states
   const [isProcessing, setIsProcessing] = useState(false);
   const [loaderMessage, setLoaderMessage] = useState("");
+
+  const [availableCoupons, setAvailableCoupons] = useState<CouponDTO[]>([]);
+
+  useEffect(() => {
+    const fetchCoupons = async () => {
+      try {
+        const coupons = await checkoutService.getAvailableCoupons();
+        setAvailableCoupons(coupons || []);
+      } catch (err) {
+        console.error("Failed to fetch available coupons", err);
+      }
+    };
+    if (mounted) {
+      fetchCoupons();
+    }
+  }, [mounted]);
+
+  // Client-side calculations fallback based on cart items (in Rupees)
+  const clientSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  
+  // Approximate coupon discount if calculations not loaded yet
+  let clientDiscount = 0;
+  if (appliedPromoCode && calculations?.discountAmount) {
+    clientDiscount = calculations.discountAmount / 100;
+  }
+  
+  const clientNetTaxable = clientSubtotal - clientDiscount;
+  const clientTax = clientNetTaxable * 0.18; // 18% GST
+  
+  // Free shipping if net taxable subtotal > ₹999, else flat ₹100
+  const clientShipping = clientNetTaxable > 999 ? 0 : 100;
+  const clientTotal = clientNetTaxable + clientTax + clientShipping;
+
+  const subtotal = calculations ? calculations.subtotal / 100 : clientSubtotal;
+  const discount = calculations ? calculations.discountAmount / 100 : clientDiscount;
+  const tax = calculations ? calculations.taxAmount / 100 : clientTax;
+  const shipping = calculations ? calculations.shippingFee / 100 : clientShipping;
+  const total = calculations ? calculations.totalAmount / 100 : clientTotal;
 
   useEffect(() => {
     setMounted(true);
@@ -73,14 +111,12 @@ export default function CheckoutPage() {
       if (coupon) {
         payload.couponCode = coupon;
       }
-      if (!isAuthenticated) {
-        payload.items = items.map(item => ({
-          variantId: item.variantId || item.id,
-          quantity: item.quantity,
-          isCustomBox: item.isCustomBox,
-          customBoxSelections: item.customBoxSelections
-        }));
-      }
+      payload.items = items.map(item => ({
+        variantId: item.variantId || item.id,
+        quantity: item.quantity,
+        isCustomBox: item.isCustomBox,
+        customBoxSelections: item.customBoxSelections
+      }));
       const data = await checkoutService.validateCheckout(payload);
       setCalculations(data);
     } catch (err: any) {
@@ -128,14 +164,12 @@ export default function CheckoutPage() {
       const payload: CheckoutValidatePayload = {
         couponCode: promoInput.trim().toUpperCase(),
       };
-      if (!isAuthenticated) {
-        payload.items = items.map(item => ({
-          variantId: item.variantId || item.id,
-          quantity: item.quantity,
-          isCustomBox: item.isCustomBox,
-          customBoxSelections: item.customBoxSelections
-        }));
-      }
+      payload.items = items.map(item => ({
+        variantId: item.variantId || item.id,
+        quantity: item.quantity,
+        isCustomBox: item.isCustomBox,
+        customBoxSelections: item.customBoxSelections
+      }));
       const data = await checkoutService.validateCheckout(payload);
       setCalculations(data);
       setAppliedPromoCode(promoInput.trim().toUpperCase());
@@ -486,11 +520,11 @@ export default function CheckoutPage() {
                         <span className="block text-sm text-brand-text-secondary">3-5 Business Days</span>
                       </div>
                       <span className="font-bold text-brand-brown">
-                        {calculations && calculations.shippingFee === 0 ? "Free" : `₹${calculations ? (calculations.shippingFee / 100).toFixed(2) : "100.00"}`}
+                        {shipping === 0 ? "Free" : `₹${shipping.toFixed(2)}`}
                       </span>
                     </label>
 
-                    {calculations && calculations.shippingFee > 0 && (
+                    {shipping > 0 && (
                       <p className="text-xs text-brand-text-secondary italic">
                         Tip: Add products worth more than ₹999.00 to unlock Free Shipping!
                       </p>
@@ -562,7 +596,7 @@ export default function CheckoutPage() {
                     <button onClick={() => setStep(2)} className="w-1/3 px-8 py-4 font-bold text-brand-brown bg-brand-light rounded-xl hover:bg-brand-brown/10 transition-colors cursor-pointer">Back</button>
                     <button onClick={handlePlaceOrder} className="w-2/3 flex items-center justify-center space-x-2 px-8 py-4 font-bold text-white bg-brand-gold rounded-xl hover:bg-brand-brown transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
                       <CheckCircle2 className="w-5 h-5" />
-                      <span>Pay ₹{calculations ? (calculations.totalAmount / 100).toFixed(2) : "0.00"}</span>
+                      <span>Pay ₹{total.toFixed(2)}</span>
                     </button>
                   </div>
                 </div>
@@ -604,18 +638,57 @@ export default function CheckoutPage() {
                     </button>
                   </div>
                 ) : (
-                  <form onSubmit={handleApplyCoupon} className="flex space-x-2">
-                    <input 
-                      type="text" 
-                      placeholder="Promo Code" 
-                      value={promoInput}
-                      onChange={(e) => setPromoInput(e.target.value)}
-                      className="flex-1 bg-brand-light border border-brand-brown/10 rounded-xl px-3 py-2 text-xs font-bold uppercase tracking-wider outline-none text-brand-brown focus:border-brand-gold transition-all"
-                    />
-                    <button type="submit" disabled={isLoadingValidate} className="px-4 py-2 bg-brand-brown text-white rounded-xl hover:bg-brand-gold text-xs font-black uppercase transition-colors cursor-pointer">
-                      Apply
-                    </button>
-                  </form>
+                  <>
+                    <form onSubmit={handleApplyCoupon} className="flex space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="Promo Code" 
+                        value={promoInput}
+                        onChange={(e) => setPromoInput(e.target.value)}
+                        className="flex-1 bg-brand-light border border-brand-brown/10 rounded-xl px-3 py-2 text-xs font-bold uppercase tracking-wider outline-none text-brand-brown focus:border-brand-gold transition-all"
+                      />
+                      <button type="submit" disabled={isLoadingValidate} className="px-4 py-2 bg-brand-brown text-white rounded-xl hover:bg-brand-gold text-xs font-black uppercase transition-colors cursor-pointer">
+                        Apply
+                      </button>
+                    </form>
+                    
+                    {/* Coupon Suggestions */}
+                    {availableCoupons.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        <label className="block text-[10px] uppercase tracking-widest font-bold text-brand-text-secondary/70 mb-1">Available Coupons</label>
+                        <div className="flex flex-wrap gap-2">
+                          {availableCoupons.map((coupon) => {
+                            const isEligible = subtotal * 100 >= coupon.minOrderValue;
+                            return (
+                              <button
+                                key={coupon.id}
+                                disabled={!isEligible}
+                                onClick={() => {
+                                  setPromoInput(coupon.code);
+                                  loadCalculations(coupon.code);
+                                }}
+                                className={`flex flex-col items-center justify-center text-[10px] px-2.5 py-1.5 rounded-lg border font-bold uppercase transition-all duration-300 ${
+                                  isEligible
+                                    ? "bg-brand-gold/10 border-brand-gold text-brand-brown hover:bg-brand-gold hover:text-white cursor-pointer"
+                                    : "bg-gray-50 border-gray-200 text-gray-400 opacity-60 cursor-not-allowed"
+                                }`}
+                                title={
+                                  isEligible
+                                    ? `Get ${coupon.discountType === 'PERCENTAGE' ? `${coupon.value}%` : `₹${coupon.value / 100}`} off`
+                                    : `Requires minimum order of ₹${(coupon.minOrderValue / 100).toFixed(2)}`
+                                }
+                              >
+                                <span className="block">{coupon.code}</span>
+                                <span className="text-[8px] font-medium lowercase tracking-normal text-brand-text-secondary/60">
+                                  {coupon.discountType === 'PERCENTAGE' ? `${coupon.value}% off` : `₹${coupon.value / 100} off`}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -632,37 +705,37 @@ export default function CheckoutPage() {
                     <div className="flex justify-between">
                       <span className="text-brand-text-secondary">Subtotal</span>
                       <span className="font-bold text-brand-brown">
-                        ₹{calculations ? (calculations.subtotal / 100).toFixed(2) : "0.00"}
+                        ₹{subtotal.toFixed(2)}
                       </span>
                     </div>
 
-                    {calculations && calculations.discountAmount > 0 && (
+                    {discount > 0 && (
                       <div className="flex justify-between text-green-700">
                         <span className="flex items-center text-xs font-bold">
-                          <Tag className="w-3.5 h-3.5 mr-1" /> Discount ({calculations.appliedCoupon?.code})
+                          <Tag className="w-3.5 h-3.5 mr-1" /> Discount ({calculations?.appliedCoupon?.code || appliedPromoCode})
                         </span>
-                        <span className="font-bold">-₹{(calculations.discountAmount / 100).toFixed(2)}</span>
+                        <span className="font-bold">-₹{discount.toFixed(2)}</span>
                       </div>
                     )}
 
                     <div className="flex justify-between">
                       <span className="text-brand-text-secondary">GST (18%)</span>
                       <span className="font-bold text-brand-brown">
-                        ₹{calculations ? (calculations.taxAmount / 100).toFixed(2) : "0.00"}
+                        ₹{tax.toFixed(2)}
                       </span>
                     </div>
 
                     <div className="flex justify-between">
                       <span className="text-brand-text-secondary">Shipping</span>
                       <span className="font-bold text-brand-brown">
-                        {calculations && calculations.shippingFee === 0 ? "Free" : `₹${calculations ? (calculations.shippingFee / 100).toFixed(2) : "0.00"}`}
+                        {shipping === 0 ? "Free" : `₹${shipping.toFixed(2)}`}
                       </span>
                     </div>
 
                     <div className="flex justify-between items-center pt-4 border-t border-brand-brown/10 mt-2">
                       <span className="font-bold text-lg text-brand-brown">Total</span>
                       <span className="font-black text-2xl text-brand-brown">
-                        ₹{calculations ? (calculations.totalAmount / 100).toFixed(2) : "0.00"}
+                        ₹{total.toFixed(2)}
                       </span>
                     </div>
                   </>

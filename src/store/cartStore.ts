@@ -73,6 +73,13 @@ export const useCartStore = create<CartState>()(
       error: null,
 
       hydrateCart: async () => {
+        const { useAuthStore } = await import('@/store/authStore');
+        const { isAuthenticated } = useAuthStore.getState();
+        if (!isAuthenticated) {
+          set({ items: [], isLoading: false });
+          return;
+        }
+
         set({ isLoading: true, error: null });
         try {
           const { cartService } = await import('@/services/cartService');
@@ -84,6 +91,17 @@ export const useCartStore = create<CartState>()(
       },
 
       addItem: async (newItem) => {
+        const { useAuthStore } = await import('@/store/authStore');
+        const { isAuthenticated } = useAuthStore.getState();
+        if (!isAuthenticated) {
+          const { toast } = await import('sonner');
+          toast.error("Please log in to add items to your cart.");
+          if (typeof window !== "undefined") {
+            window.location.href = `/auth?redirect=${encodeURIComponent(window.location.pathname)}`;
+          }
+          return;
+        }
+
         set({ isLoading: true, error: null });
         try {
           const { cartService } = await import('@/services/cartService');

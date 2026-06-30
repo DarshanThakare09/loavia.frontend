@@ -51,9 +51,24 @@ export interface VerifyPaymentPayload {
   method: string;
 }
 
+export interface CouponDTO {
+  id: string;
+  code: string;
+  discountType: 'PERCENTAGE' | 'FIXED';
+  value: number;
+  minOrderValue: number;
+maxDiscount?: number | null;
+  expiresAt: string;
+}
+
 export const checkoutService = {
   async validateCheckout(payload: CheckoutValidatePayload): Promise<CheckoutValidateResponse> {
     const response = await apiClient.post("/checkout/validate", payload);
+    return response.data.data;
+  },
+
+  async getAvailableCoupons(): Promise<CouponDTO[]> {
+    const response = await apiClient.get("/checkout/coupons");
     return response.data.data;
   },
 
