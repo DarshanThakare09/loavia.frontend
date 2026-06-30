@@ -115,7 +115,7 @@ export default function WhyChoose() {
   return (
     <section
       ref={sectionRef}
-      className="w-full relative lg:aspect-[1672/941] flex items-center py-20 lg:py-0 overflow-hidden parallax-bg"
+      className="w-full relative min-h-[70vh] lg:min-h-[85vh] flex items-center py-20 lg:py-24 overflow-hidden parallax-bg"
     >
       <style>{`
         .parallax-bg {
@@ -183,7 +183,7 @@ export default function WhyChoose() {
             {whyChooseFeatures?.map((feature) => (
               <div
                 key={feature}
-                className="group why-choose-card rounded-2xl p-5 flex items-center space-x-4 cursor-pointer"
+                className="group why-choose-card rounded-2xl p-5 flex items-center space-x-4 cursor-pointer h-full"
               >
                 <div className="flex-shrink-0 w-10 h-10 rounded-full bg-brand-gold/15 flex items-center justify-center text-brand-gold group-hover:bg-brand-gold group-hover:text-white transition-all duration-300 transform group-hover:scale-110">
                   {getFeatureIcon(feature)}

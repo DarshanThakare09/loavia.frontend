@@ -172,10 +172,24 @@ export interface CustomerSummaryDTO {
   totalSpent?: number; // in paise
 }
 
+export interface ContactMessageDTO {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  responseText?: string | null;
+  isResponded: boolean;
+  respondedAt?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface CustomerProfileDTO extends CustomerSummaryDTO {
   addresses: Address[];
   orders: OrderListDTO[]; // Last 10 orders
   loyaltyPoints?: LoyaltyPoints;
+  contactMessages?: ContactMessageDTO[];
 }
 
 export interface UpdateCustomerStatusRequestDTO {

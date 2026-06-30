@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display, Nunito } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
@@ -22,6 +22,12 @@ const nunito = Nunito({
 export const metadata: Metadata = {
   title: "LOAVIA | Healthy Inside, Yummy Outside",
   description: "Premium cookie brand offering healthy and yummy cookies. Buy custom boxes, gift boxes, and more.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({

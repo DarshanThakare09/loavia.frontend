@@ -6,7 +6,7 @@ import { CustomerSummaryDTO, CustomerProfileDTO, UserRole } from "@/types/admin"
 import {
   Search, Eye, X, User as UserIcon, MapPin, ShoppingBag,
   Mail, Phone, AlertCircle, Loader2, RefreshCw, Shield, Ban,
-  CheckCircle2,
+  CheckCircle2, MessageSquare, Send, ChevronDown, ChevronUp,
 } from "lucide-react";
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -55,11 +55,15 @@ export default function AdminUsersPage() {
   const [pendingRole, setPendingRole]     = useState<UserRole>("CUSTOMER");
   const [pendingStatus, setPendingStatus] = useState<"ACTIVE" | "SUSPENDED">("ACTIVE");
 
+  // Reply state map: { [messageId]: { open: boolean, text: string } }
+  const [replyState, setReplyState] = useState<Record<string, { open: boolean; text: string }>>({});
+
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // ── Fetch on mount ────────────────────────────────────────────────────
   useEffect(() => {
     store.fetchCustomers(1, 10);
+    store.fetchContactMessages(1, 50);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -128,8 +132,11 @@ export default function AdminUsersPage() {
           </p>
         </div>
         <button
-          onClick={() => store.fetchCustomers(store.currentPage, store.pageSize, searchQuery)}
-          disabled={store.isLoadingCustomers}
+          onClick={() => {
+            store.fetchCustomers(store.currentPage, store.pageSize, searchQuery);
+            store.fetchContactMessages(1, 50);
+          }}
+          disabled={store.isLoadingCustomers || store.isLoadingMessages}
           className="flex items-center gap-2 px-4 py-2 bg-white border border-brand-brown/10 rounded-xl text-sm font-semibold text-brand-brown hover:bg-brand-light transition-colors disabled:opacity-50"
         >
           <RefreshCw className={`w-4 h-4 ${store.isLoadingCustomers ? "animate-spin" : ""}`} />
@@ -183,141 +190,265 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* Loading Skeleton */}
-      {store.isLoadingCustomers && (
-        <div className="bg-white rounded-2xl shadow-sm border border-brand-brown/10 p-8">
-          <div className="space-y-4">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-14 bg-gradient-to-r from-brand-light to-brand-gold/10 rounded-lg animate-pulse" />
-            ))}
-          </div>
-        </div>
-      )}
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        {/* Left Side: Customers list Table (or empty state) */}
+        <div className="flex-1 w-full space-y-6">
+          {/* Loading Skeleton */}
+          {store.isLoadingCustomers && (
+            <div className="bg-white rounded-2xl shadow-sm border border-brand-brown/10 p-8">
+              <div className="space-y-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="h-14 bg-gradient-to-r from-brand-light to-brand-gold/10 rounded-lg animate-pulse" />
+                ))}
+              </div>
+            </div>
+          )}
 
-      {/* Empty State */}
-      {!store.isLoadingCustomers && displayedCustomers.length === 0 && !store.customersError && (
-        <div className="bg-white rounded-2xl shadow-sm border border-brand-brown/10 p-12 text-center">
-          <UserIcon className="w-12 h-12 text-brand-gold/40 mx-auto mb-4" />
-          <p className="text-brand-text-secondary text-lg font-semibold">No customers found</p>
-          <p className="text-brand-text-secondary text-sm mt-1">
-            {searchQuery ? "Try a different search term" : "No customer accounts exist yet"}
-          </p>
-        </div>
-      )}
+          {/* Empty State */}
+          {!store.isLoadingCustomers && displayedCustomers.length === 0 && !store.customersError && (
+            <div className="bg-white rounded-2xl shadow-sm border border-brand-brown/10 p-12 text-center">
+              <UserIcon className="w-12 h-12 text-brand-gold/40 mx-auto mb-4" />
+              <p className="text-brand-text-secondary text-lg font-semibold">No customers found</p>
+              <p className="text-brand-text-secondary text-sm mt-1">
+                {searchQuery ? "Try a different search term" : "No customer accounts exist yet"}
+              </p>
+            </div>
+          )}
 
-      {/* Customer Table */}
-      {!store.isLoadingCustomers && displayedCustomers.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-brand-brown/10 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-brand-light border-b border-brand-brown/10">
-                  <th className="p-4 font-semibold text-brand-brown text-sm">Customer</th>
-                  <th className="p-4 font-semibold text-brand-brown text-sm">Phone</th>
-                  <th className="p-4 font-semibold text-brand-brown text-sm">Role</th>
-                  <th className="p-4 font-semibold text-brand-brown text-sm">Status</th>
-                  <th className="p-4 font-semibold text-brand-brown text-sm">Orders</th>
-                  <th className="p-4 font-semibold text-brand-brown text-sm">Total Spent</th>
-                  <th className="p-4 font-semibold text-brand-brown text-sm">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayedCustomers.map((customer) => (
-                  <tr
-                    key={customer.id}
-                    className="border-b border-brand-brown/5 hover:bg-brand-light/40 transition-colors"
-                  >
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-brand-gold/15 text-brand-gold font-bold flex items-center justify-center text-sm border border-brand-gold/10 flex-shrink-0">
-                          {customer.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <span className="font-semibold text-brand-text-primary text-sm block">{customer.name}</span>
-                          <span className="text-xs text-brand-text-secondary">{customer.email}</span>
+          {/* Customer Table */}
+          {!store.isLoadingCustomers && displayedCustomers.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-sm border border-brand-brown/10 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-brand-light border-b border-brand-brown/10">
+                      <th className="p-4 font-semibold text-brand-brown text-sm">Customer</th>
+                      <th className="p-4 font-semibold text-brand-brown text-sm">Phone</th>
+                      <th className="p-4 font-semibold text-brand-brown text-sm">Role</th>
+                      <th className="p-4 font-semibold text-brand-brown text-sm">Status</th>
+                      <th className="p-4 font-semibold text-brand-brown text-sm">Orders</th>
+                      <th className="p-4 font-semibold text-brand-brown text-sm">Total Spent</th>
+                      <th className="p-4 font-semibold text-brand-brown text-sm">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displayedCustomers.map((customer) => (
+                      <tr
+                        key={customer.id}
+                        className="border-b border-brand-brown/5 hover:bg-brand-light/40 transition-colors"
+                      >
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-brand-gold/15 text-brand-gold font-bold flex items-center justify-center text-sm border border-brand-gold/10 flex-shrink-0">
+                              {customer.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <span className="font-semibold text-brand-text-primary text-sm block">{customer.name}</span>
+                              <span className="text-xs text-brand-text-secondary">{customer.email}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4 text-sm text-brand-text-secondary">
+                          {customer.phone || "N/A"}
+                        </td>
+                        <td className="p-4">
+                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold border ${getRoleBadge(customer.role)}`}>
+                            {customer.role}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${getStatusBadge(customer.status)}`}>
+                            {customer.status}
+                          </span>
+                        </td>
+                        <td className="p-4 text-sm text-brand-text-secondary">
+                          {customer.ordersCount ?? "—"}
+                        </td>
+                        <td className="p-4 font-bold text-brand-text-primary text-sm">
+                          {formatRupees(customer.totalSpent)}
+                        </td>
+                        <td className="p-4">
+                          <button
+                            onClick={() => handleViewProfile(customer)}
+                            disabled={store.isLoadingCustomer}
+                            className="text-brand-gold hover:text-brand-brown p-2 hover:bg-brand-gold/10 rounded-lg transition-colors disabled:opacity-50"
+                            title="View Profile"
+                          >
+                            {store.isLoadingCustomer ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Eye className="w-4 h-4" />
+                            )}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {!store.isLoadingCustomers && store.pagination && store.pagination.totalPages > 1 && (
+            <div className="flex justify-center gap-2 flex-wrap">
+              <button
+                disabled={store.currentPage <= 1}
+                onClick={() => fetchPage(store.currentPage - 1)}
+                className="px-3 py-2 rounded-lg text-sm font-semibold bg-brand-light text-brand-text-secondary hover:bg-brand-gold/20 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                ← Prev
+              </button>
+              {Array.from({ length: store.pagination.totalPages }, (_, i) => i + 1)
+                .filter(p => Math.abs(p - store.currentPage) <= 2 || p === 1 || p === store.pagination!.totalPages)
+                .map((page, idx, arr) => (
+                  <>
+                    {idx > 0 && arr[idx - 1] !== page - 1 && (
+                      <span key={`e-${page}`} className="px-2 py-2 text-brand-text-secondary text-sm">…</span>
+                    )}
+                    <button
+                      key={page}
+                      onClick={() => fetchPage(page)}
+                      className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                        store.currentPage === page
+                          ? "bg-brand-brown text-white"
+                          : "bg-brand-light text-brand-text-secondary hover:bg-brand-gold/20"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  </>
+                ))}
+              <button
+                disabled={store.currentPage >= store.pagination.totalPages}
+                onClick={() => fetchPage(store.currentPage + 1)}
+                className="px-3 py-2 rounded-lg text-sm font-semibold bg-brand-light text-brand-text-secondary hover:bg-brand-gold/20 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Next →
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Right Side: Customer Queries Section */}
+        <div className="w-full lg:w-96 bg-white p-5 rounded-3xl border border-brand-brown/10 shadow-sm space-y-4 shrink-0 self-stretch flex flex-col max-h-[80vh]">
+          <h3 className="font-serif font-bold text-xl text-brand-brown border-b border-brand-brown/10 pb-3 flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-brand-gold" />
+            <span>Customer Queries</span>
+          </h3>
+          
+          <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+            {store.isLoadingMessages ? (
+              <div className="space-y-2 py-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-20 bg-brand-light rounded-xl animate-pulse" />
+                ))}
+              </div>
+            ) : store.contactMessages.length > 0 ? (
+              store.contactMessages.map((msg: any) => {
+                const reply = replyState[msg.id] || { open: false, text: "" };
+                const toggleReply = () =>
+                  setReplyState((prev) => ({
+                    ...prev,
+                    [msg.id]: { open: !reply.open, text: reply.text },
+                  }));
+                const setReplyText = (text: string) =>
+                  setReplyState((prev) => ({
+                    ...prev,
+                    [msg.id]: { ...prev[msg.id], open: true, text },
+                  }));
+                const handleSendReply = async () => {
+                  if (!reply.text.trim()) return;
+                  try {
+                    await store.respondContactMessage(msg.id, reply.text.trim());
+                    setReplyState((prev) => ({ ...prev, [msg.id]: { open: false, text: "" } }));
+                    // inline toast import
+                    const { toast } = await import("sonner");
+                    toast.success(`Reply sent to ${msg.email}`);
+                  } catch (err: any) {
+                    const { toast } = await import("sonner");
+                    toast.error(err.message || "Failed to send reply");
+                  }
+                };
+
+                return (
+                  <div key={msg.id} className={`rounded-xl border transition-all text-xs space-y-2 overflow-hidden ${msg.isResponded ? "border-emerald-200 bg-emerald-50/30" : "border-brand-brown/5 bg-brand-light hover:border-brand-gold/30"}`}>
+                    <div className="p-4 space-y-2">
+                      {/* Header row */}
+                      <div className="flex justify-between items-start gap-1">
+                        <span className="font-bold text-brand-brown break-all line-clamp-1">{msg.name}</span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {msg.isResponded && (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-bold border border-emerald-200">
+                              ✓ Replied
+                            </span>
+                          )}
+                          <span className="text-[9px] text-brand-text-secondary/60 font-mono">{formatDate(msg.createdAt)}</span>
                         </div>
                       </div>
-                    </td>
-                    <td className="p-4 text-sm text-brand-text-secondary">
-                      {customer.phone || "N/A"}
-                    </td>
-                    <td className="p-4">
-                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold border ${getRoleBadge(customer.role)}`}>
-                        {customer.role}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${getStatusBadge(customer.status)}`}>
-                        {customer.status}
-                      </span>
-                    </td>
-                    <td className="p-4 text-sm text-brand-text-secondary">
-                      {customer.ordersCount ?? "—"}
-                    </td>
-                    <td className="p-4 font-bold text-brand-text-primary text-sm">
-                      {formatRupees(customer.totalSpent)}
-                    </td>
-                    <td className="p-4">
+
+                      {/* Subject */}
+                      <div className="text-[10px] text-brand-gold font-bold uppercase tracking-wider">{msg.subject}</div>
+
+                      {/* Message body */}
+                      <p className="text-[11px] text-brand-text-secondary leading-relaxed bg-white/70 p-2.5 rounded-lg border border-brand-brown/5 font-sans whitespace-pre-wrap">
+                        {msg.message}
+                      </p>
+
+                      {/* Sender email */}
+                      <div className="text-[10px] text-brand-text-secondary/50 truncate font-mono select-all">{msg.email}</div>
+
+                      {/* Previous response (if any) */}
+                      {msg.isResponded && msg.responseText && (
+                        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-2.5 space-y-1">
+                          <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">Your previous response:</p>
+                          <p className="text-[11px] text-emerald-800 whitespace-pre-wrap">{msg.responseText}</p>
+                        </div>
+                      )}
+
+                      {/* Reply toggle button */}
                       <button
-                        onClick={() => handleViewProfile(customer)}
-                        disabled={store.isLoadingCustomer}
-                        className="text-brand-gold hover:text-brand-brown p-2 hover:bg-brand-gold/10 rounded-lg transition-colors disabled:opacity-50"
-                        title="View Profile"
+                        onClick={toggleReply}
+                        className="flex items-center gap-1.5 text-[10px] font-bold text-brand-gold hover:text-brand-brown transition-colors mt-1"
                       >
-                        {store.isLoadingCustomer ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
+                        {reply.open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                        {msg.isResponded ? "Send Another Reply" : "Reply to this query"}
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+
+                    {/* Collapsible reply box */}
+                    {reply.open && (
+                      <div className="border-t border-brand-brown/5 bg-white/80 p-3 space-y-2">
+                        <textarea
+                          value={reply.text}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          placeholder={`Write your reply to ${msg.name}...`}
+                          rows={3}
+                          className="w-full text-[11px] p-2.5 rounded-lg border border-brand-brown/10 bg-white resize-none outline-none focus:ring-1 focus:ring-brand-gold font-sans"
+                        />
+                        <button
+                          onClick={handleSendReply}
+                          disabled={store.isRespondingMessage || !reply.text.trim()}
+                          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-brand-gold text-white text-[11px] font-bold rounded-lg hover:bg-brand-brown transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {store.isRespondingMessage ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <Send className="w-3 h-3" />
+                          )}
+                          {store.isRespondingMessage ? "Sending..." : "Send Reply via Email"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-xs text-brand-text-secondary text-center py-8">No customer queries exist yet.</p>
+            )}
           </div>
         </div>
-      )}
-
-      {/* Pagination */}
-      {!store.isLoadingCustomers && store.pagination && store.pagination.totalPages > 1 && (
-        <div className="flex justify-center gap-2 flex-wrap">
-          <button
-            disabled={store.currentPage <= 1}
-            onClick={() => fetchPage(store.currentPage - 1)}
-            className="px-3 py-2 rounded-lg text-sm font-semibold bg-brand-light text-brand-text-secondary hover:bg-brand-gold/20 disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            ← Prev
-          </button>
-          {Array.from({ length: store.pagination.totalPages }, (_, i) => i + 1)
-            .filter(p => Math.abs(p - store.currentPage) <= 2 || p === 1 || p === store.pagination!.totalPages)
-            .map((page, idx, arr) => (
-              <>
-                {idx > 0 && arr[idx - 1] !== page - 1 && (
-                  <span key={`e-${page}`} className="px-2 py-2 text-brand-text-secondary text-sm">…</span>
-                )}
-                <button
-                  key={page}
-                  onClick={() => fetchPage(page)}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                    store.currentPage === page
-                      ? "bg-brand-brown text-white"
-                      : "bg-brand-light text-brand-text-secondary hover:bg-brand-gold/20"
-                  }`}
-                >
-                  {page}
-                </button>
-              </>
-            ))}
-          <button
-            disabled={store.currentPage >= store.pagination.totalPages}
-            onClick={() => fetchPage(store.currentPage + 1)}
-            className="px-3 py-2 rounded-lg text-sm font-semibold bg-brand-light text-brand-text-secondary hover:bg-brand-gold/20 disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Next →
-          </button>
-        </div>
-      )}
+      </div>
 
       {/* ── Customer Profile Modal ──────────────────────────────────────── */}
       {selectedUser && (
@@ -422,6 +553,34 @@ export default function AdminUsersPage() {
                   </div>
                 ) : (
                   <p className="text-xs text-brand-text-secondary text-center py-2">No addresses saved.</p>
+                )}
+              </div>
+
+              {/* Customer Messages */}
+              <div className="bg-white p-5 rounded-2xl border border-brand-brown/5 shadow-sm space-y-3">
+                <h4 className="font-bold text-brand-brown text-sm uppercase tracking-wider flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-brand-gold" /> Messages Sent
+                </h4>
+                {selectedUser.contactMessages && selectedUser.contactMessages.length > 0 ? (
+                  <div className="space-y-3">
+                    {selectedUser.contactMessages.map((msg) => (
+                      <div key={msg.id} className="p-4 bg-brand-light rounded-xl border border-brand-brown/5 text-xs space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-brand-brown uppercase tracking-wider text-[10px]">
+                            Subject: {msg.subject}
+                          </span>
+                          <span className="text-brand-text-secondary/60 font-medium">
+                            {formatDate(msg.createdAt)}
+                          </span>
+                        </div>
+                        <p className="text-brand-text-secondary font-medium leading-relaxed bg-white/60 p-3 rounded-lg border border-brand-brown/5 whitespace-pre-wrap">
+                          {msg.message}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-brand-text-secondary text-center py-2">No messages sent by this customer.</p>
                 )}
               </div>
 

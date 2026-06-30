@@ -35,6 +35,11 @@ interface AdminUserState {
   searchQuery: string;
   selectedRole: UserRole | null;
 
+  contactMessages: any[];
+  isLoadingMessages: boolean;
+  messagesError: string | null;
+  isRespondingMessage: boolean;
+
   // Actions
   fetchCustomers: (page?: number, limit?: number, search?: string) => Promise<void>;
   getCustomerProfile: (id: string) => Promise<void>;
@@ -43,6 +48,8 @@ interface AdminUserState {
     status: 'ACTIVE' | 'SUSPENDED'
   ) => Promise<void>;
   updateCustomerRole: (id: string, role: UserRole) => Promise<void>;
+  fetchContactMessages: (page?: number, limit?: number) => Promise<void>;
+  respondContactMessage: (id: string, responseText: string) => Promise<void>;
   setSearchQuery: (query: string) => void;
   setSelectedRole: (role: UserRole | null) => void;
   setPagination: (page: number, pageSize: number) => void;
@@ -67,6 +74,10 @@ const initialState = {
   roleError: null,
   searchQuery: '',
   selectedRole: null,
+  contactMessages: [],
+  isLoadingMessages: false,
+  messagesError: null,
+  isRespondingMessage: false,
 };
 
 export const useAdminUserStore = create<AdminUserState>()(
@@ -162,6 +173,45 @@ export const useAdminUserStore = create<AdminUserState>()(
           throw error;
         } finally {
           set({ isUpdatingRole: false });
+        }
+      },
+
+      fetchContactMessages: async (page = 1, limit = 50) => {
+        set({ isLoadingMessages: true, messagesError: null });
+        try {
+          const data = await adminUserService.listContactMessages(page, limit);
+          set({
+            contactMessages: Array.isArray(data.data) ? data.data : [],
+          });
+        } catch (error) {
+          const message =
+            error instanceof AdminServiceError
+              ? error.message
+              : 'Failed to fetch contact messages';
+          set({ messagesError: message });
+        } finally {
+          set({ isLoadingMessages: false });
+        }
+      },
+
+      respondContactMessage: async (id: string, responseText: string) => {
+        set({ isRespondingMessage: true });
+        try {
+          const updated = await adminUserService.respondContactMessage(id, responseText);
+          // Optimistically patch the message in local state
+          set((state: any) => ({
+            contactMessages: state.contactMessages.map((m: any) =>
+              m.id === id ? { ...m, ...updated } : m
+            ),
+          }));
+        } catch (error) {
+          const message =
+            error instanceof AdminServiceError
+              ? error.message
+              : 'Failed to send response';
+          throw new Error(message);
+        } finally {
+          set({ isRespondingMessage: false });
         }
       },
 

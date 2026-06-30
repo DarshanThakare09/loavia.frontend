@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useAuthStore } from "@/store/authStore";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -39,10 +40,10 @@ const InstagramIcon = () => (
 export default function ContactPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
+  const { user } = useAuthStore();
   
   // Form state
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,6 +51,12 @@ export default function ContactPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Pre-fill name from logged-in user session
+  useEffect(() => {
+    if (user && !name && user.name) setName(user.name);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   useGSAP(() => {
     if (!mounted) return;
@@ -100,24 +107,37 @@ export default function ContactPage() {
     );
   }, { dependencies: [mounted], scope: containerRef });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !subject || !message) {
+    if (!name || !subject || !message) {
       toast.error("Please fill in all form fields.");
+      return;
+    }
+    // Use session email if logged in, otherwise prompt (shouldn't happen since field is removed)
+    const senderEmail = user?.email || "";
+    if (!senderEmail) {
+      toast.error("Please log in to send a message.");
       return;
     }
     
     setIsSubmitting(true);
-    
-    // Simulate submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const { apiClient } = await import("@/services/apiClient");
+      await apiClient.post("/contact", {
+        name: name.trim(),
+        email: senderEmail.trim(),
+        subject: subject.trim(),
+        message: message.trim(),
+      });
       toast.success("Thank you! Your message has been sent successfully. We will get back to you shortly.");
       setName("");
-      setEmail("");
       setSubject("");
       setMessage("");
-    }, 1500);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || "Failed to send message. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -188,29 +208,16 @@ export default function ContactPage() {
             <div className="w-12 h-[2px] bg-brand-gold mb-8"></div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="flex flex-col text-left">
-                  <label className="text-xs font-semibold text-brand-brown mb-2 pl-2">Your Name</label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter your name"
-                    className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-brand-brown/10 rounded-2xl focus:ring-1 focus:ring-brand-gold focus:border-brand-gold outline-none text-sm font-sans"
-                    required
-                  />
-                </div>
-                <div className="flex flex-col text-left">
-                  <label className="text-xs font-semibold text-brand-brown mb-2 pl-2">Email Address</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-brand-brown/10 rounded-2xl focus:ring-1 focus:ring-brand-gold focus:border-brand-gold outline-none text-sm font-sans"
-                    required
-                  />
-                </div>
+              <div className="flex flex-col text-left">
+                <label className="text-xs font-semibold text-brand-brown mb-2 pl-2">Your Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your name"
+                  className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-brand-brown/10 rounded-2xl focus:ring-1 focus:ring-brand-gold focus:border-brand-gold outline-none text-sm font-sans"
+                  required
+                />
               </div>
 
               <div className="flex flex-col text-left">

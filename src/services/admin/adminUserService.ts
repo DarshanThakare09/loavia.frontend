@@ -8,6 +8,7 @@ import {
   UpdateCustomerRoleRequestDTO,
   ApiResponse,
   ListCustomersQuery,
+  ContactMessageDTO,
 } from '@/types/admin';
 
 export const adminUserService = {
@@ -18,11 +19,19 @@ export const adminUserService = {
   ): Promise<PaginatedResponse<CustomerSummaryDTO>> {
     try {
       const response = await apiClient.get<
-        PaginatedResponse<CustomerSummaryDTO>
+        ApiResponse<{ data: CustomerSummaryDTO[]; total: number }>
       >('/admin/customers', {
         params: { page, limit, ...query },
       });
-      return response.data;
+      return {
+        data: response.data.data.data,
+        meta: {
+          page,
+          limit,
+          total: response.data.data.total,
+          totalPages: Math.ceil(response.data.data.total / limit),
+        },
+      };
     } catch (error) {
       throw handleApiError(error);
     }
@@ -65,6 +74,45 @@ export const adminUserService = {
       >(`/admin/customers/${id}/role`, {
         role,
       } as UpdateCustomerRoleRequestDTO);
+      return response.data.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  async listContactMessages(
+    page: number = 1,
+    limit: number = 50
+  ): Promise<PaginatedResponse<ContactMessageDTO>> {
+    try {
+      const response = await apiClient.get<
+        ApiResponse<{ data: ContactMessageDTO[]; total: number }>
+      >('/admin/contact-messages', {
+        params: { page, limit },
+      });
+      return {
+        data: response.data.data.data,
+        meta: {
+          page,
+          limit,
+          total: response.data.data.total,
+          totalPages: Math.ceil(response.data.data.total / limit),
+        },
+      };
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  async respondContactMessage(
+    id: string,
+    responseText: string
+  ): Promise<ContactMessageDTO> {
+    try {
+      const response = await apiClient.post<ApiResponse<ContactMessageDTO>>(
+        `/admin/contact-messages/${id}/respond`,
+        { responseText }
+      );
       return response.data.data;
     } catch (error) {
       throw handleApiError(error);
