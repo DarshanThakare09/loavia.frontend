@@ -10,7 +10,7 @@ export interface CategoryItem {
 export type ReviewStatus = 'pending' | 'approved' | 'rejected' | 'hidden';
 
 export interface ReviewItem {
-  id: number;
+  id: string | number;
   customerName: string;
   customerEmail: string;
   reviewText: string;
@@ -129,14 +129,14 @@ interface SiteState {
   ) => void;
   
   // Review Moderation Actions
-  moderateReview: (id: number, status: ReviewStatus) => void;
-  toggleReviewFeatured: (id: number) => void;
-  toggleReviewPinned: (id: number) => void;
-  deleteReview: (id: number) => void;
+  moderateReview: (id: string | number, status: ReviewStatus) => void;
+  toggleReviewFeatured: (id: string | number) => void;
+  toggleReviewPinned: (id: string | number) => void;
+  deleteReview: (id: string | number) => void;
   // Legacy compat
   addTestimonial: (testimonial: Omit<TestimonialItem, 'id'>) => void;
-  updateTestimonial: (id: number, data: Partial<TestimonialItem>) => void;
-  deleteTestimonial: (id: number) => void;
+  updateTestimonial: (id: string | number, data: Partial<TestimonialItem>) => void;
+  deleteTestimonial: (id: string | number) => void;
   setReviews: (reviews: ReviewItem[]) => void;
   addReview: (review: { customerName: string; customerEmail: string; reviewText: string; rating: number }) => void;
 }

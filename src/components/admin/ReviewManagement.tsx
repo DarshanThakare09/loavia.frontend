@@ -56,10 +56,10 @@ function StatusBadge({ status, featured, pinned }: { status: ReviewStatus; featu
 // ── Action menu ───────────────────────────────────────────────────────────────
 function ActionMenu({ review, onModerate, onFeature, onPin, onDelete }: {
   review: ReviewItem;
-  onModerate: (id: number, s: ReviewStatus) => void;
-  onFeature: (id: number) => void;
-  onPin: (id: number) => void;
-  onDelete: (id: number) => void;
+  onModerate: (id: string | number, s: ReviewStatus) => void;
+  onFeature: (id: string | number) => void;
+  onPin: (id: string | number) => void;
+  onDelete: (id: string | number) => void;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -161,24 +161,24 @@ export default function ReviewManagement() {
     return list;
   }, [reviews, filter, search]);
 
-  const handleModerate = (id: number, status: ReviewStatus) => {
+  const handleModerate = (id: string | number, status: ReviewStatus) => {
     moderateReview(id, status);
     toast.success(`Review marked as ${STATUS_CONFIG[status].label}.`);
   };
 
-  const handleFeature = (id: number) => {
+  const handleFeature = (id: string | number) => {
     const r = reviews.find(r => r.id === id);
     toggleReviewFeatured(id);
     toast.success(r?.featured ? "Removed from featured." : "Marked as featured.");
   };
 
-  const handlePin = (id: number) => {
+  const handlePin = (id: string | number) => {
     const r = reviews.find(r => r.id === id);
     toggleReviewPinned(id);
     toast.success(r?.pinned ? "Review unpinned." : "Review pinned to top.");
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string | number) => {
     if (!confirm("Permanently delete this review?")) return;
     deleteReview(id);
     toast.success("Review deleted.");

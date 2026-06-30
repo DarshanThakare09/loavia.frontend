@@ -34,6 +34,7 @@ export interface PlaceOrderPayload {
   addressId?: string;
   shippingAddress?: AddressDTO;
   couponCode?: string;
+  customGiftNote?: string;
   items?: Array<{
     variantId: string;
     quantity: number;

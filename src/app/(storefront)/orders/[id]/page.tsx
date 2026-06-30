@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
   CheckCircle, Package, Truck, Home, XCircle, Clock, AlertCircle,
-  MapPin, CreditCard, ShoppingBag, ChevronRight, ArrowLeft, RefreshCw
+  MapPin, CreditCard, ShoppingBag, ChevronRight, ArrowLeft, RefreshCw, Gift
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/authStore";
@@ -446,6 +446,21 @@ export default function OrderDetailPage() {
               )}
             </div>
           </div>
+
+          {/* ── Gift Note (If present) ── */}
+          {order.customGiftNote && (
+            <div className="p-8 border-b border-brand-brown/5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <h3 className="font-bold text-brand-brown mb-4 flex items-center space-x-2">
+                <Gift className="w-4 h-4 text-brand-gold animate-pulse" />
+                <span>Hand-Written Gift Note</span>
+              </h3>
+              <div className="bg-brand-cream/30 rounded-2xl p-5 border border-brand-brown/5">
+                <p className="italic text-brand-brown font-serif text-base leading-relaxed">
+                  "{order.customGiftNote}"
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* ── Shipment Tracking ── */}
           {order.shipment && (

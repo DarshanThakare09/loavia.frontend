@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { MockService } from "@/services/mockService";
 import { catalogService } from "@/services/catalogService";
+import { reviewService } from "@/services/reviewService";
 import { useProductStore } from "@/store/productStore";
 import { useSiteStore } from "@/store/siteStore";
 
@@ -36,7 +37,7 @@ export default function StorefrontLayout({
         const [productsData, categoriesData, reviews] = await Promise.all([
           catalogService.getProducts({ limit: 100 }),
           catalogService.getCategories(),
-          MockService.reviews.getReviews(),
+          reviewService.getApprovedReviews(),
         ]);
         setProducts(productsData.products);
         
@@ -46,7 +47,24 @@ export default function StorefrontLayout({
           link: `/shop?category=${cat.slug}`
         }));
         updateCategories(mappedCategories);
-        setReviews(reviews);
+
+        const mappedReviews = reviews.map((r: any) => ({
+          id: r.id,
+          customerName: r.user?.name || "Anonymous",
+          customerEmail: r.user?.email || "",
+          reviewText: r.comment || "",
+          rating: r.rating,
+          status: (r.status || "APPROVED").toLowerCase() as any,
+          featured: false,
+          pinned: false,
+          createdAt: r.createdAt,
+          // Legacy compat for storefront Testimonials component
+          name: r.user?.name || "Anonymous",
+          role: "Verified Buyer",
+          content: r.comment || "",
+        }));
+
+        setReviews(mappedReviews);
       } catch (err) {
         console.error("Failed to load initial storefront data from backend", err);
       }

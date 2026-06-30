@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, ChevronRight, CreditCard, Truck, MapPin, Tag, ArrowLeft } from "lucide-react";
+import { CheckCircle2, ChevronRight, CreditCard, Truck, MapPin, Tag, ArrowLeft, Gift } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { checkoutService, CheckoutValidateResponse, CheckoutValidatePayload, PlaceOrderPayload } from "@/services/checkoutService";
@@ -28,6 +28,9 @@ export default function CheckoutPage() {
     phone: "",
     email: "",
   });
+
+  const [customGiftNote, setCustomGiftNote] = useState("");
+  const hasCustomBox = items.some(item => item.isCustomBox);
 
   // Backend calculations state
   const [calculations, setCalculations] = useState<CheckoutValidateResponse | null>(null);
@@ -226,6 +229,7 @@ export default function CheckoutPage() {
           email: isAuthenticated ? user?.email : addressForm.email.trim(),
         },
         couponCode: appliedPromoCode || undefined,
+        customGiftNote: hasCustomBox && customGiftNote.trim() ? customGiftNote.trim() : undefined,
       };
 
       if (!isAuthenticated) {
@@ -493,6 +497,28 @@ export default function CheckoutPage() {
                     )}
 
                   </div>
+
+                  {hasCustomBox && (
+                    <div className="mb-8 p-6 bg-brand-light/30 border border-brand-gold/15 rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+                      <h3 className="text-sm font-bold text-brand-brown mb-2 flex items-center">
+                        <Gift className="w-4 h-4 mr-2 text-brand-gold" /> Add a Hand-Written Note
+                      </h3>
+                      <p className="text-xs text-brand-text-secondary mb-4 leading-relaxed font-light">
+                        Since your order contains a customized gift box, you can request a complimentary hand-written message to be included in the box.
+                      </p>
+                      <textarea
+                        value={customGiftNote}
+                        onChange={(e) => setCustomGiftNote(e.target.value)}
+                        placeholder="Write your personal message here (e.g. 'Dear Mom, Happy Birthday! Love, Rahul.')"
+                        rows={3}
+                        maxLength={250}
+                        className="w-full bg-white border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-xl py-3 px-4 outline-none font-medium text-brand-brown shadow-sm transition-all duration-300 placeholder:text-brand-text-secondary/40 text-sm resize-none"
+                      />
+                      <div className="text-right text-[10px] text-brand-text-secondary/70 mt-1">
+                        {customGiftNote.length}/250 characters
+                      </div>
+                    </div>
+                  )}
                   <div className="flex gap-4">
                     <button onClick={() => setStep(1)} className="w-1/3 px-8 py-4 font-bold text-brand-brown bg-brand-light rounded-xl hover:bg-brand-brown/10 transition-colors cursor-pointer">Back</button>
                     <button onClick={handleNextStep} className="w-2/3 flex items-center justify-center space-x-2 px-8 py-4 font-bold text-white bg-brand-brown rounded-xl hover:bg-brand-gold transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
@@ -524,6 +550,12 @@ export default function CheckoutPage() {
                       <span className="text-brand-text-secondary">Shipping Address:</span>
                       <span className="font-bold text-brand-brown text-right max-w-[200px] line-clamp-2">{addressForm.street}, {addressForm.city}</span>
                     </div>
+                    {hasCustomBox && customGiftNote.trim() && (
+                      <div className="flex justify-between text-sm border-t border-brand-brown/5 pt-2">
+                        <span className="text-brand-text-secondary">Gift Note:</span>
+                        <span className="font-bold text-brand-brown italic max-w-[200px] line-clamp-2 text-right">"{customGiftNote.trim()}"</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex gap-4 max-w-md mx-auto">

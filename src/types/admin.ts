@@ -103,6 +103,7 @@ export interface OrderListDTO {
   createdAt: string;   // ISO date
   items: OrderItemDTO[];
   shipment?: ShipmentDTO;
+  customGiftNote?: string | null;
   customer?: {
     name: string;
     email: string;

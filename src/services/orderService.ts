@@ -108,6 +108,7 @@ export interface OrderDetail {
   couponCode: string | null;
   createdAt: string;
   shippingAddress: OrderShippingAddress;
+  customGiftNote?: string | null;
   items: OrderDetailItem[];
   payment: OrderDetailPayment | null;
   shipment: OrderDetailShipment | null;

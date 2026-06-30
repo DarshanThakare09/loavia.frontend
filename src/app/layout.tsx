@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display, Nunito } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import ScrollToTop from "@/components/layout/ScrollToTop";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -34,6 +35,7 @@ export default function RootLayout({
       className={`${inter.variable} ${playfair.variable} ${nunito.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-proxima text-brand-text-primary bg-brand-cream">
+        <ScrollToTop />
         <Toaster position="bottom-right" richColors />
         {children}
       </body>

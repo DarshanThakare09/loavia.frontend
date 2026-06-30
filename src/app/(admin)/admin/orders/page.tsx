@@ -5,7 +5,7 @@ import { useAdminOrderStore } from "@/store/adminOrderStore";
 import { OrderListDTO, OrderStatus, ShipmentStatus } from "@/types/admin";
 import {
   Search, Eye, X, Calendar, User, MapPin, CreditCard,
-  ShoppingBag, AlertCircle, Loader2, Truck, RefreshCw,
+  ShoppingBag, AlertCircle, Loader2, Truck, RefreshCw, Gift
 } from "lucide-react";
 import Image from "next/image";
 
@@ -401,6 +401,18 @@ export default function AdminOrdersPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Hand-Written Gift Note */}
+              {selectedOrder.customGiftNote && (
+                <div className="bg-amber-50/60 p-5 rounded-2xl border border-brand-gold/25 space-y-3 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <h4 className="font-bold text-brand-brown text-sm uppercase tracking-wider flex items-center">
+                    <Gift className="w-4 h-4 mr-2 text-brand-gold animate-bounce" /> Hand-Written Gift Note
+                  </h4>
+                  <div className="bg-white p-4 rounded-xl border border-brand-brown/5 italic text-brand-brown font-serif text-base shadow-inner leading-relaxed">
+                    "{selectedOrder.customGiftNote}"
+                  </div>
+                </div>
+              )}
 
               {/* Shipment */}
               {selectedOrder.shipment && (

@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSiteStore } from "@/store/siteStore";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,33 +17,37 @@ export function Categories() {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
-  const [isMobile, setIsMobile] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches
-  );
 
   const { categoriesList } = useSiteStore();
   const categories = categoriesList || [];
 
-  const headingText = "Shop by Category".split("");
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const handleNext = () => {
+    setActiveIndex((prev) => (prev + 1) % categories.length);
+  };
+
+  const handlePrev = () => {
+    setActiveIndex((prev) => (prev - 1 + categories.length) % categories.length);
+  };
+
+  // Auto-scroll loop
+  useEffect(() => {
+    if (categories.length <= 1) return;
+    const interval = setInterval(handleNext, 6000);
+    return () => clearInterval(interval);
+  }, [categories.length]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
     mediaQuery.addEventListener("change", handler);
-
-    const mobileQuery = window.matchMedia("(max-width: 768px)");
-    const mobileHandler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mobileQuery.addEventListener("change", mobileHandler);
-
-    return () => {
-      mediaQuery.removeEventListener("change", handler);
-      mobileQuery.removeEventListener("change", mobileHandler);
-    };
+    return () => mediaQuery.removeEventListener("change", handler);
   }, []);
 
   useGSAP(() => {
     if (prefersReducedMotion) {
-      gsap.set(".cat-char, .category-circle", { opacity: 1, y: 0, scale: 1 });
+      gsap.set(".cat-char, .category-deck", { opacity: 1, y: 0 });
       gsap.set(".cat-underline", { opacity: 1, y: 0, width: "60%" });
       return;
     }
@@ -55,7 +60,7 @@ export function Categories() {
       }
     });
 
-    // Heading chars
+    // Heading animation
     tl.fromTo(".cat-char",
       { opacity: 0, y: 30 },
       { opacity: 1, y: 0, duration: 0.5, stagger: 0.03, ease: "power2.out" }
@@ -65,110 +70,12 @@ export function Categories() {
         { width: "60%", duration: 0.6, ease: "power2.inOut" },
         "+=0.1"
       )
-      .fromTo(".category-circle",
-        { opacity: 0, y: 80, scale: 0.8 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.8, stagger: 0.15, ease: "back.out(1.4)" },
-        "-=0.6"
+      .fromTo(".category-deck",
+        { opacity: 0, y: 60 },
+        { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
+        "-=0.4"
       );
-
-    // Parallax
-    gsap.utils.toArray<HTMLElement>(".category-img-container").forEach((el, i) => {
-      const yAmount = i % 2 === 0 ? 20 : 30;
-      const img = el.querySelector("img");
-      if (!img) return;
-      gsap.fromTo(img,
-        { y: yAmount },
-        {
-          y: -yAmount,
-          ease: "none",
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1.5
-          }
-        }
-      );
-    });
-
   }, { scope: containerRef, dependencies: [prefersReducedMotion] });
-
-  useEffect(() => {
-    if (isMobile || prefersReducedMotion) return;
-
-    // Magnetic Cursor Effect
-    const section = containerRef.current;
-    if (!section) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const circles = section.querySelectorAll<HTMLElement>(".category-circle");
-      circles.forEach((circle) => {
-        const rect = circle.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const distX = e.clientX - centerX;
-        const distY = e.clientY - centerY;
-        const distance = Math.sqrt(distX ** 2 + distY ** 2);
-
-        if (distance < 80) {
-          gsap.to(circle, {
-            x: distX * 0.15,
-            y: distY * 0.15,
-            duration: 0.4,
-            ease: "power2.out"
-          });
-        } else {
-          gsap.to(circle, { x: 0, y: 0, duration: 0.4, ease: "elastic.out(1, 0.4)" });
-        }
-      });
-    };
-
-    section.addEventListener("mousemove", handleMouseMove);
-    return () => section.removeEventListener("mousemove", handleMouseMove);
-  }, [isMobile, prefersReducedMotion]);
-
-  const handleCircleMouseMove = (e: React.MouseEvent) => {
-    if (isMobile || prefersReducedMotion) return;
-    const element = e.currentTarget as HTMLElement;
-    const rect = element.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const rotateX = ((e.clientY - centerY) / (rect.height / 2)) * 12;
-    const rotateY = ((e.clientX - centerX) / (rect.width / 2)) * -12;
-
-    gsap.to(element, {
-      rotateX,
-      rotateY,
-      transformPerspective: 800,
-      duration: 0.1,
-      ease: "none"
-    });
-
-    const img = element.querySelector(".category-img-container");
-    if (img) {
-      gsap.to(img, {
-        x: rotateY * -0.4,
-        y: rotateX * 0.4,
-        duration: 0.1,
-        ease: "none"
-      });
-    }
-  };
-
-  const handleCircleMouseLeave = (e: React.MouseEvent) => {
-    if (isMobile || prefersReducedMotion) return;
-    const element = e.currentTarget as HTMLElement;
-    gsap.to(element, {
-      rotateX: 0, rotateY: 0,
-      duration: 0.5,
-      ease: "elastic.out(1, 0.5)"
-    });
-
-    const img = element.querySelector(".category-img-container");
-    if (img) {
-      gsap.to(img, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.5)" });
-    }
-  };
 
   const handleCircleClick = (e: React.MouseEvent, link: string) => {
     e.preventDefault();
@@ -181,7 +88,7 @@ export function Categories() {
   };
 
   return (
-    <section ref={containerRef} id="category-section" className="relative py-24 md:py-28 bg-brand-light overflow-hidden">
+    <section ref={containerRef} id="category-section" className="relative py-24 md:py-28 bg-[#FDFBF7] overflow-hidden">
       <style>{`
         .category-bg-layer {
           background-image: url('/cookie-parallax-bg.png');
@@ -195,6 +102,67 @@ export function Categories() {
             background-attachment: fixed;
           }
         }
+        
+        .category-deck {
+          perspective: 1000px;
+        }
+        .category-card {
+          position: absolute;
+          left: 50%;
+          transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+          width: 90%;
+          max-width: 320px;
+        }
+        .category-card-active {
+          transform: translateX(-50%) scale(1.05);
+          opacity: 1;
+          z-index: 30;
+        }
+        .category-card-prev {
+          transform: translateX(calc(-50% - 220px)) scale(0.9) rotateY(15deg);
+          opacity: 0.4;
+          z-index: 20;
+          cursor: pointer;
+        }
+        .category-card-next {
+          transform: translateX(calc(-50% + 220px)) scale(0.9) rotateY(-15deg);
+          opacity: 0.4;
+          z-index: 20;
+          cursor: pointer;
+        }
+        .category-card-out {
+          transform: translateX(-50%) scale(0.8);
+          opacity: 0;
+          z-index: 10;
+          pointer-events: none;
+        }
+        @media (max-width: 1024px) {
+          .category-card-prev {
+            transform: translateX(calc(-50% - 150px)) scale(0.9) rotateY(10deg);
+          }
+          .category-card-next {
+            transform: translateX(calc(-50% + 150px)) scale(0.9) rotateY(-10deg);
+          }
+        }
+        @media (max-width: 768px) {
+          .category-card {
+            max-width: 95%;
+          }
+          .category-card-prev {
+            transform: translateX(-150%) scale(0.8);
+            opacity: 0;
+            pointer-events: none;
+          }
+          .category-card-next {
+            transform: translateX(50%) scale(0.8);
+            opacity: 0;
+            pointer-events: none;
+          }
+          .category-card-active {
+            transform: translateX(-50%) scale(1);
+          }
+        }
+
         @keyframes floatAnim0 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         @keyframes floatAnim1 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes floatAnim2 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
@@ -203,8 +171,9 @@ export function Categories() {
         .float-1 { animation: floatAnim1 3.8s ease-in-out infinite; }
         .float-2 { animation: floatAnim2 3.5s ease-in-out infinite; }
         .float-3 { animation: floatAnim3 4.0s ease-in-out infinite; }
-        .float-paused { animation-play-state: paused; }
-        .category-circle:hover { animation-play-state: paused; }
+        .float-0:hover, .float-1:hover, .float-2:hover, .float-3:hover {
+          animation-play-state: paused;
+        }
       `}</style>
       <div className="category-bg-layer absolute inset-[-8%] z-0 opacity-100"></div>
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -238,49 +207,100 @@ export function Categories() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
-          {categories.map((category, index) => {
-            return (
-              <div
-                key={category.name}
-                className={`category-circle opacity-0 will-change-transform float-${index}`}
-                onMouseMove={handleCircleMouseMove}
-                onMouseLeave={handleCircleMouseLeave}
-              >
-                <a
-                  href={category.link}
-                  onClick={(e) => handleCircleClick(e, category.link)}
-                  className="block relative aspect-[4/5] overflow-hidden rounded-[2.5rem] bg-white shadow-md transition-all duration-500 group focus:outline-none focus:ring-4 focus:ring-brand-gold hover:shadow-2xl"
-                  tabIndex={0}
-                  aria-label={`Shop ${category.name}`}
-                >
-                  <div className="category-img-container absolute inset-0 w-full h-full transition-transform duration-700 ease-out group-hover:scale-110">
-                    <Image
-                      src={category.image}
-                      alt={category.name}
-                      fill
-                      className="object-cover"
-                      priority={false}
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    />
-                    {/* Subtle overlay gradient to blend background */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10 z-10" />
-                  </div>
+        {/* Carousel Deck Wrapper */}
+        <div className="relative category-deck w-full min-h-[440px] md:min-h-[400px] flex items-center justify-center overflow-visible">
+          {/* Navigation Arrows */}
+          <button
+            onClick={handlePrev}
+            className="absolute left-0 md:left-2 lg:left-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/70 backdrop-blur-sm border border-[#5C3317]/10 flex items-center justify-center text-brand-brown hover:bg-brand-brown hover:text-white transition-all duration-300 shadow-md z-40 cursor-pointer"
+            aria-label="Previous category"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
 
-                  {/* Fading dark brown gradient shadow overlay from bottom to top */}
-                  <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 bg-gradient-to-t from-[#5C3317]/95 via-[#5C3317]/40 to-transparent transition-all duration-500 group-hover:from-[#5C3317]/100 group-hover:via-[#5C3317]/55">
-                    <h3 className="text-white font-sans font-bold text-xl sm:text-2xl text-left transition-colors duration-300 group-hover:text-brand-gold transform group-hover:-translate-y-1">
-                      {category.name}
-                    </h3>
-                    <div className="mt-2 text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-brand-gold/80 flex items-center justify-between transform group-hover:-translate-y-1 transition-transform duration-300">
-                      <span>Shop Now</span>
-                      <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+          <button
+            onClick={handleNext}
+            className="absolute right-0 md:right-2 lg:right-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/70 backdrop-blur-sm border border-[#5C3317]/10 flex items-center justify-center text-brand-brown hover:bg-brand-brown hover:text-white transition-all duration-300 shadow-md z-40 cursor-pointer"
+            aria-label="Next category"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+
+          {/* Cards */}
+          <div className="w-full relative h-full flex items-center justify-center">
+            {categories.map((category, index) => {
+              const total = categories.length;
+              let cardClass = "category-card-out";
+              
+              if (total === 1) {
+                cardClass = "category-card-active";
+              } else {
+                const diff = (index - activeIndex + total) % total;
+                if (diff === 0) cardClass = "category-card-active";
+                else if (diff === 1 || (total === 2 && diff === 1)) cardClass = "category-card-next";
+                else if (diff === total - 1) cardClass = "category-card-prev";
+              }
+
+              return (
+                <div
+                  key={category.name}
+                  onClick={() => {
+                    if (cardClass === "category-card-next") handleNext();
+                    if (cardClass === "category-card-prev") handlePrev();
+                  }}
+                  className={`category-card ${cardClass}`}
+                >
+                  <div className={`float-${index} w-full h-full`}>
+                    <a
+                      href={category.link}
+                      onClick={(e) => handleCircleClick(e, category.link)}
+                      className="block relative aspect-[4/5] overflow-hidden rounded-[2.5rem] bg-white shadow-md transition-all duration-500 group focus:outline-none focus:ring-4 focus:ring-brand-gold hover:shadow-2xl"
+                      tabIndex={0}
+                      aria-label={`Shop ${category.name}`}
+                    >
+                    <div className="category-img-container absolute inset-0 w-full h-full transition-transform duration-700 ease-out group-hover:scale-110">
+                      <Image
+                        src={category.image}
+                        alt={category.name}
+                        fill
+                        className="object-cover"
+                        priority={false}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      />
+                      {/* Subtle overlay gradient to blend background */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10 z-10" />
                     </div>
-                  </div>
-                </a>
+
+                    {/* Fading dark brown gradient shadow overlay from bottom to top */}
+                    <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 bg-gradient-to-t from-[#5C3317]/95 via-[#5C3317]/40 to-transparent transition-all duration-500 group-hover:from-[#5C3317]/100 group-hover:via-[#5C3317]/55">
+                      <h3 className="text-white font-sans font-bold text-xl sm:text-2xl text-left transition-colors duration-300 group-hover:text-brand-gold transform group-hover:-translate-y-1">
+                        {category.name}
+                      </h3>
+                      <div className="mt-2 text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-brand-gold/80 flex items-center justify-between transform group-hover:-translate-y-1 transition-transform duration-300">
+                        <span>Shop Now</span>
+                        <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+                      </div>
+                    </div>
+                  </a>
+                </div>
               </div>
             );
-          })}
+            })}
+          </div>
+        </div>
+
+        {/* Indicators */}
+        <div className="flex justify-center space-x-3 mt-12 relative z-30">
+          {categories.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setActiveIndex(index)}
+              className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                index === activeIndex ? "bg-brand-gold w-8" : "bg-brand-brown/20 hover:bg-brand-brown/40"
+              }`}
+              aria-label={`Go to category ${index + 1}`}
+            />
+          ))}
         </div>
       </div>
     </section>
