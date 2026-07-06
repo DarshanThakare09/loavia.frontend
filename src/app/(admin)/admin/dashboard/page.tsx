@@ -300,7 +300,6 @@ export default function AdminDashboard() {
     setCats(updatedCats);
   };
 
-<<<<<<< HEAD
   const handleMoodChange = (index: number, field: string, value: string) => {
     const updated = [...smMoods];
     updated[index] = { ...updated[index], [field]: value };
@@ -313,14 +312,6 @@ export default function AdminDashboard() {
 
   const handleRemoveMood = (index: number) => {
     setSmMoods(smMoods.filter((_, i) => i !== index));
-=======
-  const handleAddCategory = () => {
-    setCats([...cats, { name: "", image: "", link: "/shop" }]);
-  };
-
-  const handleRemoveCategory = (index: number) => {
-    setCats(cats.filter((_, i) => i !== index));
->>>>>>> f4f58064ac4eea3d959cf4540526b736906bbc11
   };
 
   // ── Analytics cards ─────────────────────────────────────────────────────
