@@ -6,6 +6,7 @@ import { ArrowLeft, Loader2, Save, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminProductStore } from "@/store/adminProductStore";
 import { ProductStatus } from "@/types/admin";
+import { catalogService } from "@/services/catalogService";
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -16,16 +17,34 @@ export default function EditProductPage() {
 
   const [name, setName]               = useState("");
   const [description, setDescription] = useState("");
+  const [ingredients, setIngredients] = useState("");
+  const [calories, setCalories]       = useState("");
+  const [categoryId, setCategoryId]   = useState("");
   const [price, setPrice]             = useState("");
   const [discountPrice, setDiscount]  = useState("");
   const [status, setStatus]           = useState<ProductStatus>("ACTIVE");
   const [isFeatured, setFeatured]     = useState(false);
+  const [isBestSeller, setBestSeller] = useState(false);
   const [images, setImages]           = useState<string[]>(["", "", ""]);
   const [tags, setTags]               = useState("");
+  const [categories, setCategories]   = useState<any[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
-  // ── Load product ─────────────────────────────────────────────────────
+  // ── Load product and categories ───────────────────────────────────────
   useEffect(() => {
     if (id) getProduct(id);
+    
+    async function loadCategories() {
+      try {
+        const cats = await catalogService.getCategories();
+        setCategories(cats);
+      } catch (err) {
+        toast.error("Failed to load categories.");
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    }
+    loadCategories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -34,12 +53,25 @@ export default function EditProductPage() {
     if (!selectedProduct) return;
     setName(selectedProduct.name);
     setDescription(selectedProduct.description ?? "");
+    setIngredients(selectedProduct.ingredients ?? "");
+    setCalories(selectedProduct.calories ?? "");
+    setCategoryId(selectedProduct.category?.id ?? "");
     setPrice((selectedProduct.price / 100).toString());
     setDiscount(selectedProduct.discountPrice ? (selectedProduct.discountPrice / 100).toString() : "");
     setStatus(selectedProduct.status);
     setFeatured(selectedProduct.isFeatured);
+    setBestSeller(selectedProduct.isFeatured && selectedProduct.tags?.includes("Best Seller") ? true : false); // fallback sync
     setImages(selectedProduct.images?.length ? [...selectedProduct.images, "", ""].slice(0, 3) : ["", "", ""]);
     setTags(selectedProduct.tags?.join(", ") ?? "");
+  }, [selectedProduct]);
+
+  // Try to read isBestSeller properly from backend fields
+  useEffect(() => {
+    if (!selectedProduct) return;
+    // We can check if isBestSeller is set on selectedProduct
+    if ('isBestSeller' in selectedProduct) {
+      setBestSeller((selectedProduct as any).isBestSeller);
+    }
   }, [selectedProduct]);
 
   const updateImage = (idx: number, val: string) => {
@@ -51,6 +83,13 @@ export default function EditProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) { toast.error("Product name is required."); return; }
+    if (!categoryId.trim()) { toast.error("Category is required."); return; }
+    if (!description.trim() || description.trim().length < 10) { 
+      toast.error("Description must be at least 10 characters."); 
+      return; 
+    }
+    if (!ingredients.trim()) { toast.error("Ingredients list is required."); return; }
+    
     const cleanImages = images.filter(Boolean);
     if (cleanImages.length === 0) { toast.error("At least one image URL is required."); return; }
 
@@ -58,13 +97,19 @@ export default function EditProductPage() {
       await updateProduct(id, {
         name: name.trim(),
         description: description.trim(),
-        price: Math.round(Number(price) * 100),
-        discountPrice: discountPrice ? Math.round(Number(discountPrice) * 100) : undefined,
-        images: cleanImages,
+        ingredients: ingredients.trim(),
+        calories: calories.trim() || null,
+        categoryId: categoryId.trim(),
+        images: cleanImages.map((url, idx) => ({
+          url,
+          isPrimary: idx === 0,
+          altText: `${name.trim()} image ${idx + 1}`
+        })),
         status,
         isFeatured,
+        isBestSeller,
         tags: tags.split(",").map(t => t.trim()).filter(Boolean),
-      });
+      } as any);
       toast.success("Product updated.");
       router.push("/admin/products");
     } catch { /* toast shown by store */ }
@@ -118,6 +163,7 @@ export default function EditProductPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Basic Information */}
         <div className="bg-white p-6 rounded-2xl border border-brand-brown/10 shadow-sm space-y-4">
           <h2 className="font-bold text-brand-brown text-base">Basic Information</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -125,19 +171,42 @@ export default function EditProductPage() {
               <label className={labelClass}>Product Name *</label>
               <input type="text" value={name} onChange={e => setName(e.target.value)} className={inputClass} required />
             </div>
-            {selectedProduct && (
-              <div className="sm:col-span-2">
-                <label className={labelClass}>Category</label>
-                <input type="text" value={selectedProduct.category?.name ?? "—"} className={`${inputClass} bg-brand-light/50 text-brand-text-secondary`} disabled />
-              </div>
-            )}
+            <div>
+              <label className={labelClass}>Category *</label>
+              {isLoadingCategories ? (
+                <div className="text-sm text-brand-text-secondary py-2.5">Loading categories...</div>
+              ) : (
+                <select value={categoryId} onChange={e => setCategoryId(e.target.value)} className={inputClass} required>
+                  <option value="">Select Category</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+            <div>
+              <label className={labelClass}>SKU (Read Only)</label>
+              <input type="text" value={selectedProduct?.sku || ""} className={`${inputClass} bg-brand-light/50 text-brand-text-secondary font-mono`} disabled />
+            </div>
             <div className="sm:col-span-2">
-              <label className={labelClass}>Description</label>
-              <textarea value={description} onChange={e => setDescription(e.target.value)} className={`${inputClass} min-h-[100px] resize-none`} />
+              <label className={labelClass}>Description * (Minimum 10 characters)</label>
+              <textarea value={description} onChange={e => setDescription(e.target.value)} className={`${inputClass} min-h-[100px] resize-none`} required />
+              <p className="text-xs text-brand-text-secondary mt-1">
+                {description.length}/10 characters minimum
+              </p>
+            </div>
+            <div className="sm:col-span-2">
+              <label className={labelClass}>Ingredients *</label>
+              <textarea value={ingredients} onChange={e => setIngredients(e.target.value)} className={`${inputClass} min-h-[80px] resize-none`} required />
+            </div>
+            <div>
+              <label className={labelClass}>Calories (e.g. 220 kcal)</label>
+              <input type="text" value={calories} onChange={e => setCalories(e.target.value)} className={inputClass} placeholder="e.g. 220 kcal (optional)" />
             </div>
           </div>
         </div>
 
+        {/* Pricing & Status */}
         <div className="bg-white p-6 rounded-2xl border border-brand-brown/10 shadow-sm space-y-4">
           <h2 className="font-bold text-brand-brown text-base">Pricing & Status</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -161,13 +230,20 @@ export default function EditProductPage() {
               <label className={labelClass}>Tags (comma-separated)</label>
               <input type="text" value={tags} onChange={e => setTags(e.target.value)} className={inputClass} placeholder="healthy, gift, bestseller" />
             </div>
-            <div className="sm:col-span-2 flex items-center gap-3">
-              <input type="checkbox" id="featured" checked={isFeatured} onChange={e => setFeatured(e.target.checked)} className="w-4 h-4 accent-brand-brown" />
-              <label htmlFor="featured" className="text-sm font-semibold text-brand-text-primary cursor-pointer">Mark as Featured Product</label>
+            <div className="sm:col-span-2 flex flex-wrap gap-6 mt-2">
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input type="checkbox" checked={isFeatured} onChange={e => setFeatured(e.target.checked)} className="w-4 h-4 accent-brand-brown" />
+                <span className="text-sm font-semibold text-brand-text-primary">Mark as Featured Product</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input type="checkbox" checked={isBestSeller} onChange={e => setBestSeller(e.target.checked)} className="w-4 h-4 accent-brand-brown" />
+                <span className="text-sm font-semibold text-brand-text-primary">Mark as Best Seller</span>
+              </label>
             </div>
           </div>
         </div>
 
+        {/* Product Images */}
         <div className="bg-white p-6 rounded-2xl border border-brand-brown/10 shadow-sm space-y-4">
           <h2 className="font-bold text-brand-brown text-base">Product Images</h2>
           <p className="text-xs text-brand-text-secondary">First image is the primary display image.</p>

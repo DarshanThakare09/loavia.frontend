@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { siteService } from '@/services/siteService';
 
 export interface CategoryItem {
   name: string;
@@ -42,6 +43,11 @@ interface SiteState {
   featuredProductsTitle: string;
   featuredProductsSubtitle: string;
   featuredProductsCtaText: string;
+
+  // Shop By Mood Section
+  shopByMoodTitle: string;
+  shopByMoodSubtitle: string;
+  shopByMoodList: string;
   
   // Why Choose Section
   whyChooseTitle: string;
@@ -97,6 +103,8 @@ interface SiteState {
   aboutStat3Desc: string;
   
   // Setters
+  loadSettingsFromServer: () => Promise<void>;
+  updateShopByMood: (title: string, subtitle: string, list: string) => void;
   updateAnnouncement: (text: string) => void;
   updateHero: (title: string, subtitle: string) => void;
   updateBestSellers: (title: string, subtitle: string) => void;
@@ -235,6 +243,16 @@ export const useSiteStore = create<SiteState>()(
       featuredProductsTitle: "Featured Products",
       featuredProductsSubtitle: "Explore our most loved millet cookies crafted for tea-time indulgence, healthy snacking, and premium gifting.",
       featuredProductsCtaText: "Explore Products",
+
+      // Shop By Mood Default Values
+      shopByMoodTitle: "What's your mood?",
+      shopByMoodSubtitle: "Whether you need a mid-day energy boost or a decadent midnight snack, we have a cookie crafted just for how you feel.",
+      shopByMoodList: JSON.stringify([
+        { id: "sweet", name: "Craving Sweet", icon: "Heart", image: "/stuffed_cookie.png", link: "/shop?mood=sweet" },
+        { id: "healthy", name: "Healthy Fix", icon: "Sparkles", image: "/vegan_cookie.png", link: "/shop?mood=healthy" },
+        { id: "tea", name: "Perfect with Tea", icon: "Coffee", image: "/premium_cookie.png", link: "/shop?mood=tea" },
+        { id: "gifting", name: "Gifting", icon: "Gift", image: "/cookie_gift_box.png", link: "/shop?mood=gifting" }
+      ]),
       
       
       // Why Choose Default Values
@@ -291,6 +309,54 @@ export const useSiteStore = create<SiteState>()(
       aboutStat3Desc: "Made fresh every morning in our Nashik kitchen.",
 
       // Setters
+      loadSettingsFromServer: async () => {
+        try {
+          const settings = await siteService.getSettings();
+          set({
+            announcementText: settings.announcementText,
+            heroTitle: settings.heroTitle,
+            heroSubtitle: settings.heroSubtitle,
+            bestSellersTitle: settings.bestSellersTitle,
+            bestSellersSubtitle: settings.bestSellersSubtitle,
+            featuredProductsTitle: settings.featuredProductsTitle,
+            featuredProductsSubtitle: settings.featuredProductsSubtitle,
+            featuredProductsCtaText: settings.featuredProductsCtaText,
+            whyChooseTitle: settings.whyChooseTitle,
+            whyChooseDescription: settings.whyChooseDescription,
+            whyChooseFeatures: settings.whyChooseFeatures ? JSON.parse(settings.whyChooseFeatures) : [],
+            giftingTitle: settings.giftingTitle,
+            giftingDescription: settings.giftingDescription,
+            aboutStoryTitle: settings.aboutStoryTitle,
+            aboutStorySubtitle: settings.aboutStorySubtitle,
+            aboutFounderName: settings.aboutFounderName,
+            aboutFounderText: settings.aboutFounderText,
+            aboutMeaningTitle: settings.aboutMeaningTitle,
+            aboutMeaningSubtitle: settings.aboutMeaningSubtitle,
+            aboutMeaningText1: settings.aboutMeaningText1,
+            aboutMeaningText2: settings.aboutMeaningText2,
+            aboutMeaningText3: settings.aboutMeaningText3,
+            aboutNashikRootsTitle: settings.aboutNashikRootsTitle,
+            aboutNashikRootsText1: settings.aboutNashikRootsText1,
+            aboutNashikRootsText2: settings.aboutNashikRootsText2,
+            aboutStat1Number: settings.aboutStat1Number,
+            aboutStat1Title: settings.aboutStat1Title,
+            aboutStat1Desc: settings.aboutStat1Desc,
+            aboutStat2Number: settings.aboutStat2Number,
+            aboutStat2Title: settings.aboutStat2Title,
+            aboutStat2Desc: settings.aboutStat2Desc,
+            aboutStat3Number: settings.aboutStat3Number,
+            aboutStat3Title: settings.aboutStat3Title,
+            aboutStat3Desc: settings.aboutStat3Desc,
+            shopByMoodTitle: settings.shopByMoodTitle,
+            shopByMoodSubtitle: settings.shopByMoodSubtitle,
+            shopByMoodList: settings.shopByMoodList,
+            categoriesList: settings.categoriesList ? JSON.parse(settings.categoriesList) : [],
+          });
+        } catch (err) {
+          console.error("Failed to load settings from server:", err);
+        }
+      },
+      updateShopByMood: (title, subtitle, list) => set({ shopByMoodTitle: title, shopByMoodSubtitle: subtitle, shopByMoodList: list }),
       updateAnnouncement: (text) => set({ announcementText: text }),
       updateHero: (title, subtitle) => set({ heroTitle: title, heroSubtitle: subtitle }),
       updateBestSellers: (title, subtitle) => set({ bestSellersTitle: title, bestSellersSubtitle: subtitle }),

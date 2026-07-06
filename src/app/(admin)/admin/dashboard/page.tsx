@@ -4,6 +4,8 @@ import { useSiteStore, CategoryItem } from "@/store/siteStore";
 import { useAdminDashboardStore } from "@/store/adminDashboardStore";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { siteService } from "@/services/siteService";
 import {
   Save, IndianRupee, ShoppingBag, Users, Cookie,
   Settings, AlertCircle, Loader2, TrendingUp,
@@ -11,7 +13,6 @@ import {
 } from "lucide-react";
 import FeaturedProductsManager from "@/components/admin/FeaturedProductsManager";
 import GiftingSectionAdmin from "@/components/admin/GiftingSectionAdmin";
-import ReviewManagement from "@/components/admin/ReviewManagement";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -34,7 +35,8 @@ export default function AdminDashboard() {
     updateAnnouncement, updateHero, updateBestSellers, updateWhyChoose,
     updateCategories, updateGifting,
     updateAboutStory, updateAboutFounder, updateAboutMeaning,
-    updateAboutRoots, updateAboutStats,
+    updateAboutRoots, updateAboutStats, loadSettingsFromServer,
+    shopByMoodTitle, shopByMoodSubtitle, shopByMoodList, updateShopByMood,
   } = useSiteStore();
 
   // ── Analytics store ─────────────────────────────────────────────────────
@@ -47,6 +49,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchSummary();
+    loadSettingsFromServer();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -73,6 +76,13 @@ export default function AdminDashboard() {
   // ── Gifting state ───────────────────────────────────────────────────────
   const [gTitle, setGTitle] = useState(giftingTitle);
   const [gDescription, setGDescription] = useState(giftingDescription);
+
+  // ── Shop by Mood state ──────────────────────────────────────────────────
+  const [smTitle, setSmTitle] = useState(shopByMoodTitle);
+  const [smSubtitle, setSmSubtitle] = useState(shopByMoodSubtitle);
+  const [smMoods, setSmMoods] = useState<Array<{ id: string; name: string; icon: string; image: string; link: string }>>(() => {
+    try { return JSON.parse(shopByMoodList); } catch { return []; }
+  });
 
   // ── About states ────────────────────────────────────────────────────────
   const [abStoryTitle, setAbStoryTitle] = useState(aboutStoryTitle);
@@ -131,6 +141,9 @@ export default function AdminDashboard() {
     setAbS3Num(aboutStat3Number);
     setAbS3Title(aboutStat3Title);
     setAbS3Desc(aboutStat3Desc);
+    setSmTitle(shopByMoodTitle);
+    setSmSubtitle(shopByMoodSubtitle);
+    try { setSmMoods(JSON.parse(shopByMoodList)); } catch { /* keep existing */ }
   }, [
     announcementText, heroTitle, heroSubtitle,
     bestSellersTitle, bestSellersSubtitle,
@@ -144,47 +157,130 @@ export default function AdminDashboard() {
     aboutStat1Number, aboutStat1Title, aboutStat1Desc,
     aboutStat2Number, aboutStat2Title, aboutStat2Desc,
     aboutStat3Number, aboutStat3Title, aboutStat3Desc,
+    shopByMoodTitle, shopByMoodSubtitle, shopByMoodList,
   ]);
 
   // ── Save handlers ───────────────────────────────────────────────────────
-  const handleSaveHero = () => {
-    updateAnnouncement(announcement);
-    updateHero(title, subtitle);
-    alert("Hero settings saved successfully!");
+  const handleSaveHero = async () => {
+    try {
+      await siteService.updateSettings({
+        announcementText: announcement,
+        heroTitle: title,
+        heroSubtitle: subtitle,
+      });
+      updateAnnouncement(announcement);
+      updateHero(title, subtitle);
+      toast.success("Hero & Announcement settings saved successfully!");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || "Failed to save settings");
+    }
   };
 
-  const handleSaveBestSellers = () => {
-    updateBestSellers(bsTitle, bsSubtitle);
-    alert("Best Sellers settings saved successfully!");
+  const handleSaveBestSellers = async () => {
+    try {
+      await siteService.updateSettings({
+        bestSellersTitle: bsTitle,
+        bestSellersSubtitle: bsSubtitle,
+      });
+      updateBestSellers(bsTitle, bsSubtitle);
+      toast.success("Best Sellers settings saved successfully!");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || "Failed to save settings");
+    }
   };
 
-  const handleSaveWhyChoose = () => {
-    updateWhyChoose(wcTitle, wcDescription, wcFeatures);
-    alert("Why Choose settings saved successfully!");
+  const handleSaveWhyChoose = async () => {
+    try {
+      await siteService.updateSettings({
+        whyChooseTitle: wcTitle,
+        whyChooseDescription: wcDescription,
+        whyChooseFeatures: JSON.stringify(wcFeatures),
+      });
+      updateWhyChoose(wcTitle, wcDescription, wcFeatures);
+      toast.success("Why Choose Us settings saved successfully!");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || "Failed to save settings");
+    }
   };
 
-  const handleSaveCategories = () => {
-    updateCategories(cats);
-    alert("Categories saved successfully!");
+  const handleSaveCategories = async () => {
+    try {
+      await siteService.updateSettings({
+        categoriesList: JSON.stringify(cats),
+      });
+      updateCategories(cats);
+      toast.success("Featured Categories saved successfully!");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || "Failed to save categories");
+    }
   };
 
-  const handleSaveGifting = () => {
-    updateGifting(gTitle, gDescription);
-    alert("Gifting settings saved successfully!");
+  const handleSaveGifting = async () => {
+    try {
+      await siteService.updateSettings({
+        giftingTitle: gTitle,
+        giftingDescription: gDescription,
+      });
+      updateGifting(gTitle, gDescription);
+      toast.success("Gifting settings saved successfully!");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || "Failed to save settings");
+    }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleSaveAbout = () => {
-    updateAboutStory(abStoryTitle, abStorySubtitle);
-    updateAboutFounder(abFounderName, abFounderText);
-    updateAboutMeaning(abMeaningTitle, abMeaningSubtitle, abMeaningT1, abMeaningT2, abMeaningT3);
-    updateAboutRoots(abRootsTitle, abRootsT1, abRootsT2);
-    updateAboutStats(
-      abS1Num, abS1Title, abS1Desc,
-      abS2Num, abS2Title, abS2Desc,
-      abS3Num, abS3Title, abS3Desc
-    );
-    alert("About & Brand Story settings saved successfully!");
+  const handleSaveShopByMood = async () => {
+    try {
+      const listJson = JSON.stringify(smMoods);
+      await siteService.updateSettings({
+        shopByMoodTitle: smTitle,
+        shopByMoodSubtitle: smSubtitle,
+        shopByMoodList: listJson,
+      });
+      updateShopByMood(smTitle, smSubtitle, listJson);
+      toast.success("Shop by Mood settings saved successfully!");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || "Failed to save settings");
+    }
+  };
+
+  const handleSaveAbout = async () => {
+    try {
+      await siteService.updateSettings({
+        aboutStoryTitle: abStoryTitle,
+        aboutStorySubtitle: abStorySubtitle,
+        aboutFounderName: abFounderName,
+        aboutFounderText: abFounderText,
+        aboutMeaningTitle: abMeaningTitle,
+        aboutMeaningSubtitle: abMeaningSubtitle,
+        aboutMeaningText1: abMeaningT1,
+        aboutMeaningText2: abMeaningT2,
+        aboutMeaningText3: abMeaningT3,
+        aboutNashikRootsTitle: abRootsTitle,
+        aboutNashikRootsText1: abRootsT1,
+        aboutNashikRootsText2: abRootsT2,
+        aboutStat1Number: abS1Num,
+        aboutStat1Title: abS1Title,
+        aboutStat1Desc: abS1Desc,
+        aboutStat2Number: abS2Num,
+        aboutStat2Title: abS2Title,
+        aboutStat2Desc: abS2Desc,
+        aboutStat3Number: abS3Num,
+        aboutStat3Title: abS3Title,
+        aboutStat3Desc: abS3Desc,
+      });
+      updateAboutStory(abStoryTitle, abStorySubtitle);
+      updateAboutFounder(abFounderName, abFounderText);
+      updateAboutMeaning(abMeaningTitle, abMeaningSubtitle, abMeaningT1, abMeaningT2, abMeaningT3);
+      updateAboutRoots(abRootsTitle, abRootsT1, abRootsT2);
+      updateAboutStats(
+        abS1Num, abS1Title, abS1Desc,
+        abS2Num, abS2Title, abS2Desc,
+        abS3Num, abS3Title, abS3Desc
+      );
+      toast.success("About & Brand Story settings saved successfully!");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || "Failed to save settings");
+    }
   };
 
   const handleAddFeature = () => {
@@ -202,6 +298,20 @@ export default function AdminDashboard() {
     const updatedCats = [...cats];
     updatedCats[index] = { ...updatedCats[index], [field]: value };
     setCats(updatedCats);
+  };
+
+  const handleMoodChange = (index: number, field: string, value: string) => {
+    const updated = [...smMoods];
+    updated[index] = { ...updated[index], [field]: value };
+    setSmMoods(updated);
+  };
+
+  const handleAddMood = () => {
+    setSmMoods([...smMoods, { id: `mood-${Date.now()}`, name: "New Mood", icon: "Heart", image: "/premium_cookie.png", link: "/shop" }]);
+  };
+
+  const handleRemoveMood = (index: number) => {
+    setSmMoods(smMoods.filter((_, i) => i !== index));
   };
 
   // ── Analytics cards ─────────────────────────────────────────────────────
@@ -264,8 +374,8 @@ export default function AdminDashboard() {
     { id: "whychoose",      label: "Why Choose Section" },
     { id: "categories",     label: "Featured Categories" },
     { id: "featuredproducts", label: "Featured Products" },
+    { id: "shopbymood",     label: "Shop by Mood" },
     { id: "gifting",        label: "Gifting Section" },
-    { id: "testimonials",   label: "Review Management" },
     { id: "about",          label: "About & Brand Story" },
   ];
 
@@ -493,10 +603,120 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* Review Management */}
-          {activeSection === "testimonials" && (
-            <div className="animate-in fade-in duration-300">
-              <ReviewManagement />
+          {/* Shop by Mood Settings */}
+          {activeSection === "shopbymood" && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">Shop by Mood Settings</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-brand-text-primary mb-1">Section Title</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-sm font-semibold"
+                    value={smTitle}
+                    onChange={(e) => setSmTitle(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-brand-text-primary mb-1">Section Subtitle</label>
+                  <textarea
+                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none min-h-[80px] text-sm"
+                    value={smSubtitle}
+                    onChange={(e) => setSmSubtitle(e.target.value)}
+                  />
+                </div>
+
+                {/* Editable Mood Cards */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="block text-sm font-medium text-brand-text-primary">Mood Cards</label>
+                    <button
+                      type="button"
+                      onClick={handleAddMood}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-gold/20 text-brand-brown border border-brand-gold/40 hover:bg-brand-gold hover:text-white rounded-xl transition-colors text-xs font-bold cursor-pointer"
+                    >
+                      <span className="text-base leading-none">+</span> Add Mood
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {smMoods.map((mood, idx) => (
+                      <div key={mood.id || idx} className="p-4 bg-brand-light/30 border border-brand-brown/10 rounded-2xl space-y-3 shadow-inner">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-xs text-brand-gold uppercase tracking-wider">Mood {idx + 1}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveMood(idx)}
+                            className="text-xs font-bold text-rose-400 hover:text-rose-600 transition-colors cursor-pointer px-2 py-0.5 rounded-lg hover:bg-rose-50"
+                          >
+                            ✕ Remove
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-bold text-brand-text-secondary mb-1">Mood Name</label>
+                            <input
+                              type="text"
+                              className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs font-semibold"
+                              value={mood.name}
+                              onChange={(e) => handleMoodChange(idx, "name", e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-brand-text-secondary mb-1">Icon</label>
+                            <select
+                              className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs font-semibold bg-white cursor-pointer"
+                              value={mood.icon}
+                              onChange={(e) => handleMoodChange(idx, "icon", e.target.value)}
+                            >
+                              <option value="Heart">❤️ Heart</option>
+                              <option value="Sparkles">✨ Sparkles</option>
+                              <option value="Coffee">☕ Coffee</option>
+                              <option value="Gift">🎁 Gift</option>
+                              <option value="PartyPopper">🎉 PartyPopper</option>
+                              <option value="Tag">🏷️ Tag</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-brand-text-secondary mb-1">Image Path / URL</label>
+                            <input
+                              type="text"
+                              className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs"
+                              value={mood.image}
+                              onChange={(e) => handleMoodChange(idx, "image", e.target.value)}
+                              placeholder="/premium_cookie.png"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-brand-text-secondary mb-1">Shop Route Link</label>
+                            <input
+                              type="text"
+                              className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs"
+                              value={mood.link}
+                              onChange={(e) => handleMoodChange(idx, "link", e.target.value)}
+                              placeholder="/shop?mood=sweet"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {smMoods.length === 0 && (
+                      <p className="text-xs text-brand-text-secondary/60 italic text-center py-6 border border-dashed border-brand-brown/20 rounded-2xl">
+                        No mood cards yet. Click "Add Mood" to create one.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={handleSaveShopByMood}
+                  className="flex items-center space-x-2 px-6 py-2.5 bg-brand-brown text-white rounded-xl hover:bg-brand-gold transition-colors font-semibold cursor-pointer text-sm"
+                >
+                  <Save className="w-4 h-4" /><span>Save Shop by Mood</span>
+                </button>
+              </div>
             </div>
           )}
 

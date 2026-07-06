@@ -5,7 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { MiniCart } from "@/components/layout/MiniCart";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { MockService } from "@/services/mockService";
+
 import { catalogService } from "@/services/catalogService";
 import { reviewService } from "@/services/reviewService";
 import { useProductStore } from "@/store/productStore";
@@ -24,6 +24,7 @@ export default function StorefrontLayout({
   const setProducts = useProductStore((state) => state.setProducts);
   const updateCategories = useSiteStore((state) => state.updateCategories);
   const setReviews = useSiteStore((state) => state.setReviews);
+  const loadSettingsFromServer = useSiteStore((state) => state.loadSettingsFromServer);
   const hydrateSession = useAuthStore((state) => state.hydrateSession);
 
   useEffect(() => {
@@ -34,19 +35,17 @@ export default function StorefrontLayout({
         console.error("Failed to hydrate user session", err);
       }
       try {
-        const [productsData, categoriesData, reviews] = await Promise.all([
+        await loadSettingsFromServer();
+      } catch (err) {
+        console.error("Failed to load settings from server", err);
+      }
+      try {
+        const [productsData, _categoriesData, reviews] = await Promise.all([
           catalogService.getProducts({ limit: 100 }),
           catalogService.getCategories(),
           reviewService.getApprovedReviews(),
         ]);
         setProducts(productsData.products);
-        
-        const mappedCategories = categoriesData.map(cat => ({
-          name: cat.name,
-          image: cat.image || "/premium_cookie.png",
-          link: `/shop?category=${cat.slug}`
-        }));
-        updateCategories(mappedCategories);
 
         const mappedReviews = reviews.map((r: any) => ({
           id: r.id,
@@ -70,7 +69,8 @@ export default function StorefrontLayout({
       }
     }
     loadData();
-  }, [setProducts, updateCategories, setReviews, hydrateSession]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>

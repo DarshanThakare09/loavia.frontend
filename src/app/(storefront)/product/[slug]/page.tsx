@@ -403,21 +403,6 @@ export default function ProductDetail() {
                     </div>
                   )}
 
-                  {product.nutritionTable && product.nutritionTable.length > 0 && (
-                    <div className="max-w-md bg-white rounded-[2rem] p-6 border border-brand-brown/10 shadow-sm">
-                      <h4 className="font-extrabold text-brand-brown mb-4 text-sm uppercase tracking-wide">Nutrition Facts</h4>
-                      <table className="w-full text-sm">
-                        <tbody>
-                          {product.nutritionTable.map((row, idx) => (
-                            <tr key={idx} className="border-b border-brand-brown/5 last:border-0">
-                              <td className="py-2.5 font-bold text-brand-text-secondary">{row.key}</td>
-                              <td className="py-2.5 text-right font-black text-brand-brown">{row.value}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
                 </div>
               )}
             </div>

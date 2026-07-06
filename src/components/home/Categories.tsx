@@ -1,45 +1,65 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Image from "next/image";
+import { Cookie, Leaf, Sparkles, Heart, Tag, LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSiteStore } from "@/store/siteStore";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const iconMap: Record<string, LucideIcon> = {
+  Cookie,
+  Leaf,
+  Sparkles,
+  Heart,
+  Tag
+};
+
+const getCategoryIcon = (name: string): LucideIcon => {
+  const lowercase = name.toLowerCase();
+  if (lowercase.includes("vegan")) return Leaf;
+  if (lowercase.includes("diet") || lowercase.includes("oat") || lowercase.includes("health")) return Heart;
+  if (lowercase.includes("classic") || lowercase.includes("millet")) return Cookie;
+  if (lowercase.includes("gluten")) return Sparkles;
+  return Tag;
+};
+
+const FloatingParticles = () => (
+  <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+    <style>{`
+      @keyframes catFloat {
+        0% { transform: translateY(0px); opacity: 0.15; }
+        50% { transform: translateY(-12px); opacity: 0.35; }
+        100% { transform: translateY(0px); opacity: 0.15; }
+      }
+      .cat-particle {
+        position: absolute;
+        animation: catFloat ease-in-out infinite;
+      }
+    `}</style>
+    <div className="cat-particle" style={{ top: '10%', left: '80%', width: '12px', height: '12px', border: '1px solid #A0772A', borderRadius: '50%', animationDuration: '4s' }} />
+    <div className="cat-particle" style={{ top: '70%', left: '5%', width: '16px', height: '16px', backgroundColor: '#A0772A', clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)', animationDuration: '5.5s', animationDelay: '1.5s' }} />
+    <div className="cat-particle" style={{ top: '30%', left: '90%', width: '8px', height: '8px', backgroundColor: '#5C3317', borderRadius: '50%', animationDuration: '3.5s', animationDelay: '0.5s' }} />
+    <div className="cat-particle" style={{ top: '80%', left: '80%', width: '10px', height: '10px', border: '1px solid #5C3317', animationDuration: '6s', animationDelay: '2s' }} />
+  </div>
+);
 
 export function Categories() {
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
+  const [hoveredCat, setHoveredCat] = useState<string | null>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   const { categoriesList } = useSiteStore();
   const categories = categoriesList || [];
 
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  const handleNext = () => {
-    setActiveIndex((prev) => (prev + 1) % categories.length);
-  };
-
-  const handlePrev = () => {
-    setActiveIndex((prev) => (prev - 1 + categories.length) % categories.length);
-  };
-
-  // Auto-scroll loop
-  useEffect(() => {
-    if (categories.length <= 1) return;
-    const interval = setInterval(handleNext, 6000);
-    return () => clearInterval(interval);
-  }, [categories.length]);
-
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
     const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
     mediaQuery.addEventListener("change", handler);
     return () => mediaQuery.removeEventListener("change", handler);
@@ -47,48 +67,41 @@ export function Categories() {
 
   useGSAP(() => {
     if (prefersReducedMotion) {
-      gsap.set(".cat-char, .category-deck", { opacity: 1, y: 0 });
-      gsap.set(".cat-underline", { opacity: 1, y: 0, width: "60%" });
+      gsap.set(".cat-heading-word, .cat-subtitle, .cat-card-item", { opacity: 1, y: 0, scale: 1 });
       return;
     }
 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
-        start: "top 85%",
+        start: "top 80%",
         once: true
       }
     });
 
-    // Heading animation
-    tl.fromTo(".cat-char",
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 0.5, stagger: 0.03, ease: "power2.out" }
+    tl.fromTo(".cat-heading-word", 
+      { opacity: 0, y: 40 },
+      { opacity: 1, y: 0, duration: 0.8, stagger: 0.08, ease: "power3.out" }
     )
-      .fromTo(".cat-underline",
-        { width: "0%" },
-        { width: "60%", duration: 0.6, ease: "power2.inOut" },
-        "+=0.1"
-      )
-      .fromTo(".category-deck",
-        { opacity: 0, y: 60 },
-        { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
-        "-=0.4"
-      );
-  }, { scope: containerRef, dependencies: [prefersReducedMotion] });
+    .fromTo(".cat-subtitle",
+      { opacity: 0, y: 40 },
+      { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" },
+      "-=0.6"
+    )
+    .fromTo(".cat-card-item",
+      { opacity: 0, y: 60, scale: 0.92 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.7, stagger: 0.12, ease: "back.out(1.2)" },
+      "-=0.4"
+    );
 
-  const handleCircleClick = (e: React.MouseEvent, link: string) => {
-    e.preventDefault();
-    const element = e.currentTarget;
-    const tl = gsap.timeline();
-    tl.to(element, { scale: 0.95, duration: 0.1 })
-      .to(element, { scale: 1, duration: 0.1 })
-      .to(containerRef.current, { opacity: 0, duration: 0.3 }, "+=0.1")
-      .call(() => router.push(link));
-  };
+  }, { scope: containerRef, dependencies: [prefersReducedMotion, categories] });
 
   return (
-    <section ref={containerRef} id="category-section" className="relative py-24 md:py-28 bg-[#FDFBF7] overflow-hidden">
+    <section 
+      ref={containerRef} 
+      id="category-section"
+      className="py-24 relative overflow-hidden"
+    >
       <style>{`
         .category-bg-layer {
           background-image: url('/cookie-parallax-bg.png');
@@ -102,205 +115,181 @@ export function Categories() {
             background-attachment: fixed;
           }
         }
-        
-        .category-deck {
-          perspective: 1000px;
-        }
-        .category-card {
-          position: absolute;
-          left: 50%;
-          transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-          width: 90%;
-          max-width: 320px;
-        }
-        .category-card-active {
-          transform: translateX(-50%) scale(1.05);
-          opacity: 1;
-          z-index: 30;
-        }
-        .category-card-prev {
-          transform: translateX(calc(-50% - 220px)) scale(0.9) rotateY(15deg);
-          opacity: 0.4;
-          z-index: 20;
-          cursor: pointer;
-        }
-        .category-card-next {
-          transform: translateX(calc(-50% + 220px)) scale(0.9) rotateY(-15deg);
-          opacity: 0.4;
-          z-index: 20;
-          cursor: pointer;
-        }
-        .category-card-out {
-          transform: translateX(-50%) scale(0.8);
-          opacity: 0;
-          z-index: 10;
-          pointer-events: none;
-        }
-        @media (max-width: 1024px) {
-          .category-card-prev {
-            transform: translateX(calc(-50% - 150px)) scale(0.9) rotateY(10deg);
-          }
-          .category-card-next {
-            transform: translateX(calc(-50% + 150px)) scale(0.9) rotateY(-10deg);
-          }
-        }
-        @media (max-width: 768px) {
-          .category-card {
-            max-width: 95%;
-          }
-          .category-card-prev {
-            transform: translateX(-150%) scale(0.8);
-            opacity: 0;
-            pointer-events: none;
-          }
-          .category-card-next {
-            transform: translateX(50%) scale(0.8);
-            opacity: 0;
-            pointer-events: none;
-          }
-          .category-card-active {
-            transform: translateX(-50%) scale(1);
-          }
-        }
-
-        @keyframes floatAnim0 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        @keyframes floatAnim1 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        @keyframes floatAnim2 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
-        @keyframes floatAnim3 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
-        .float-0 { animation: floatAnim0 3.2s ease-in-out infinite; }
-        .float-1 { animation: floatAnim1 3.8s ease-in-out infinite; }
-        .float-2 { animation: floatAnim2 3.5s ease-in-out infinite; }
-        .float-3 { animation: floatAnim3 4.0s ease-in-out infinite; }
-        .float-0:hover, .float-1:hover, .float-2:hover, .float-3:hover {
-          animation-play-state: paused;
-        }
       `}</style>
       <div className="category-bg-layer absolute inset-[-8%] z-0 opacity-100"></div>
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-14 md:mb-16 flex flex-col items-center">
+      <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none mix-blend-multiply" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
+
+      <FloatingParticles />
+
+      <style>{`
+        .cat-glass-card {
+          position: relative;
+          overflow: hidden;
+          background-size: cover;
+          background-position: center;
+          border: none;
+          transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+        }
+        .cat-glass-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to top, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.1) 40%, transparent);
+          pointer-events: none;
+          z-index: 1;
+        }
+        .cat-sheen-sweep {
+          position: absolute;
+          top: 0;
+          left: -150%;
+          width: 50%;
+          height: 100%;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0) 30%,
+            rgba(160, 119, 42, 0.25) 70%,
+            transparent 100%
+          );
+          transform: skewX(-25deg);
+          pointer-events: none;
+          z-index: 2;
+        }
+        .cat-text-container {
+          position: relative;
+          z-index: 10;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 236, 215, 0.7) 100%);
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          border: 1px solid rgba(160, 119, 42, 0.35);
+          border-top: 1px solid rgba(255, 255, 255, 0.6);
+          border-left: 1px solid rgba(255, 255, 255, 0.4);
+          border-radius: 1.25rem;
+          padding: 0.875rem 1.25rem;
+          margin: 0.75rem 1rem 1rem 1rem;
+          text-align: center;
+          transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: 
+            0 2px 8px rgba(92, 51, 23, 0.08),
+            0 8px 24px rgba(92, 51, 23, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+        .cat-card-item:hover .cat-text-container {
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 236, 215, 0.85) 100%);
+          border-color: rgba(160, 119, 42, 0.5);
+          border-top: 1px solid rgba(255, 255, 255, 0.8);
+          border-left: 1px solid rgba(255, 255, 255, 0.6);
+          box-shadow: 
+            0 4px 12px rgba(92, 51, 23, 0.12),
+            0 12px 32px rgba(92, 51, 23, 0.16),
+            inset 0 1px 0 rgba(255, 255, 255, 0.7);
+          transform: translateY(-2px);
+        }
+        .cat-card-item:hover .cat-sheen-sweep {
+          left: 150%;
+          transition: left 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .cat-card-item:hover .cat-glass-card {
+          transform: translateY(-8px) scale(1.02);
+          box-shadow: 0 30px 60px rgba(92, 51, 23, 0.2);
+        }
+      `}</style>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="text-center mb-16">
           <p className="mb-1 text-xs font-semibold uppercase tracking-[0.28em] text-brand-gold">
             Freshly Curated
           </p>
-          <h2
+          <h2 
             style={{ fontFamily: "'Amsterdam Signature', serif" }}
-            className="font-normal leading-none mb-2 flex flex-col sm:flex-row sm:items-baseline sm:justify-center sm:flex-wrap gap-x-4 gap-y-2 text-center pt-4 pb-4"
+            className="font-normal leading-none mb-6 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:justify-center sm:flex-wrap gap-x-4 gap-y-2 text-center"
           >
-            <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem] inline-block">
-              {"Shop by".split("").map((char, i) => (
-                <span key={i} className="cat-char opacity-0 inline-block" style={{ minWidth: char === ' ' ? '0.5em' : 'auto' }}>
-                  {char}
+            {"Shop by Category".split(" ").map((word, idx) => {
+              const words = "Shop by Category".split(" ");
+              const isLast = idx === words.length - 1;
+              return (
+                <span 
+                  key={idx} 
+                  className={`cat-heading-word opacity-0 inline-block ${
+                    isLast 
+                      ? "text-brand-brown text-7xl md:text-8xl lg:text-[8rem] relative" 
+                      : "text-brand-gold text-2xl md:text-3xl lg:text-[3rem]"
+                  }`}
+                >
+                  {word}
                 </span>
-              ))}
-            </span>
-            <span className="text-brand-brown text-7xl md:text-8xl lg:text-[8rem] inline-block">
-              {"Category".split("").map((char, i) => (
-                <span key={i + 10} className="cat-char opacity-0 inline-block" style={{ minWidth: char === ' ' ? '0.5em' : 'auto' }}>
-                  {char}
-                </span>
-              ))}
-            </span>
+              );
+            })}
           </h2>
-          <div className="cat-underline h-[2px] bg-brand-gold mt-3 mx-auto" style={{ width: prefersReducedMotion ? "60%" : "0%" }}></div>
-
-          <p className="mt-5 max-w-2xl font-sans text-brand-text-secondary text-sm md:text-base lg:text-lg font-light leading-relaxed">
+          <p className="cat-subtitle opacity-0 font-sans text-brand-text-secondary max-w-2xl mx-auto text-sm md:text-base lg:text-lg font-light leading-relaxed">
             Explore our carefully curated collections, each designed to delight your taste buds and satisfy your cravings.
           </p>
         </div>
 
-        {/* Carousel Deck Wrapper */}
-        <div className="relative category-deck w-full min-h-[440px] md:min-h-[400px] flex items-center justify-center overflow-visible">
-          {/* Navigation Arrows */}
-          <button
-            onClick={handlePrev}
-            className="absolute left-0 md:left-2 lg:left-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/70 backdrop-blur-sm border border-[#5C3317]/10 flex items-center justify-center text-brand-brown hover:bg-brand-brown hover:text-white transition-all duration-300 shadow-md z-40 cursor-pointer"
-            aria-label="Previous category"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {categories.map((cat, index) => {
+            const Icon = getCategoryIcon(cat.name);
+            const isHovered = hoveredCat === cat.name;
 
-          <button
-            onClick={handleNext}
-            className="absolute right-0 md:right-2 lg:right-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/70 backdrop-blur-sm border border-[#5C3317]/10 flex items-center justify-center text-brand-brown hover:bg-brand-brown hover:text-white transition-all duration-300 shadow-md z-40 cursor-pointer"
-            aria-label="Next category"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-
-          {/* Cards */}
-          <div className="w-full relative h-full flex items-center justify-center">
-            {categories.map((category, index) => {
-              const total = categories.length;
-              let cardClass = "category-card-out";
-              
-              if (total === 1) {
-                cardClass = "category-card-active";
-              } else {
-                const diff = (index - activeIndex + total) % total;
-                if (diff === 0) cardClass = "category-card-active";
-                else if (diff === 1 || (total === 2 && diff === 1)) cardClass = "category-card-next";
-                else if (diff === total - 1) cardClass = "category-card-prev";
-              }
-
-              return (
-                <div
-                  key={category.name}
-                  onClick={() => {
-                    if (cardClass === "category-card-next") handleNext();
-                    if (cardClass === "category-card-prev") handlePrev();
-                  }}
-                  className={`category-card ${cardClass}`}
-                >
-                  <div className={`float-${index} w-full h-full`}>
-                    <a
-                      href={category.link}
-                      onClick={(e) => handleCircleClick(e, category.link)}
-                      className="block relative aspect-[4/5] overflow-hidden rounded-[2.5rem] bg-white shadow-md transition-all duration-500 group focus:outline-none focus:ring-4 focus:ring-brand-gold hover:shadow-2xl"
-                      tabIndex={0}
-                      aria-label={`Shop ${category.name}`}
+            return (
+              <button 
+                key={cat.name} 
+                className="cat-card-item opacity-0 group text-left block w-full focus:outline-none transition-all duration-[400ms] ease-out will-change-transform"
+                onMouseEnter={() => setHoveredCat(cat.name)}
+                onMouseLeave={() => setHoveredCat(null)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  router.push(cat.link);
+                }}
+                tabIndex={0}
+                aria-label={`Shop category ${cat.name}`}
+              >
+                <div className="cat-glass-card rounded-[2.5rem] h-80 sm:h-[22rem] w-full flex flex-col justify-end p-3 sm:p-4 relative overflow-hidden">
+                  {/* Card Background Image */}
+                  <div className="absolute inset-0 z-0 transition-transform duration-700 ease-out group-hover:scale-110">
+                    <Image
+                      src={cat.image || "/premium_cookie.png"}
+                      alt={cat.name}
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
+                  </div>
+                  
+                  {/* Sweeping sheen */}
+                  <div className="cat-sheen-sweep z-10" />
+                  
+                  {/* Icon Header */}
+                  <div 
+                    className="absolute top-4 right-4 z-10 bg-white/90 p-2.5 rounded-full border border-brand-gold/20 shadow-sm transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-brand-gold group-hover:text-white"
+                  >
+                    <Icon className="w-4 h-4 text-brand-gold transition-colors duration-300 group-hover:text-inherit" />
+                  </div>
+                  
+                  {/* Curved-corner rectangle for text overlay */}
+                  <div className="relative z-10 w-full bg-white/90 backdrop-blur-md border border-[#5C3317]/10 p-4 rounded-2xl shadow-lg transition-all duration-300 group-hover:bg-white group-hover:border-brand-gold/40 transform group-hover:translate-y-[-4px]">
+                    <h3 
+                      className={`text-sm sm:text-base font-bold transition-colors duration-[250ms] ${
+                        isHovered ? 'text-brand-gold' : 'text-brand-brown'
+                      }`}
                     >
-                    <div className="category-img-container absolute inset-0 w-full h-full transition-transform duration-700 ease-out group-hover:scale-110">
-                      <Image
-                        src={category.image}
-                        alt={category.name}
-                        fill
-                        className="object-cover"
-                        priority={false}
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      />
-                      {/* Subtle overlay gradient to blend background */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10 z-10" />
-                    </div>
+                      {cat.name}
+                    </h3>
 
-                    {/* Fading dark brown gradient shadow overlay from bottom to top */}
-                    <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 bg-gradient-to-t from-[#5C3317]/95 via-[#5C3317]/40 to-transparent transition-all duration-500 group-hover:from-[#5C3317]/100 group-hover:via-[#5C3317]/55">
-                      <h3 className="text-white font-sans font-bold text-xl sm:text-2xl text-left transition-colors duration-300 group-hover:text-brand-gold transform group-hover:-translate-y-1">
-                        {category.name}
-                      </h3>
-                      <div className="mt-2 text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-brand-gold/80 flex items-center justify-between transform group-hover:-translate-y-1 transition-transform duration-300">
-                        <span>Shop Now</span>
-                        <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-                      </div>
+                    <div 
+                      className="mt-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-[#A0772A]/70 transition-all duration-300 ease-out flex items-center justify-between"
+                    >
+                      <span>Shop Now</span>
+                      <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
                     </div>
-                  </a>
+                  </div>
                 </div>
-              </div>
+              </button>
             );
-            })}
-          </div>
-        </div>
-
-        {/* Indicators */}
-        <div className="flex justify-center space-x-3 mt-12 relative z-30">
-          {categories.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setActiveIndex(index)}
-              className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-                index === activeIndex ? "bg-brand-gold w-8" : "bg-brand-brown/20 hover:bg-brand-brown/40"
-              }`}
-              aria-label={`Go to category ${index + 1}`}
-            />
-          ))}
+          })}
         </div>
       </div>
     </section>

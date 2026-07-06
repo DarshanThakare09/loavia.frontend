@@ -278,6 +278,8 @@ export interface ProductDTO {
   id: string;
   name: string;
   description: string;
+  ingredients: string;
+  calories?: string | null;
   price: number;              // in paise
   discountPrice?: number;     // in paise
   sku: string;
@@ -299,18 +301,27 @@ export interface ProductListResponse {
 export interface CreateProductRequestDTO {
   name: string;
   description: string;
-  price: number;          // in rupees (API converts to paise)
-  discountPrice?: number; // in rupees
+  ingredients: string;
+  calories?: string | null;
   categoryId: string;
   sku: string;
-  images: string[];
+  images: Array<{
+    url: string;
+    isPrimary?: boolean;
+    altText?: string | null;
+  }>;
   status: ProductStatus;
   isFeatured?: boolean;
+  isBestSeller?: boolean;
   variants: Array<{
     name: string;
     sku: string;
-    price: number; // in rupees
-    stock: number;
+    price: number; // in paise
+    discountPrice?: number | null; // in paise
+    stockQuantity: number;
+    weight?: number | null;
+    isDefault?: boolean;
+    displayLabel?: string | null;
   }>;
   tags?: string[];
 }

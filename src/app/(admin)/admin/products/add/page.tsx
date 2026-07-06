@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus, Trash2, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminProductStore } from "@/store/adminProductStore";
 import { ProductStatus } from "@/types/admin";
+import { catalogService } from "@/services/catalogService";
 
 type VariantForm = { name: string; sku: string; price: string; stock: string };
 
@@ -17,15 +18,38 @@ export default function AddProductPage() {
 
   const [name, setName]               = useState("");
   const [description, setDescription] = useState("");
+  const [ingredients, setIngredients] = useState("");
+  const [calories, setCalories]       = useState("");
   const [categoryId, setCategoryId]   = useState("");
   const [price, setPrice]             = useState("");
   const [discountPrice, setDiscount]  = useState("");
   const [sku, setSku]                 = useState("");
   const [status, setStatus]           = useState<ProductStatus>("ACTIVE");
   const [isFeatured, setFeatured]     = useState(false);
+  const [isBestSeller, setBestSeller] = useState(false);
   const [images, setImages]           = useState<string[]>(["", "", ""]);
   const [variants, setVariants]       = useState<VariantForm[]>([{ ...EMPTY_VARIANT }]);
   const [tags, setTags]               = useState("");
+  const [categories, setCategories]   = useState<any[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  // Load categories
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const cats = await catalogService.getCategories();
+        setCategories(cats);
+        if (cats.length > 0) {
+          setCategoryId(cats[0].id);
+        }
+      } catch (err) {
+        toast.error("Failed to load categories.");
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    }
+    loadCategories();
+  }, []);
 
   const updateImage = (idx: number, val: string) => {
     const updated = [...images];
@@ -46,31 +70,60 @@ export default function AddProductPage() {
     e.preventDefault();
     if (!name.trim())        { toast.error("Product name is required."); return; }
     if (!sku.trim())         { toast.error("SKU is required."); return; }
-    if (!categoryId.trim())  { toast.error("Category ID is required."); return; }
+    if (!categoryId.trim())  { toast.error("Category is required."); return; }
+    if (!description.trim() || description.trim().length < 10) { 
+      toast.error("Description must be at least 10 characters."); 
+      return; 
+    }
+    if (!ingredients.trim()) { toast.error("Ingredients list is required."); return; }
     if (!price || Number(price) <= 0) { toast.error("Valid price is required."); return; }
+    
     const cleanImages = images.filter(Boolean);
     if (cleanImages.length === 0) { toast.error("At least one image URL is required."); return; }
 
-    const validVariants = variants.filter(v => v.name && v.sku && v.price && v.stock);
+    // Map variants
+    let finalVariants = variants
+      .filter(v => v.name.trim() && v.sku.trim() && v.price && v.stock)
+      .map(v => ({
+        name: v.name.trim(),
+        sku: v.sku.trim().toUpperCase(),
+        price: Math.round(Number(v.price) * 100),
+        stockQuantity: Number(v.stock),
+        isDefault: false,
+      }));
+
+    if (finalVariants.length === 0) {
+      // Default single variant
+      finalVariants = [{
+        name: "Standard Box",
+        sku: `${sku.trim().toUpperCase()}-DEFAULT`,
+        price: Math.round(Number(price) * 100),
+        stockQuantity: 100,
+        isDefault: true,
+      }];
+    } else {
+      finalVariants[0].isDefault = true;
+    }
+
     try {
       await createProduct({
         name: name.trim(),
         description: description.trim(),
+        ingredients: ingredients.trim(),
+        calories: calories.trim() || null,
         categoryId: categoryId.trim(),
-        price: Math.round(Number(price) * 100),
-        discountPrice: discountPrice ? Math.round(Number(discountPrice) * 100) : undefined,
         sku: sku.trim(),
-        images: cleanImages,
+        images: cleanImages.map((url, idx) => ({
+          url,
+          isPrimary: idx === 0,
+          altText: `${name.trim()} image ${idx + 1}`
+        })),
         status,
         isFeatured,
-        variants: validVariants.map(v => ({
-          name: v.name,
-          sku: v.sku,
-          price: Math.round(Number(v.price) * 100),
-          stock: Number(v.stock),
-        })),
+        isBestSeller,
+        variants: finalVariants,
         tags: tags.split(",").map(t => t.trim()).filter(Boolean),
-      });
+      } as any);
       toast.success("Product created successfully.");
       router.push("/admin/products");
     } catch { /* toast shown by store */ }
@@ -92,6 +145,7 @@ export default function AddProductPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Basic Information */}
         <div className="bg-white p-6 rounded-2xl border border-brand-brown/10 shadow-sm space-y-4">
           <h2 className="font-bold text-brand-brown text-base">Basic Information</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -104,16 +158,37 @@ export default function AddProductPage() {
               <input type="text" value={sku} onChange={e => setSku(e.target.value.toUpperCase())} className={`${inputClass} font-mono uppercase`} placeholder="CHO-CHIP-001" required />
             </div>
             <div>
-              <label className={labelClass}>Category ID *</label>
-              <input type="text" value={categoryId} onChange={e => setCategoryId(e.target.value)} className={inputClass} placeholder="UUID from category list" required />
+              <label className={labelClass}>Category *</label>
+              {isLoadingCategories ? (
+                <div className="text-sm text-brand-text-secondary py-2.5">Loading categories...</div>
+              ) : (
+                <select value={categoryId} onChange={e => setCategoryId(e.target.value)} className={inputClass} required>
+                  <option value="">Select Category</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              )}
             </div>
             <div className="sm:col-span-2">
-              <label className={labelClass}>Description</label>
-              <textarea value={description} onChange={e => setDescription(e.target.value)} className={`${inputClass} min-h-[100px] resize-none`} placeholder="Product description..." />
+              <label className={labelClass}>Description * (Minimum 10 characters)</label>
+              <textarea value={description} onChange={e => setDescription(e.target.value)} className={`${inputClass} min-h-[100px] resize-none`} placeholder="Product description..." required />
+              <p className="text-xs text-brand-text-secondary mt-1">
+                {description.length}/10 characters minimum
+              </p>
+            </div>
+            <div className="sm:col-span-2">
+              <label className={labelClass}>Ingredients *</label>
+              <textarea value={ingredients} onChange={e => setIngredients(e.target.value)} className={`${inputClass} min-h-[80px] resize-none`} placeholder="e.g. Flour, sugar, chocolate chunks..." required />
+            </div>
+            <div>
+              <label className={labelClass}>Calories (e.g. 220 kcal)</label>
+              <input type="text" value={calories} onChange={e => setCalories(e.target.value)} className={inputClass} placeholder="e.g. 220 kcal (optional)" />
             </div>
           </div>
         </div>
 
+        {/* Pricing & Status */}
         <div className="bg-white p-6 rounded-2xl border border-brand-brown/10 shadow-sm space-y-4">
           <h2 className="font-bold text-brand-brown text-base">Pricing & Status</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -137,13 +212,20 @@ export default function AddProductPage() {
               <label className={labelClass}>Tags (comma-separated)</label>
               <input type="text" value={tags} onChange={e => setTags(e.target.value)} className={inputClass} placeholder="healthy, gift, bestseller" />
             </div>
-            <div className="sm:col-span-2 flex items-center gap-3">
-              <input type="checkbox" id="featured" checked={isFeatured} onChange={e => setFeatured(e.target.checked)} className="w-4 h-4 accent-brand-brown" />
-              <label htmlFor="featured" className="text-sm font-semibold text-brand-text-primary cursor-pointer">Mark as Featured Product</label>
+            <div className="sm:col-span-2 flex flex-wrap gap-6 mt-2">
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input type="checkbox" checked={isFeatured} onChange={e => setFeatured(e.target.checked)} className="w-4 h-4 accent-brand-brown" />
+                <span className="text-sm font-semibold text-brand-text-primary">Mark as Featured Product</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input type="checkbox" checked={isBestSeller} onChange={e => setBestSeller(e.target.checked)} className="w-4 h-4 accent-brand-brown" />
+                <span className="text-sm font-semibold text-brand-text-primary">Mark as Best Seller</span>
+              </label>
             </div>
           </div>
         </div>
 
+        {/* Product Images */}
         <div className="bg-white p-6 rounded-2xl border border-brand-brown/10 shadow-sm space-y-4">
           <h2 className="font-bold text-brand-brown text-base">Product Images</h2>
           <p className="text-xs text-brand-text-secondary">First image is the primary display image.</p>
@@ -160,9 +242,13 @@ export default function AddProductPage() {
           </div>
         </div>
 
+        {/* Variants */}
         <div className="bg-white p-6 rounded-2xl border border-brand-brown/10 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-bold text-brand-brown text-base">Variants</h2>
+            <div>
+              <h2 className="font-bold text-brand-brown text-base">Variants (Optional)</h2>
+              <p className="text-xs text-brand-text-secondary">If no variants are defined, a standard variant will be created automatically.</p>
+            </div>
             <button type="button" onClick={addVariant} className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-light text-brand-brown rounded-lg text-xs font-semibold hover:bg-brand-gold/15 transition-colors">
               <Plus className="w-3.5 h-3.5" /> Add Variant
             </button>
@@ -201,6 +287,7 @@ export default function AddProductPage() {
           </div>
         </div>
 
+        {/* Form Actions */}
         <div className="flex justify-end gap-3">
           <button type="button" onClick={() => router.push("/admin/products")} className="px-6 py-2.5 border border-brand-brown/10 rounded-xl text-brand-brown font-semibold text-sm hover:bg-brand-light transition-colors">
             Cancel

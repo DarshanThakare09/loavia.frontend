@@ -5,10 +5,20 @@ import Image from "next/image";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Heart, Sparkles, Coffee, PartyPopper } from "lucide-react";
+import { Heart, Sparkles, Coffee, PartyPopper, Gift, Tag, LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSiteStore } from "@/store/siteStore";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const iconMap: Record<string, LucideIcon> = {
+  Heart,
+  Sparkles,
+  Coffee,
+  PartyPopper,
+  Gift,
+  Tag
+};
 
 const FloatingParticles = () => (
   <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -39,12 +49,24 @@ export function ShopByMood() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
-  const moods = [
-    { id: "sweet", name: "Craving Sweet", icon: Heart, bgColor: "bg-[#FADCD9]", hoverBg: "#FFF0F0", borderHover: "border-[#FADCD9]", image: "/stuffed_cookie.png", link: "/shop?mood=sweet" },
-    { id: "healthy", name: "Healthy Fix", icon: Sparkles, bgColor: "bg-[#D4E6B5]", hoverBg: "#F0F5EE", borderHover: "border-[#D4E6B5]", image: "/vegan_cookie.png", link: "/shop?mood=healthy" },
-    { id: "tea", name: "Perfect with Tea", icon: Coffee, bgColor: "bg-[#E6D4B5]", hoverBg: "#F7F0E5", borderHover: "border-[#E6D4B5]", image: "/premium_cookie.png", link: "/shop?mood=tea" },
-    { id: "gifting", name: "Gifting", icon: PartyPopper, bgColor: "bg-[#F3D9FA]", hoverBg: "#F5F0FA", borderHover: "border-[#F3D9FA]", image: "/cookie_gift_box.png", link: "/shop?mood=gifting" },
-  ];
+  const { shopByMoodTitle, shopByMoodSubtitle, shopByMoodList } = useSiteStore();
+
+  let moods: any[] = [];
+  try {
+    const parsed = JSON.parse(shopByMoodList);
+    moods = parsed.map((m: any) => ({
+      ...m,
+      icon: iconMap[m.icon] || Tag
+    }));
+  } catch (err) {
+    console.error("Failed to parse shopByMoodList", err);
+    moods = [
+      { id: "sweet", name: "Craving Sweet", icon: Heart, image: "/stuffed_cookie.png", link: "/shop?mood=sweet" },
+      { id: "healthy", name: "Healthy Fix", icon: Sparkles, image: "/vegan_cookie.png", link: "/shop?mood=healthy" },
+      { id: "tea", name: "Perfect with Tea", icon: Coffee, image: "/premium_cookie.png", link: "/shop?mood=tea" },
+      { id: "gifting", name: "Gifting", icon: Gift, image: "/cookie_gift_box.png", link: "/shop?mood=gifting" },
+    ];
+  }
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -195,14 +217,28 @@ export function ShopByMood() {
             style={{ fontFamily: "'Amsterdam Signature', serif" }}
             className="font-normal leading-none mb-6 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:justify-center sm:flex-wrap gap-x-4 gap-y-2 text-center"
           >
-            <span className="mood-heading-word opacity-0 inline-block text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">What's</span>
-            <span className="mood-heading-word opacity-0 inline-block text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">your</span>
-            <span className="mood-heading-word opacity-0 inline-block relative text-brand-brown text-7xl md:text-8xl lg:text-[8rem]">
-              mood<span className="mood-question-mark inline-block text-brand-brown">?</span>
-            </span>
+            {shopByMoodTitle.split(" ").map((word, idx) => {
+              const words = shopByMoodTitle.split(" ");
+              const isLast = idx === words.length - 1;
+              return (
+                <span 
+                  key={idx} 
+                  className={`mood-heading-word opacity-0 inline-block ${
+                    isLast 
+                      ? "text-brand-brown text-7xl md:text-8xl lg:text-[8rem] relative" 
+                      : "text-brand-gold text-2xl md:text-3xl lg:text-[3rem]"
+                  }`}
+                >
+                  {word}
+                  {isLast && word.endsWith("?") && (
+                    <span className="mood-question-mark inline-block text-brand-brown"></span>
+                  )}
+                </span>
+              );
+            })}
           </h2>
           <p className="mood-subtitle opacity-0 font-sans text-brand-text-secondary max-w-2xl mx-auto text-sm md:text-base lg:text-lg font-light leading-relaxed">
-            Whether you need a mid-day energy boost or a decadent midnight snack, we have a cookie crafted just for how you feel.
+            {shopByMoodSubtitle}
           </p>
         </div>
 
