@@ -9,7 +9,7 @@ import { siteService } from "@/services/siteService";
 import {
   Save, IndianRupee, ShoppingBag, Users, Cookie,
   Settings, AlertCircle, Loader2, TrendingUp,
-  PackageX, ArrowUpRight,
+  PackageX, ArrowUpRight, Plus, Trash2,
 } from "lucide-react";
 import FeaturedProductsManager from "@/components/admin/FeaturedProductsManager";
 import GiftingSectionAdmin from "@/components/admin/GiftingSectionAdmin";
@@ -300,6 +300,7 @@ export default function AdminDashboard() {
     setCats(updatedCats);
   };
 
+<<<<<<< HEAD
   const handleMoodChange = (index: number, field: string, value: string) => {
     const updated = [...smMoods];
     updated[index] = { ...updated[index], [field]: value };
@@ -312,6 +313,14 @@ export default function AdminDashboard() {
 
   const handleRemoveMood = (index: number) => {
     setSmMoods(smMoods.filter((_, i) => i !== index));
+=======
+  const handleAddCategory = () => {
+    setCats([...cats, { name: "", image: "", link: "/shop" }]);
+  };
+
+  const handleRemoveCategory = (index: number) => {
+    setCats(cats.filter((_, i) => i !== index));
+>>>>>>> f4f58064ac4eea3d959cf4540526b736906bbc11
   };
 
   // ── Analytics cards ─────────────────────────────────────────────────────
@@ -566,11 +575,30 @@ export default function AdminDashboard() {
           {/* Featured Categories */}
           {activeSection === "categories" && (
             <div className="space-y-6 animate-in fade-in duration-300">
-              <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">Featured Categories </h2>
+              <div className="flex items-center justify-between border-b border-brand-brown/10 pb-2">
+                <h2 className="text-xl font-bold text-brand-brown font-serif">Featured Categories</h2>
+                <button
+                  onClick={handleAddCategory}
+                  className="flex items-center gap-2 px-4 py-2 bg-brand-gold text-white text-xs font-bold rounded-xl hover:bg-brand-brown transition-colors shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add New Category
+                </button>
+              </div>
               <div className="space-y-6">
                 {cats.map((cat, idx) => (
                   <div key={idx} className="p-4 bg-brand-light/30 border border-brand-brown/10 rounded-2xl space-y-3 shadow-inner">
-                    <span className="font-bold text-xs text-brand-gold uppercase tracking-wider block mb-1">Category {idx + 1}</span>
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs text-brand-gold uppercase tracking-wider">Category {idx + 1}</span>
+                      <button
+                        onClick={() => handleRemoveCategory(idx)}
+                        className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg hover:bg-rose-100 transition-colors"
+                        title="Remove this category"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        Remove
+                      </button>
+                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
                         <label className="block text-xs font-bold text-brand-text-secondary mb-1">Category Name</label>
@@ -587,6 +615,11 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 ))}
+                {cats.length === 0 && (
+                  <div className="text-center py-10 text-brand-text-secondary/60 text-sm border border-dashed border-brand-brown/20 rounded-2xl">
+                    No categories yet. Click <strong>Add New Category</strong> to get started.
+                  </div>
+                )}
               </div>
               <div className="flex justify-end pt-2">
                 <button onClick={handleSaveCategories} className="flex items-center space-x-2 px-6 py-2.5 bg-brand-brown text-white rounded-xl hover:bg-brand-gold transition-colors font-semibold cursor-pointer text-sm">
