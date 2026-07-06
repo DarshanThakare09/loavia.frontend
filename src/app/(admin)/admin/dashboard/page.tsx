@@ -300,6 +300,14 @@ export default function AdminDashboard() {
     setCats(updatedCats);
   };
 
+  const handleAddCategory = () => {
+    setCats([...cats, { name: "New Category", image: "/premium_cookie.png", link: "/shop" }]);
+  };
+
+  const handleRemoveCategory = (index: number) => {
+    setCats(cats.filter((_, i) => i !== index));
+  };
+
   const handleMoodChange = (index: number, field: string, value: string) => {
     const updated = [...smMoods];
     updated[index] = { ...updated[index], [field]: value };

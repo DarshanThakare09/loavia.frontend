@@ -292,7 +292,7 @@ export default function ProfilePage() {
                                 <div className="flex space-x-3">
                                   {order.items.slice(0, 3).map((item, index) => (
                                     <div key={index} className="relative w-14 h-14 bg-brand-light rounded-xl overflow-hidden border border-brand-brown/10 flex-shrink-0">
-                                      <Image src={item.productImage || "/premium_cookie.png"} fill alt={item.productName} className="object-cover" />
+                                      <Image src={item.productImage || "/premium_cookie.png"} fill alt={item.productName} className="object-cover" sizes="56px" />
                                     </div>
                                   ))}
                                   {order.items.length > 3 && (
@@ -591,7 +591,7 @@ export default function ProfilePage() {
                             className="relative w-20 h-20 bg-brand-light rounded-2xl overflow-hidden flex-shrink-0 cursor-pointer"
                             onClick={() => router.push(`/product/${item.id}`)}
                           >
-                            <Image src={item.image || "/premium_cookie.png"} fill alt={item.name} className="object-cover" />
+                            <Image src={item.image || "/premium_cookie.png"} fill alt={item.name} className="object-cover" sizes="80px" />
                           </div>
                           <div className="flex-1">
                             <h4 className="font-extrabold text-brand-brown line-clamp-1 cursor-pointer hover:text-brand-gold transition-colors pr-6 text-sm" onClick={() => router.push(`/product/${item.id}`)}>{item.name}</h4>

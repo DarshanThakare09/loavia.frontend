@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Filter, ChevronDown, ShoppingCart, Star, Heart, ArrowRight } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { toast } from "sonner";
@@ -48,6 +49,21 @@ export default function ShopPage() {
 
   const addItem = useCartStore((state) => state.addItem);
   const { user, toggleWishlist } = useAuthStore();
+  const router = useRouter();
+
+  const isCustomBoxProduct = (product: Product) => {
+    const slug = product.slug?.toLowerCase() || "";
+    const name = product.name?.toLowerCase() || "";
+    const tags = product.tags?.map((t) => t.toLowerCase()) || [];
+
+    return slug === "build-your-own-box" ||
+      name.includes("build your own") ||
+      tags.some((tag) => tag.includes("gift box") || tag.includes("custom box") || tag.includes("build your own"));
+  };
+
+  const openCustomBoxBuilder = () => {
+    router.push("/build-box");
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -190,6 +206,11 @@ export default function ShopPage() {
   };
 
   const handleAddToCart = (product: any) => {
+    if (isCustomBoxProduct(product)) {
+      openCustomBoxBuilder();
+      return;
+    }
+
     const defaultVariant = product.variants?.find((v: any) => v.isDefault) || product.variants?.[0];
     if (!defaultVariant) {
       toast.error("Product variant not available");
@@ -438,7 +459,7 @@ export default function ShopPage() {
                       </div>
                       
                       {/* Image wrapper */}
-                      <Link href={`/product/${product.slug || product.id}`} className="block relative aspect-[4/3] overflow-hidden bg-brand-light">
+                      <Link href={isCustomBoxProduct(product) ? "/build-box" : `/product/${product.slug || product.id}`} className="block relative aspect-[4/3] overflow-hidden bg-brand-light">
                         <Image
                           src={product.primaryImage || product.images?.[0] || product.image || "/premium_cookie.png"}
                           alt={product.name}
@@ -460,7 +481,7 @@ export default function ShopPage() {
                             {product.category || "Cookie"}
                           </span>
                           
-                          <Link href={`/product/${product.slug || product.id}`}>
+                          <Link href={isCustomBoxProduct(product) ? "/build-box" : `/product/${product.slug || product.id}`}>
                             <h3 className="font-serif font-bold text-xl text-brand-brown hover:text-brand-gold transition-colors duration-300 line-clamp-1 mb-1">
                               {product.name}
                             </h3>

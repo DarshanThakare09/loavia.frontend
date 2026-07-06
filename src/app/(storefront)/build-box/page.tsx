@@ -21,6 +21,18 @@ export default function BuildBoxPage() {
   const totalSelected = Object.values(selections).reduce((a, b) => a + b, 0);
   const remaining = boxSize - totalSelected;
 
+  const getCookieUnitPrice = (cookie: any) => {
+    if (!cookie) return 0;
+    if (typeof cookie.price === "number") return cookie.price;
+    const variant = cookie.variants?.find((v: any) => v.isDefault) || cookie.variants?.[0];
+    return variant?.price || 0;
+  };
+
+  const selectionPriceTotal = Object.entries(selections).reduce((total, [cookieId, qty]) => {
+    const cookie = productsList.find(c => c.id === cookieId);
+    return total + getCookieUnitPrice(cookie) * qty;
+  }, 0);
+
   useEffect(() => {
     async function loadByobProduct() {
       try {
@@ -45,12 +57,10 @@ export default function BuildBoxPage() {
   };
 
   const handleAddToCart = () => {
-    const defaultPrice = boxSize === 6 ? 1799 : boxSize === 12 ? 3499 : 6799;
-    
     const byobVariant = byobProduct?.variants?.find((v: any) => v.sku === `BYOB-${boxSize}` || v.name.includes(`${boxSize}`)) || {
       id: boxSize === 6 ? "301becef-924e-4639-b02a-37c60f96a452" : boxSize === 12 ? "20f35574-cd93-4c40-a245-af04cc9882fb" : "d1fb14b3-43a1-4242-bd87-33b0069c2bc2",
       name: `${boxSize}-Pack Custom Box`,
-      price: defaultPrice,
+      price: 0,
       sku: `BYOB-${boxSize}`
     };
 
@@ -92,7 +102,7 @@ export default function BuildBoxPage() {
       id: byobVariant.id,
       variantId: byobVariant.id,
       name: byobVariant.name || `Custom Box (${boxSize} Pack)`,
-      price: byobVariant.price || defaultPrice,
+      price: selectionPriceTotal,
       image: "/cookie_gift_box.png",
       quantity: 1,
       isCustomBox: true,
@@ -160,10 +170,15 @@ export default function BuildBoxPage() {
 
             {/* Flavor Selector */}
             <div className="bg-white p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgba(92,51,23,0.02)] border border-brand-brown/5">
-              <div className="flex justify-between items-center mb-8 border-b border-brand-brown/5 pb-4">
-                <h2 className="text-lg font-extrabold text-brand-brown flex items-center tracking-wide">
-                  <CheckCircle className="w-5 h-5 mr-3 text-brand-gold" /> Step 2: Fill Your Box
-                </h2>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 border-b border-brand-brown/5 pb-4 gap-3">
+                <div>
+                  <h2 className="text-lg font-extrabold text-brand-brown flex items-center tracking-wide">
+                    <CheckCircle className="w-5 h-5 mr-3 text-brand-gold" /> Step 2: Fill Your Box
+                  </h2>
+                  <p className="text-sm text-brand-text-secondary mt-2">
+                    {totalSelected}/{boxSize} Selected
+                  </p>
+                </div>
                 <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider ${remaining === 0 ? "bg-green-100 text-green-700" : "bg-brand-gold/10 text-brand-gold"}`}>
                   {remaining === 0 ? "Box is Full!" : `${remaining} slots left`}
                 </span>
@@ -240,17 +255,14 @@ export default function BuildBoxPage() {
               <div className="border-t border-brand-brown/5 pt-6">
                 <div className="flex justify-between items-center mb-6">
                   <span className="font-extrabold text-brand-brown text-sm uppercase tracking-wider">Total Price</span>
-                  <span className="font-black text-2xl text-brand-brown">₹{
-                    byobProduct?.variants?.find((v: any) => v.sku === `BYOB-${boxSize}` || v.name.includes(`${boxSize}`))?.price || 
-                    (boxSize === 6 ? 1799 : boxSize === 12 ? 3499 : 6799)
-                  }</span>
+                  <span className="font-black text-2xl text-brand-brown">₹{selectionPriceTotal}</span>
                 </div>
                 <button 
                   disabled={remaining > 0}
                   onClick={handleAddToCart}
-                  className={`w-full flex items-center justify-center space-x-2 px-8 py-4 font-bold rounded-full transition-all duration-300 cursor-pointer ${
+                  className={`w-full flex items-center justify-center space-x-2 px-8 py-4 font-bold rounded-full transition-all duration-300 ${
                     remaining === 0 
-                      ? "bg-brand-brown text-white hover:bg-brand-gold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" 
+                      ? "bg-brand-brown text-white hover:bg-brand-gold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer" 
                       : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
                   }`}
                 >
