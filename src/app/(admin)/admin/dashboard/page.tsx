@@ -165,12 +165,9 @@ export default function AdminDashboard() {
     try {
       await siteService.updateSettings({
         announcementText: announcement,
-        heroTitle: title,
-        heroSubtitle: subtitle,
       });
       updateAnnouncement(announcement);
-      updateHero(title, subtitle);
-      toast.success("Hero & Announcement settings saved successfully!");
+      toast.success("Announcement bar settings saved successfully!");
     } catch (err: any) {
       toast.error(err.response?.data?.message || err.message || "Failed to save settings");
     }
@@ -377,14 +374,9 @@ export default function AdminDashboard() {
   ];
 
   const sections = [
-    { id: "hero",            label: "Hero & Announcement" },
-    { id: "bestsellers",    label: "Best Sellers Header" },
-    { id: "whychoose",      label: "Why Choose Section" },
+    { id: "hero",            label: "Announcement Bar" },
     { id: "categories",     label: "Featured Categories" },
-    { id: "featuredproducts", label: "Featured Products" },
     { id: "shopbymood",     label: "Shop by Mood" },
-    { id: "gifting",        label: "Gifting Section" },
-    { id: "about",          label: "About & Brand Story" },
   ];
 
   return (
@@ -469,7 +461,7 @@ export default function AdminDashboard() {
           {/* Hero & Announcement */}
           {activeSection === "hero" && (
             <div className="space-y-6 animate-in fade-in duration-300">
-              <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">Hero & Header Settings</h2>
+              <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">Announcement Bar Settings</h2>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-brand-text-primary mb-1">Announcement Bar Text</label>
@@ -479,97 +471,16 @@ export default function AdminDashboard() {
                     onChange={(e) => setAnnouncement(e.target.value)}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-brand-text-primary mb-1">Hero Section Title (use \n for line breaks)</label>
-                  <textarea
-                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none min-h-[85px] text-sm font-serif"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-brand-text-primary mb-1">Hero Section Subtitle</label>
-                  <textarea
-                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none min-h-[100px] text-sm"
-                    value={subtitle}
-                    onChange={(e) => setSubtitle(e.target.value)}
-                  />
-                </div>
               </div>
               <div className="flex justify-end pt-2">
                 <button onClick={handleSaveHero} className="flex items-center space-x-2 px-6 py-2.5 bg-brand-brown text-white rounded-xl hover:bg-brand-gold transition-colors font-semibold cursor-pointer text-sm">
-                  <Save className="w-4 h-4" /><span>Save Hero Section</span>
+                  <Save className="w-4 h-4" /><span>Save Announcement</span>
                 </button>
               </div>
             </div>
           )}
 
-          {/* Best Sellers Header */}
-          {activeSection === "bestsellers" && (
-            <div className="space-y-6 animate-in fade-in duration-300">
-              <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">Best Sellers Section Header</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-brand-text-primary mb-1">Section Title</label>
-                  <input type="text" className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-sm font-semibold" value={bsTitle} onChange={(e) => setBsTitle(e.target.value)} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-brand-text-primary mb-1">Section Subtitle</label>
-                  <textarea className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none min-h-[80px] text-sm" value={bsSubtitle} onChange={(e) => setBsSubtitle(e.target.value)} />
-                </div>
-              </div>
-              <div className="flex justify-end pt-2">
-                <button onClick={handleSaveBestSellers} className="flex items-center space-x-2 px-6 py-2.5 bg-brand-brown text-white rounded-xl hover:bg-brand-gold transition-colors font-semibold cursor-pointer text-sm">
-                  <Save className="w-4 h-4" /><span>Save Best Sellers</span>
-                </button>
-              </div>
-            </div>
-          )}
 
-          {/* Featured Products */}
-          {activeSection === "featuredproducts" && (
-            <div className="animate-in fade-in duration-300">
-              <FeaturedProductsManager />
-            </div>
-          )}
-
-          {/* Why Choose Section */}
-          {activeSection === "whychoose" && (
-            <div className="space-y-6 animate-in fade-in duration-300">
-              <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">Why Choose Us Section</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-brand-text-primary mb-1">Section Title</label>
-                  <input type="text" className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-sm font-semibold" value={wcTitle} onChange={(e) => setWcTitle(e.target.value)} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-brand-text-primary mb-1">Section Description Text</label>
-                  <textarea className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none min-h-[100px] text-sm" value={wcDescription} onChange={(e) => setWcDescription(e.target.value)} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-brand-text-primary mb-1">Add Feature Badge</label>
-                  <div className="flex space-x-2 mb-2">
-                    <input type="text" className="flex-1 px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-sm" placeholder="e.g. Organic Millet Sweetened" value={newFeature} onChange={(e) => setNewFeature(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAddFeature()} />
-                    <button type="button" onClick={handleAddFeature} className="px-4 py-2 bg-brand-brown text-white hover:bg-brand-gold rounded-xl transition-colors text-sm font-semibold cursor-pointer">Add</button>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-3 p-3 bg-brand-light/50 border border-brand-brown/5 rounded-xl min-h-[60px]">
-                    {wcFeatures.map((f, i) => (
-                      <span key={i} className="px-3 py-1 bg-brand-brown text-white text-xs font-bold rounded-full flex items-center shadow-sm">
-                        {f}
-                        <button type="button" onClick={() => handleRemoveFeature(f)} className="ml-2 hover:text-brand-gold transition-colors text-xs font-bold cursor-pointer">&times;</button>
-                      </span>
-                    ))}
-                    {wcFeatures.length === 0 && <span className="text-xs text-brand-text-secondary/70 italic m-auto">No features added yet.</span>}
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end pt-2">
-                <button onClick={handleSaveWhyChoose} className="flex items-center space-x-2 px-6 py-2.5 bg-brand-brown text-white rounded-xl hover:bg-brand-gold transition-colors font-semibold cursor-pointer text-sm">
-                  <Save className="w-4 h-4" /><span>Save Why Choose</span>
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Featured Categories */}
           {activeSection === "categories" && (
@@ -628,36 +539,11 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* Gifting Section */}
-          {activeSection === "gifting" && (
-            <div className="animate-in fade-in duration-300">
-              <GiftingSectionAdmin />
-            </div>
-          )}
-
           {/* Shop by Mood Settings */}
           {activeSection === "shopbymood" && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">Shop by Mood Settings</h2>
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-brand-text-primary mb-1">Section Title</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none text-sm font-semibold"
-                    value={smTitle}
-                    onChange={(e) => setSmTitle(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-brand-text-primary mb-1">Section Subtitle</label>
-                  <textarea
-                    className="w-full px-4 py-2 border border-brand-brown/20 rounded-xl focus:ring-2 focus:ring-brand-gold outline-none min-h-[80px] text-sm"
-                    value={smSubtitle}
-                    onChange={(e) => setSmSubtitle(e.target.value)}
-                  />
-                </div>
-
                 {/* Editable Mood Cards */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -752,85 +638,7 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* About & Brand Story */}
-          {activeSection === "about" && (
-            <div className="space-y-6 animate-in fade-in duration-300">
-              <h2 className="text-xl font-bold text-brand-brown font-serif border-b border-brand-brown/10 pb-2">About & Brand Story Settings</h2>
-              <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-                <div className="p-4 bg-brand-light/30 border border-brand-brown/5 rounded-2xl space-y-3">
-                  <span className="font-bold text-xs text-brand-gold uppercase tracking-wider block">1. Story Hero Header</span>
-                  <div>
-                    <label className="block text-xs font-bold text-brand-text-secondary mb-1">Hero Title</label>
-                    <input type="text" className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs font-semibold" value={abStoryTitle} onChange={e => setAbStoryTitle(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-brand-text-secondary mb-1">Hero Subtitle</label>
-                    <input type="text" className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs" value={abStorySubtitle} onChange={e => setAbStorySubtitle(e.target.value)} />
-                  </div>
-                </div>
 
-                <div className="p-4 bg-brand-light/30 border border-brand-brown/5 rounded-2xl space-y-3">
-                  <span className="font-bold text-xs text-brand-gold uppercase tracking-wider block">2. Founder Profile & Narrative</span>
-                  <div>
-                    <label className="block text-xs font-bold text-brand-text-secondary mb-1">Founder Full Name</label>
-                    <input type="text" className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs font-semibold" value={abFounderName} onChange={e => setAbFounderName(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-brand-text-secondary mb-1">Founder Journey Narrative</label>
-                    <textarea className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs min-h-[160px] leading-relaxed" value={abFounderText} onChange={e => setAbFounderText(e.target.value)} />
-                  </div>
-                </div>
-
-                <div className="p-4 bg-brand-light/30 border border-brand-brown/5 rounded-2xl space-y-3">
-                  <span className="font-bold text-xs text-brand-gold uppercase tracking-wider block">3. Brand Name Meaning</span>
-                  <div><label className="block text-xs font-bold text-brand-text-secondary mb-1">Meaning Title</label><input type="text" className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs font-semibold" value={abMeaningTitle} onChange={e => setAbMeaningTitle(e.target.value)} /></div>
-                  <div><label className="block text-xs font-bold text-brand-text-secondary mb-1">Meaning Subtitle</label><input type="text" className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs font-semibold text-brand-brown" value={abMeaningSubtitle} onChange={e => setAbMeaningSubtitle(e.target.value)} /></div>
-                  <div><label className="block text-xs font-bold text-brand-text-secondary mb-1">Meaning Text Block 1</label><textarea className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs min-h-[60px]" value={abMeaningT1} onChange={e => setAbMeaningT1(e.target.value)} /></div>
-                  <div><label className="block text-xs font-bold text-brand-text-secondary mb-1">Meaning Text Block 2</label><textarea className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs min-h-[60px]" value={abMeaningT2} onChange={e => setAbMeaningT2(e.target.value)} /></div>
-                  <div><label className="block text-xs font-bold text-brand-text-secondary mb-1">Meaning Text Block 3</label><textarea className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs min-h-[60px]" value={abMeaningT3} onChange={e => setAbMeaningT3(e.target.value)} /></div>
-                </div>
-
-                <div className="p-4 bg-brand-light/30 border border-brand-brown/5 rounded-2xl space-y-3">
-                  <span className="font-bold text-xs text-brand-gold uppercase tracking-wider block">4. Nashik Roots Story</span>
-                  <div><label className="block text-xs font-bold text-brand-text-secondary mb-1">Roots Heading</label><input type="text" className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs font-semibold" value={abRootsTitle} onChange={e => setAbRootsTitle(e.target.value)} /></div>
-                  <div><label className="block text-xs font-bold text-brand-text-secondary mb-1">Roots Paragraph 1</label><textarea className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs min-h-[80px]" value={abRootsT1} onChange={e => setAbRootsT1(e.target.value)} /></div>
-                  <div><label className="block text-xs font-bold text-brand-text-secondary mb-1">Roots Paragraph 2</label><textarea className="w-full px-3 py-1.5 border border-brand-brown/20 rounded-xl text-xs min-h-[80px]" value={abRootsT2} onChange={e => setAbRootsT2(e.target.value)} /></div>
-                </div>
-
-                <div className="p-4 bg-brand-light/30 border border-brand-brown/5 rounded-2xl space-y-4">
-                  <span className="font-bold text-xs text-brand-gold uppercase tracking-wider block">5. Quality Statistics Counters</span>
-                  {[
-                    { num: abS1Num, setNum: setAbS1Num, title: abS1Title, setTitle: setAbS1Title, desc: abS1Desc, setDesc: setAbS1Desc, label: "Counter Card 1" },
-                    { num: abS2Num, setNum: setAbS2Num, title: abS2Title, setTitle: setAbS2Title, desc: abS2Desc, setDesc: setAbS2Desc, label: "Counter Card 2" },
-                    { num: abS3Num, setNum: setAbS3Num, title: abS3Title, setTitle: setAbS3Title, desc: abS3Desc, setDesc: setAbS3Desc, label: "Counter Card 3" },
-                  ].map((card, i) => (
-                    <div key={i} className="p-3 bg-white border border-brand-brown/5 rounded-xl space-y-2">
-                      <span className="font-semibold text-xs text-brand-brown block">{card.label}</span>
-                      <div className="grid grid-cols-3 gap-2">
-                        <div>
-                          <label className="block text-[10px] font-bold text-brand-text-secondary mb-0.5">Big Number</label>
-                          <input type="text" className="w-full px-2 py-1 border border-brand-brown/20 rounded-lg text-xs" value={card.num} onChange={e => card.setNum(e.target.value)} />
-                        </div>
-                        <div className="col-span-2">
-                          <label className="block text-[10px] font-bold text-brand-text-secondary mb-0.5">Title</label>
-                          <input type="text" className="w-full px-2 py-1 border border-brand-brown/20 rounded-lg text-xs font-bold" value={card.title} onChange={e => card.setTitle(e.target.value)} />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-bold text-brand-text-secondary mb-0.5">Description</label>
-                        <input type="text" className="w-full px-2 py-1 border border-brand-brown/20 rounded-lg text-xs" value={card.desc} onChange={e => card.setDesc(e.target.value)} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="flex justify-end pt-2">
-                <button onClick={handleSaveAbout} className="flex items-center space-x-2 px-6 py-2.5 bg-brand-brown text-white rounded-xl hover:bg-brand-gold transition-colors font-semibold cursor-pointer text-sm">
-                  <Save className="w-4 h-4" /><span>Save About Settings</span>
-                </button>
-              </div>
-            </div>
-          )}
 
         </main>
       </div>

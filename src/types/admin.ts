@@ -287,6 +287,8 @@ export interface ProductDTO {
   image: string;              // Primary image URL (first image)
   images?: string[];          // All images
   isFeatured: boolean;
+  isBestSeller?: boolean;
+  inStock?: boolean;
   status: ProductStatus;
   variants?: ProductVariantDTO[];
   tags?: string[];
@@ -311,6 +313,7 @@ export interface CreateProductRequestDTO {
     altText?: string | null;
   }>;
   status: ProductStatus;
+  inStock?: boolean;
   isFeatured?: boolean;
   isBestSeller?: boolean;
   variants: Array<{

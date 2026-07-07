@@ -63,7 +63,8 @@ interface AuthState {
   hydrateSession: () => Promise<User | null>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (password: string, token: string) => Promise<void>;
-  updateUser: (data: Partial<User>) => void;
+  updateUser: (data: Partial<User>) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   addAddress: (address: Omit<Address, 'id'>) => void;
   updateAddress: (id: string, address: Partial<Address>) => void;
   deleteAddress: (id: string) => void;
@@ -217,14 +218,22 @@ export const useAuthStore = create<AuthState>()(
         await apiClient.post('/auth/reset-password', { password, token });
       },
 
-      updateUser: (data) => set((state) => {
-        if (!state.user) return {};
-        const updatedUser = { ...state.user, ...data };
-        return {
-          user: updatedUser,
-          allUsers: state.allUsers.map(u => u.id === state.user!.id ? updatedUser : u)
-        };
-      }),
+      updateUser: async (data) => {
+        const response = await apiClient.put('/auth/profile', data);
+        const updated = response.data.data;
+        set((state) => {
+          if (!state.user) return {};
+          const updatedUser = { ...state.user, ...updated };
+          return {
+            user: updatedUser,
+            allUsers: state.allUsers.map(u => u.id === state.user!.id ? updatedUser : u)
+          };
+        });
+      },
+
+      changePassword: async (currentPassword, newPassword) => {
+        await apiClient.post('/auth/change-password', { currentPassword, newPassword });
+      },
 
       addAddress: (address) => set((state) => {
         if (!state.user) return {};

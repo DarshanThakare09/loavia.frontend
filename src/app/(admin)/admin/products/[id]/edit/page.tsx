@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useAdminProductStore } from "@/store/adminProductStore";
 import { ProductStatus } from "@/types/admin";
 import { catalogService } from "@/services/catalogService";
+import { siteService } from "@/services/siteService";
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -25,16 +26,21 @@ export default function EditProductPage() {
   const [status, setStatus]           = useState<ProductStatus>("ACTIVE");
   const [isFeatured, setFeatured]     = useState(false);
   const [isBestSeller, setBestSeller] = useState(false);
+  const [inStock, setInStock]         = useState(true);
   const [images, setImages]           = useState<string[]>(["", "", ""]);
   const [tags, setTags]               = useState("");
   const [categories, setCategories]   = useState<any[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  
+  const [selectedMood, setSelectedMood] = useState("");
+  const [moods, setMoods]             = useState<string[]>([]);
+  const [isLoadingMoods, setIsLoadingMoods] = useState(true);
 
   // ── Load product and categories ───────────────────────────────────────
   useEffect(() => {
     if (id) getProduct(id);
     
-    async function loadCategories() {
+    async function loadData() {
       try {
         const cats = await catalogService.getCategories();
         setCategories(cats);
@@ -43,8 +49,22 @@ export default function EditProductPage() {
       } finally {
         setIsLoadingCategories(false);
       }
+
+      try {
+        const settings = await siteService.getSettings();
+        if (settings && settings.shopByMoodList) {
+          const parsed = JSON.parse(settings.shopByMoodList);
+          if (Array.isArray(parsed)) {
+            setMoods(parsed.map((m: any) => m.name));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load moods settings:", err);
+      } finally {
+        setIsLoadingMoods(false);
+      }
     }
-    loadCategories();
+    loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -60,19 +80,29 @@ export default function EditProductPage() {
     setDiscount(selectedProduct.discountPrice ? (selectedProduct.discountPrice / 100).toString() : "");
     setStatus(selectedProduct.status);
     setFeatured(selectedProduct.isFeatured);
-    setBestSeller(selectedProduct.isFeatured && selectedProduct.tags?.includes("Best Seller") ? true : false); // fallback sync
+    setBestSeller(selectedProduct.isBestSeller ?? (selectedProduct.tags?.includes("Best Seller") || false));
+    setInStock(selectedProduct.inStock ?? true);
     setImages(selectedProduct.images?.length ? [...selectedProduct.images, "", ""].slice(0, 3) : ["", "", ""]);
-    setTags(selectedProduct.tags?.join(", ") ?? "");
-  }, [selectedProduct]);
-
-  // Try to read isBestSeller properly from backend fields
-  useEffect(() => {
-    if (!selectedProduct) return;
-    // We can check if isBestSeller is set on selectedProduct
-    if ('isBestSeller' in selectedProduct) {
-      setBestSeller((selectedProduct as any).isBestSeller);
+    
+    // Extract matching mood from product tags
+    if (selectedProduct.tags && moods.length > 0) {
+      const match = selectedProduct.tags.find(t => moods.some(m => m.toLowerCase() === t.toLowerCase()));
+      if (match) {
+        const exactMood = moods.find(m => m.toLowerCase() === match.toLowerCase()) || match;
+        setSelectedMood(exactMood);
+      } else {
+        setSelectedMood("");
+      }
+    } else {
+      setSelectedMood("");
     }
-  }, [selectedProduct]);
+    
+    // Filter out mood from tags input text
+    const otherTags = selectedProduct.tags 
+      ? selectedProduct.tags.filter(t => !moods.some(m => m.toLowerCase() === t.toLowerCase())) 
+      : [];
+    setTags(otherTags.join(", "));
+  }, [selectedProduct, moods]);
 
   const updateImage = (idx: number, val: string) => {
     const updated = [...images];
@@ -93,6 +123,42 @@ export default function EditProductPage() {
     const cleanImages = images.filter(Boolean);
     if (cleanImages.length === 0) { toast.error("At least one image URL is required."); return; }
 
+    const productVariants = selectedProduct?.variants || [];
+    const defaultVariant = productVariants.find((v: any) => v.isDefault) || productVariants[0];
+    
+    let updatedVariants = [];
+    if (productVariants.length > 0) {
+      updatedVariants = productVariants.map((v: any) => {
+        if (v.id === defaultVariant?.id || productVariants.length === 1) {
+          return {
+            name: v.name,
+            sku: v.sku,
+            price: Math.round(Number(price) * 100),
+            discountPrice: discountPrice ? Math.round(Number(discountPrice) * 100) : null,
+            stockQuantity: v.stock || 100,
+            isDefault: v.isDefault ?? true,
+          };
+        }
+        return {
+          name: v.name,
+          sku: v.sku,
+          price: Math.round(v.price), // already in Paise in DTO
+          discountPrice: v.discountPrice ? Math.round(v.discountPrice) : null, // already in Paise in DTO
+          stockQuantity: v.stock || 100,
+          isDefault: v.isDefault ?? false,
+        };
+      });
+    } else {
+      updatedVariants = [{
+        name: "Standard Box",
+        sku: `${selectedProduct?.sku || "SKU-9"}-DEFAULT`,
+        price: Math.round(Number(price) * 100),
+        discountPrice: discountPrice ? Math.round(Number(discountPrice) * 100) : null,
+        stockQuantity: 100,
+        isDefault: true,
+      }];
+    }
+
     try {
       await updateProduct(id, {
         name: name.trim(),
@@ -106,9 +172,13 @@ export default function EditProductPage() {
           altText: `${name.trim()} image ${idx + 1}`
         })),
         status,
+        inStock,
         isFeatured,
         isBestSeller,
-        tags: tags.split(",").map(t => t.trim()).filter(Boolean),
+        variants: updatedVariants,
+        tags: Array.from(new Set(
+          [selectedMood, ...tags.split(",").map(t => t.trim()).filter(Boolean)]
+        )).filter(Boolean),
       } as any);
       toast.success("Product updated.");
       router.push("/admin/products");
@@ -203,6 +273,19 @@ export default function EditProductPage() {
               <label className={labelClass}>Calories (e.g. 220 kcal)</label>
               <input type="text" value={calories} onChange={e => setCalories(e.target.value)} className={inputClass} placeholder="e.g. 220 kcal (optional)" />
             </div>
+            <div>
+              <label className={labelClass}>Mood</label>
+              {isLoadingMoods ? (
+                <div className="text-sm text-brand-text-secondary py-2.5">Loading moods...</div>
+              ) : (
+                <select value={selectedMood} onChange={e => setSelectedMood(e.target.value)} className={inputClass}>
+                  <option value="">Select Mood (Optional)</option>
+                  {moods.map((m) => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
+              )}
+            </div>
           </div>
         </div>
 
@@ -232,6 +315,10 @@ export default function EditProductPage() {
             </div>
             <div className="sm:col-span-2 flex flex-wrap gap-6 mt-2">
               <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input type="checkbox" checked={inStock} onChange={e => setInStock(e.target.checked)} className="w-4 h-4 accent-brand-brown" />
+                <span className="text-sm font-semibold text-brand-text-primary">Product is In Stock</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer select-none">
                 <input type="checkbox" checked={isFeatured} onChange={e => setFeatured(e.target.checked)} className="w-4 h-4 accent-brand-brown" />
                 <span className="text-sm font-semibold text-brand-text-primary">Mark as Featured Product</span>
               </label>
@@ -257,29 +344,7 @@ export default function EditProductPage() {
           </div>
         </div>
 
-        {/* Existing variants (read-only) */}
-        {selectedProduct?.variants && selectedProduct.variants.length > 0 && (
-          <div className="bg-white p-6 rounded-2xl border border-brand-brown/10 shadow-sm">
-            <h2 className="font-bold text-brand-brown text-base mb-3">Existing Variants</h2>
-            <p className="text-xs text-brand-text-secondary mb-4">Manage individual variant stock via the Inventory page.</p>
-            <div className="space-y-2">
-              {selectedProduct.variants.map(v => (
-                <div key={v.id} className="flex items-center justify-between p-3 bg-brand-light/40 rounded-xl text-sm">
-                  <div>
-                    <span className="font-semibold text-brand-brown">{v.name}</span>
-                    <span className="text-xs text-brand-text-secondary ml-2 font-mono">{v.sku}</span>
-                  </div>
-                  <div className="flex items-center gap-4 text-xs text-brand-text-secondary">
-                    <span>₹{(v.price / 100).toLocaleString()}</span>
-                    <span className={`font-bold ${v.stock <= 5 ? "text-rose-600" : "text-emerald-700"}`}>
-                      {v.stock} in stock
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         <div className="flex justify-end gap-3">
           <button type="button" onClick={() => router.push("/admin/products")} className="px-6 py-2.5 border border-brand-brown/10 rounded-xl text-brand-brown font-semibold text-sm hover:bg-brand-light transition-colors">

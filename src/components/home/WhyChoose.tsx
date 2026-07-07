@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
 import { useSiteStore } from "@/store/siteStore";
 import { Wheat, ShieldCheck, Sprout, Dumbbell, Flame, Sparkles, X, Star } from "lucide-react";
 import { toast } from "sonner";
@@ -21,6 +23,8 @@ const getFeatureIcon = (text: string) => {
 };
 
 export default function WhyChoose() {
+  const router = useRouter();
+  const { isAuthenticated, user } = useAuthStore();
   const { whyChooseTitle, whyChooseDescription, whyChooseFeatures } = useSiteStore();
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -33,6 +37,13 @@ export default function WhyChoose() {
   const [hoverRating, setHoverRating] = useState<number | null>(null);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setName(user.name || "");
+      setEmail(user.email || "");
+    }
+  }, [isAuthenticated, user]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -198,7 +209,14 @@ export default function WhyChoose() {
           {/* Add Review Button */}
           <div className="mt-8 animate-in fade-in duration-300 delay-150">
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => {
+                if (!isAuthenticated) {
+                  toast.error("Please login to write a review.");
+                  router.push("/auth?redirect=/");
+                } else {
+                  setIsModalOpen(true);
+                }
+              }}
               className="inline-flex items-center justify-center px-8 py-3.5 text-xs font-bold text-white bg-brand-brown rounded-full hover:bg-brand-gold transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer uppercase tracking-wider border border-transparent"
             >
               Write a Review

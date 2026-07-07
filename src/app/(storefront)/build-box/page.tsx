@@ -6,16 +6,16 @@ import { Package, Minus, Plus, ShoppingCart, CheckCircle } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useProductStore } from "@/store/productStore";
 import { toast } from "sonner";
-import { PRODUCTS } from "@/lib/mockData";
 
 export default function BuildBoxPage() {
   const { products: storeProducts } = useProductStore();
-  const productsList = storeProducts.length > 0 ? storeProducts : PRODUCTS;
 
   const [boxSize, setBoxSize] = useState(6);
   const [selections, setSelections] = useState<{ [id: string]: number }>({});
   const [byobProduct, setByobProduct] = useState<any>(null);
-  
+  const [productsList, setProductsList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const { addItem } = useCartStore();
 
   const totalSelected = Object.values(selections).reduce((a, b) => a + b, 0);
@@ -34,25 +34,41 @@ export default function BuildBoxPage() {
   }, 0);
 
   useEffect(() => {
-    async function loadByobProduct() {
+    async function loadData() {
       try {
+        setLoading(true);
         const { catalogService } = await import('@/services/catalogService');
+        
+        // Load BYOB product
         const prod = await catalogService.getProductBySlug("build-your-own-box");
         setByobProduct(prod);
+
+        // Load catalog cookies/products
+        let cookies = storeProducts;
+        if (cookies.length === 0) {
+          const res = await catalogService.getProducts({ limit: 100 });
+          cookies = res.products;
+        }
+        
+        // Filter out BYOB product
+        const filteredCookies = cookies.filter(p => p.slug !== "build-your-own-box");
+        setProductsList(filteredCookies);
       } catch (err) {
-        console.error("Failed to load Build Your Own Box product from backend", err);
+        console.error("Failed to load Build Your Own Box data from backend", err);
+      } finally {
+        setLoading(false);
       }
     }
-    loadByobProduct();
-  }, []);
+    loadData();
+  }, [storeProducts]);
 
   const handleUpdate = (id: string, delta: number) => {
     const current = selections[id] || 0;
     const newCount = current + delta;
-    
+
     if (newCount < 0) return;
     if (delta > 0 && remaining <= 0) return;
-    
+
     setSelections({ ...selections, [id]: newCount });
   };
 
@@ -109,7 +125,7 @@ export default function BuildBoxPage() {
       customBoxSelections
     });
     toast.success(`Custom ${boxSize}-Pack added to cart`);
-    
+
     // Reset selection after adding
     setSelections({});
   };
@@ -117,7 +133,7 @@ export default function BuildBoxPage() {
   return (
     <div className="bg-[#FDFBF7] min-h-screen pt-8 pb-24 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         <div className="text-center mb-16 flex flex-col items-center">
           <span className="text-brand-gold font-sans font-bold text-xs uppercase tracking-[3px] mb-2 block">Custom Creation</span>
           <h1
@@ -133,38 +149,38 @@ export default function BuildBoxPage() {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-          
+
           {/* Main Content */}
           <div className="w-full lg:w-2/3">
-            
+
             {/* Box Size Selector */}
             <div className="bg-white p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgba(92,51,23,0.02)] border border-brand-brown/5 mb-8">
               <h2 className="text-lg font-extrabold text-brand-brown mb-6 flex items-center tracking-wide">
                 <Package className="w-5 h-5 mr-3 text-brand-gold" /> Step 1: Choose Size
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {[6, 12, 24].map(size => (
-                  <button 
-                    key={size}
-                    onClick={() => {
-                      setBoxSize(size);
-                      setSelections({});
-                    }}
-                    className={`p-6 rounded-[2rem] border-2 transition-all duration-300 text-center cursor-pointer ${
-                      boxSize === size 
-                        ? "border-brand-brown bg-brand-brown text-white shadow-lg scale-[1.02]" 
+                {loading ? (
+                  [1, 2, 3].map(i => (
+                    <div key={i} className="h-20 rounded-[2rem] bg-gray-100/70 animate-pulse border border-brand-brown/5" />
+                  ))
+                ) : (
+                  [6, 12, 24].map(size => (
+                    <button
+                      key={size}
+                      onClick={() => {
+                        setBoxSize(size);
+                        setSelections({});
+                      }}
+                      className={`p-6 rounded-[2rem] border-2 transition-all duration-300 text-center cursor-pointer ${boxSize === size
+                        ? "border-brand-brown bg-brand-brown text-white shadow-lg scale-[1.02]"
                         : "border-brand-brown/10 bg-white text-brand-brown hover:border-brand-gold/40 hover:bg-[#FDFBF7]"
-                    }`}
-                  >
-                    <span className="block text-2xl font-black mb-1">{size} Pack</span>
-                    <span className={`font-bold ${boxSize === size ? "text-brand-cream" : "text-brand-gold"}`}>
-                      ₹{
-                        byobProduct?.variants?.find((v: any) => v.sku === `BYOB-${size}` || v.name.includes(`${size}`))?.price || 
-                        (size === 6 ? 1799 : size === 12 ? 3499 : 6799)
-                      }
-                    </span>
-                  </button>
-                ))}
+                        }`}
+                    >
+                      <span className="block text-2xl font-black mb-1">{size} Pack</span>
+
+                    </button>
+                  ))
+                )}
               </div>
             </div>
 
@@ -183,46 +199,64 @@ export default function BuildBoxPage() {
                   {remaining === 0 ? "Box is Full!" : `${remaining} slots left`}
                 </span>
               </div>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {productsList.slice(0, 6).map(cookie => {
-                  const count = selections[cookie.id] || 0;
-                  return (
-                    <div key={cookie.id} className="flex items-center space-x-4 p-4 border border-brand-brown/10 rounded-2xl hover:border-brand-gold/30 hover:shadow-sm transition-all duration-300 bg-[#FDFBF7]/40 group">
-                      <div className="relative w-20 h-20 bg-brand-light rounded-xl overflow-hidden flex-shrink-0 border border-brand-brown/5 group-hover:scale-95 transition-transform duration-300">
-                        <Image src={cookie.image} alt={cookie.name} fill className="object-cover" sizes="80px" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-extrabold text-sm text-brand-brown mb-3 line-clamp-2 leading-tight">{cookie.name}</h3>
-                        <div className="flex items-center space-x-3">
-                          <button 
-                            onClick={() => handleUpdate(cookie.id, -1)}
-                            disabled={count === 0}
-                            className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-200 cursor-pointer ${
-                              count === 0 
-                                ? "border-gray-200 text-gray-300 cursor-not-allowed" 
-                                : "border-brand-brown text-brand-brown hover:bg-brand-brown hover:text-white"
-                            }`}
-                          >
-                            <Minus className="w-4 h-4" />
-                          </button>
-                          <span className="font-extrabold text-brand-brown w-4 text-center">{count}</span>
-                          <button 
-                            onClick={() => handleUpdate(cookie.id, 1)}
-                            disabled={remaining === 0}
-                            className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-200 cursor-pointer ${
-                              remaining === 0 
-                                ? "border-gray-200 text-gray-300 cursor-not-allowed" 
-                                : "border-brand-brown text-brand-brown hover:bg-brand-brown hover:text-white"
-                            }`}
-                          >
-                            <Plus className="w-4 h-4" />
-                          </button>
+                {loading ? (
+                  [1, 2, 3, 4, 5, 6].map(i => (
+                    <div key={i} className="flex items-center space-x-4 p-4 border border-brand-brown/10 rounded-2xl bg-white animate-pulse">
+                      <div className="w-20 h-20 bg-gray-100/70 rounded-xl flex-shrink-0" />
+                      <div className="flex-1 space-y-3">
+                        <div className="h-4 bg-gray-100/70 rounded w-3/4" />
+                        <div className="flex space-x-2">
+                          <div className="w-8 h-8 rounded-full bg-gray-100/70 animate-pulse" />
+                          <div className="w-8 h-8 rounded bg-gray-100/70 animate-pulse" />
+                          <div className="w-8 h-8 rounded-full bg-gray-100/70 animate-pulse" />
                         </div>
                       </div>
                     </div>
-                  );
-                })}
+                  ))
+                ) : productsList.length === 0 ? (
+                  <div className="col-span-full py-12 text-center text-brand-text-secondary font-light">
+                    No custom flavors available at the moment.
+                  </div>
+                ) : (
+                  productsList.slice(0, 6).map(cookie => {
+                    const count = selections[cookie.id] || 0;
+                    return (
+                      <div key={cookie.id} className="flex items-center space-x-4 p-4 border border-brand-brown/10 rounded-2xl hover:border-brand-gold/30 hover:shadow-sm transition-all duration-300 bg-[#FDFBF7]/40 group">
+                        <div className="relative w-20 h-20 bg-brand-light rounded-xl overflow-hidden flex-shrink-0 border border-brand-brown/5 group-hover:scale-95 transition-transform duration-300">
+                          <Image src={cookie.image} alt={cookie.name} fill className="object-cover" sizes="80px" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-extrabold text-sm text-brand-brown mb-3 line-clamp-2 leading-tight">{cookie.name}</h3>
+                          <div className="flex items-center space-x-3">
+                            <button
+                              onClick={() => handleUpdate(cookie.id, -1)}
+                              disabled={count === 0}
+                              className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-200 cursor-pointer ${count === 0
+                                ? "border-gray-200 text-gray-300 cursor-not-allowed"
+                                : "border-brand-brown text-brand-brown hover:bg-brand-brown hover:text-white"
+                                }`}
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="font-extrabold text-brand-brown w-4 text-center">{count}</span>
+                            <button
+                              onClick={() => handleUpdate(cookie.id, 1)}
+                              disabled={remaining === 0}
+                              className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-200 cursor-pointer ${remaining === 0
+                                ? "border-gray-200 text-gray-300 cursor-not-allowed"
+                                : "border-brand-brown text-brand-brown hover:bg-brand-brown hover:text-white"
+                                }`}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
           </div>
@@ -233,23 +267,29 @@ export default function BuildBoxPage() {
               <h3 className="text-xl font-bold text-brand-brown mb-6 border-b border-brand-brown/5 pb-4">
                 Your Box ({boxSize}-Pack)
               </h3>
-              
-              <div className="grid grid-cols-3 gap-3 mb-8">
-                {Array.from({ length: boxSize }).map((_, i) => {
-                  const flatSelections = Object.entries(selections).flatMap(([id, count]) => Array(count).fill(id));
-                  const cookieId = flatSelections[i];
-                  const cookie = productsList.find(c => c.id === cookieId);
 
-                  return (
-                    <div key={i} className="aspect-square rounded-2xl bg-[#FDFBF7] border-2 border-dashed border-brand-brown/15 flex items-center justify-center relative overflow-hidden group shadow-inner">
-                       {cookie ? (
-                        <Image src={cookie.image} alt={cookie.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="90px" />
-                      ) : (
-                        <span className="text-brand-brown/25 font-bold text-xs select-none">Empty</span>
-                      )}
-                    </div>
-                  );
-                })}
+              <div className="grid grid-cols-3 gap-3 mb-8">
+                {loading ? (
+                  Array.from({ length: boxSize }).map((_, i) => (
+                    <div key={i} className="aspect-square rounded-2xl bg-gray-100/70 animate-pulse border border-brand-brown/5" />
+                  ))
+                ) : (
+                  Array.from({ length: boxSize }).map((_, i) => {
+                    const flatSelections = Object.entries(selections).flatMap(([id, count]) => Array(count).fill(id));
+                    const cookieId = flatSelections[i];
+                    const cookie = productsList.find(c => c.id === cookieId);
+
+                    return (
+                      <div key={i} className="aspect-square rounded-2xl bg-[#FDFBF7] border-2 border-dashed border-brand-brown/15 flex items-center justify-center relative overflow-hidden group shadow-inner">
+                        {cookie ? (
+                          <Image src={cookie.image} alt={cookie.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="90px" />
+                        ) : (
+                          <span className="text-brand-brown/25 font-bold text-xs select-none">Empty</span>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </div>
 
               <div className="border-t border-brand-brown/5 pt-6">
@@ -257,14 +297,13 @@ export default function BuildBoxPage() {
                   <span className="font-extrabold text-brand-brown text-sm uppercase tracking-wider">Total Price</span>
                   <span className="font-black text-2xl text-brand-brown">₹{selectionPriceTotal}</span>
                 </div>
-                <button 
+                <button
                   disabled={remaining > 0}
                   onClick={handleAddToCart}
-                  className={`w-full flex items-center justify-center space-x-2 px-8 py-4 font-bold rounded-full transition-all duration-300 ${
-                    remaining === 0 
-                      ? "bg-brand-brown text-white hover:bg-brand-gold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer" 
-                      : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
-                  }`}
+                  className={`w-full flex items-center justify-center space-x-2 px-8 py-4 font-bold rounded-full transition-all duration-300 ${remaining === 0
+                    ? "bg-brand-brown text-white hover:bg-brand-gold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer"
+                    : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                    }`}
                 >
                   <ShoppingCart className="w-5 h-5" />
                   <span>{remaining === 0 ? "Add to Cart" : `Select ${remaining} more`}</span>

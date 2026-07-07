@@ -9,11 +9,13 @@ import { useCartStore } from "@/store/cartStore";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/authStore";
 import { catalogService } from "@/services/catalogService";
+import { siteService } from "@/services/siteService";
 import { Product } from "@/store/productStore";
 import { PaginationMeta } from "@/types/catalog";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useSiteStore } from "@/store/siteStore";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -31,7 +33,8 @@ export default function ShopPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   
-  const [categories, setCategories] = useState<string[]>(["All", "Classic", "Vegan", "Gluten-Free", "Stuffed", "Specialty"]);
+  const [categories, setCategories] = useState<string[]>(["All"]);
+  const [flavors, setFlavors] = useState<string[]>(FLAVORS);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedFlavors, setSelectedFlavors] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("popular");
@@ -147,6 +150,29 @@ export default function ShopPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    async function loadCategoriesAndMoods() {
+      try {
+        const dbCats = await catalogService.getCategories();
+        setCategories(["All", ...dbCats.map(c => c.name)]);
+      } catch (err) {
+        console.error("Failed to load categories in shop page:", err);
+      }
+      try {
+        const settings = await siteService.getSettings();
+        if (settings && settings.shopByMoodList) {
+          const parsed = JSON.parse(settings.shopByMoodList);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setFlavors(parsed.map((m: any) => m.name));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load moods in shop page:", err);
+      }
+    }
+    loadCategoriesAndMoods();
+  }, []);
 
   useEffect(() => {
     if (mounted) {
@@ -344,7 +370,7 @@ export default function ShopPage() {
               <div>
                 <h3 className="font-serif font-bold text-lg text-brand-brown mb-4 border-b border-brand-brown/10 pb-2">Flavors & Mood</h3>
                 <div className="flex flex-wrap gap-2">
-                  {FLAVORS.map(flavor => {
+                  {flavors.map(flavor => {
                     const isSelected = selectedFlavors.includes(flavor);
                     return (
                       <button

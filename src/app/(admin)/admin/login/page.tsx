@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useAdminAuthStore } from "@/store/adminAuthStore";
+import { useSettingsStore } from "@/store/settingsStore";
+import { apiClient } from "@/services/apiClient";
 import Link from "next/link";
-
 
 export default function AdminLogin() {
   const [username, setUsername] = useState("");
@@ -21,38 +22,40 @@ export default function AdminLogin() {
     setError("");
     setIsLoading(true);
     try {
-      const normalizedUser = username.toLowerCase().trim();
-      if (
-        (normalizedUser === "admin" || normalizedUser === "admin@loavia.com") &&
-        password === "admin123"
-      ) {
-        // Set mock cookies so that backend API calls from admin panel work
-        document.cookie = "access_token=mock-admin-token; path=/; max-age=86400";
-        document.cookie = "admin_access_token=mock-admin-token; path=/; max-age=86400";
+      const email = username.toLowerCase().trim();
 
-        // Mark admin as authenticated in the isolated admin store
-        useAdminAuthStore.getState().login();
+      // Calls the admin-specific endpoint which:
+      // 1. Validates credentials against the DB
+      // 2. Enforces admin/staff role (returns 400 for customers)
+      // 3. Sets admin_access_token cookie ONLY (never access_token)
+      // This keeps the customer storefront session completely untouched.
+      const response = await apiClient.post("/auth/admin-login", { email, password });
+      const user = response.data?.data?.user;
 
-        router.push("/admin/dashboard");
-
-        // Fallback for robust redirect
-        setTimeout(() => {
-          if (window.location.pathname !== "/admin/dashboard") {
-            window.location.href = "/admin/dashboard";
-          }
-        }, 300);
-        return;
+      // Store admin profile in settingsStore (separate from customer authStore)
+      if (user) {
+        useSettingsStore.getState().updateAdminProfile(
+          user.name || "Admin",
+          user.email || email,
+          user.phone || "",
+          useSettingsStore.getState().adminAvatar || ""
+        );
       }
 
-      // Invalid credentials
-      setError("Invalid username or password.");
+      // Mark admin session as authenticated (isolated from customer session)
+      useAdminAuthStore.getState().login();
+
+      router.push("/admin/dashboard");
     } catch (err: any) {
-      setError(err?.message || "Login failed. Please try again.");
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Login failed. Please check your credentials.";
+      setError(msg);
     } finally {
       setIsLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen bg-brand-light flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -75,10 +78,10 @@ export default function AdminLogin() {
                 type="text"
                 required
                 className="appearance-none rounded-xl relative block w-full px-3 py-2 border border-brand-brown/20 placeholder-gray-500 text-brand-text-primary focus:outline-none focus:ring-brand-gold focus:border-brand-gold focus:z-10 sm:text-sm"
-                placeholder="Username"
+                placeholder="Email address"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleLogin(e as any)}
+                onKeyDown={(e) => e.key === "Enter" && handleLogin(e as any)}
               />
             </div>
             <div>
@@ -93,7 +96,7 @@ export default function AdminLogin() {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleLogin(e as any)}
+                  onKeyDown={(e) => e.key === "Enter" && handleLogin(e as any)}
                 />
                 <button
                   type="button"

@@ -354,11 +354,15 @@ export default function ProfilePage() {
 
                   {isEditingInfo ? (
                     <form
-                      onSubmit={(e) => {
+                      onSubmit={async (e) => {
                         e.preventDefault();
-                        updateUser({ name: editName, phone: editPhone });
-                        setIsEditingInfo(false);
-                        toast.success("Profile updated successfully!");
+                        try {
+                          await updateUser({ name: editName, phone: editPhone });
+                          setIsEditingInfo(false);
+                          toast.success("Profile updated successfully!");
+                        } catch {
+                          toast.error("Failed to update profile. Please try again.");
+                        }
                       }}
                       className="space-y-6"
                     >

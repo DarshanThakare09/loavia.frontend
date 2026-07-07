@@ -26,6 +26,8 @@ function mapBackendProduct(p: any): ProductDTO {
     image: primaryImage,
     images: mappedImages.length > 0 ? mappedImages : [primaryImage],
     isFeatured: p.isFeatured ?? false,
+    isBestSeller: p.isBestSeller ?? false,
+    inStock: p.inStock ?? true,
     status: p.status === 'PUBLISHED' ? 'ACTIVE' : p.status === 'DRAFT' ? 'INACTIVE' : p.status,
     variants: p.variants ? p.variants.map((v: any) => ({
       id: v.id,
