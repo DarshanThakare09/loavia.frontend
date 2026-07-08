@@ -2,13 +2,43 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { Gift, CalendarHeart, PenTool, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { apiClient } from "@/services/apiClient";
 
 export default function GiftPage() {
-  const handleSubmit = (e: React.FormEvent) => {
+  const [form, setForm] = useState({ name: "", email: "", company: "", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Your inquiry has been sent! We'll get back to you shortly.");
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await apiClient.post("/contact", {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        subject: form.company.trim()
+          ? `Bulk Order Enquiry — ${form.company.trim()}`
+          : "Bulk Order Enquiry",
+        message: form.message.trim(),
+        enquiryType: "BULK_ORDER",
+      });
+      toast.success("Your inquiry has been sent! We'll get back to you shortly.");
+      setForm({ name: "", email: "", company: "", message: "" });
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to send inquiry. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -81,12 +111,47 @@ export default function GiftPage() {
             </p>
             
             <form className="space-y-4 font-sans" onSubmit={handleSubmit}>
-              <input type="text" placeholder="Full Name" required className="w-full bg-[#FDFBF7] border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-2xl py-3 px-5 outline-none font-medium text-brand-brown shadow-sm transition-all duration-300" />
-              <input type="email" placeholder="Email Address" required className="w-full bg-[#FDFBF7] border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-2xl py-3 px-5 outline-none font-medium text-brand-brown shadow-sm transition-all duration-300" />
-              <input type="text" placeholder="Company Name" className="w-full bg-[#FDFBF7] border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-2xl py-3 px-5 outline-none font-medium text-brand-brown shadow-sm transition-all duration-300" />
-              <textarea placeholder="Tell us about your needs (approx volume, dates, etc.)" required rows={4} className="w-full bg-[#FDFBF7] border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-2xl py-3 px-5 outline-none font-medium text-brand-brown resize-none shadow-sm transition-all duration-300"></textarea>
-              <button type="submit" className="w-full px-8 py-4 font-bold text-white bg-brand-brown rounded-2xl hover:bg-brand-gold hover:text-white transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
-                Submit Inquiry
+              <input
+                type="text"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                placeholder="Full Name *"
+                required
+                className="w-full bg-[#FDFBF7] border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-2xl py-3 px-5 outline-none font-medium text-brand-brown shadow-sm transition-all duration-300"
+              />
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="Email Address *"
+                required
+                className="w-full bg-[#FDFBF7] border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-2xl py-3 px-5 outline-none font-medium text-brand-brown shadow-sm transition-all duration-300"
+              />
+              <input
+                type="text"
+                name="company"
+                value={form.company}
+                onChange={handleChange}
+                placeholder="Company Name (optional)"
+                className="w-full bg-[#FDFBF7] border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-2xl py-3 px-5 outline-none font-medium text-brand-brown shadow-sm transition-all duration-300"
+              />
+              <textarea
+                name="message"
+                value={form.message}
+                onChange={handleChange}
+                placeholder="Tell us about your needs (approx volume, dates, etc.) *"
+                required
+                rows={4}
+                className="w-full bg-[#FDFBF7] border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-2xl py-3 px-5 outline-none font-medium text-brand-brown resize-none shadow-sm transition-all duration-300"
+              />
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full px-8 py-4 font-bold text-white bg-brand-brown rounded-2xl hover:bg-brand-gold hover:text-white transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 cursor-pointer"
+              >
+                {isSubmitting ? "Submitting..." : "Submit Inquiry"}
               </button>
             </form>
           </div>

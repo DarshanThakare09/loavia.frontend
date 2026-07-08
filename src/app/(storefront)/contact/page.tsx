@@ -44,6 +44,8 @@ export default function ContactPage() {
   
   // Form state
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,9 +54,12 @@ export default function ContactPage() {
     setMounted(true);
   }, []);
 
-  // Pre-fill name from logged-in user session
+  // Pre-fill name/email from logged-in user session
   useEffect(() => {
-    if (user && !name && user.name) setName(user.name);
+    if (user) {
+      if (!name && user.name) setName(user.name);
+      if (!email && user.email) setEmail(user.email);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -109,14 +114,14 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !subject || !message) {
-      toast.error("Please fill in all form fields.");
+    const senderEmail = user?.email || email.trim();
+    if (!name.trim() || !senderEmail || !subject.trim() || !message.trim()) {
+      toast.error("Please fill in all required fields.");
       return;
     }
-    // Use session email if logged in, otherwise prompt (shouldn't happen since field is removed)
-    const senderEmail = user?.email || "";
-    if (!senderEmail) {
-      toast.error("Please log in to send a message.");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(senderEmail)) {
+      toast.error("Please enter a valid email address.");
       return;
     }
     
@@ -125,12 +130,16 @@ export default function ContactPage() {
       const { apiClient } = await import("@/services/apiClient");
       await apiClient.post("/contact", {
         name: name.trim(),
-        email: senderEmail.trim(),
+        email: senderEmail,
+        phone: phone.trim() || undefined,
         subject: subject.trim(),
         message: message.trim(),
+        enquiryType: "GENERAL",
       });
       toast.success("Thank you! Your message has been sent successfully. We will get back to you shortly.");
       setName("");
+      setEmail("");
+      setPhone("");
       setSubject("");
       setMessage("");
     } catch (err: any) {
@@ -217,6 +226,31 @@ export default function ContactPage() {
                   placeholder="Enter your name"
                   className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-brand-brown/10 rounded-2xl focus:ring-1 focus:ring-brand-gold focus:border-brand-gold outline-none text-sm font-sans"
                   required
+                />
+              </div>
+
+              {!user && (
+                <div className="flex flex-col text-left">
+                  <label className="text-xs font-semibold text-brand-brown mb-2 pl-2">Email Address</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-brand-brown/10 rounded-2xl focus:ring-1 focus:ring-brand-gold focus:border-brand-gold outline-none text-sm font-sans"
+                    required
+                  />
+                </div>
+              )}
+
+              <div className="flex flex-col text-left">
+                <label className="text-xs font-semibold text-brand-brown mb-2 pl-2">Phone Number <span className="text-brand-text-secondary font-normal">(optional)</span></label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+91 XXXXX XXXXX"
+                  className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-brand-brown/10 rounded-2xl focus:ring-1 focus:ring-brand-gold focus:border-brand-gold outline-none text-sm font-sans"
                 />
               </div>
 

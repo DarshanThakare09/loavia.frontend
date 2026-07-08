@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, ShoppingBag, Users, Settings, Tag, LogOut, Menu, X, ArrowLeft, Package, MessageSquare, ShoppingCart } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, Users, Settings, Tag, LogOut, Menu, X, ArrowLeft, Package, MessageSquare, ShoppingCart, Inbox } from "lucide-react";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useAdminAuthStore } from "@/store/adminAuthStore";
 import LogoutModal from "@/components/admin/LogoutModal";
@@ -68,6 +68,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Promo Codes", href: "/admin/promo-codes",   icon: Tag },
     { name: "Inventory",   href: "/admin/inventory",     icon: Package },
     { name: "Reviews",     href: "/admin/reviews",       icon: MessageSquare },
+    { name: "Enquiries",   href: "/admin/enquiries",     icon: Inbox },
     { name: "Settings",    href: "/admin/settings",      icon: Settings },
   ];
 

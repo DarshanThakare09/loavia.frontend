@@ -176,8 +176,11 @@ export interface ContactMessageDTO {
   id: string;
   name: string;
   email: string;
+  phone?: string | null;
   subject: string;
   message: string;
+  enquiryType: string;
+  isRead: boolean;
   responseText?: string | null;
   isResponded: boolean;
   respondedAt?: string | null;
