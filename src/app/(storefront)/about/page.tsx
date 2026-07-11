@@ -525,7 +525,7 @@ export default function AboutPage() {
               className="font-normal leading-none mb-6 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2"
             >
               <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">The</span>
-              <span className="text-brand-brown text-7xl md:text-8xl lg:text-[6rem]">Founder</span>
+              <span className="text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[6rem]">Founder</span>
             </h2>
 
             {/* Premium Asymmetric Quote Container */}
@@ -561,7 +561,7 @@ export default function AboutPage() {
               className="philosophy-title-el font-normal leading-none mb-8 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2 justify-center"
             >
               <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">What We</span>
-              <span className="text-brand-brown text-7xl md:text-8xl lg:text-[6rem]">Stand For</span>
+              <span className="text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[6rem]">Stand For</span>
             </h2>
 
             <p className="philosophy-title-el text-lg md:text-xl font-serif text-brand-brown/90 mb-16 font-light italic max-w-3xl mx-auto leading-relaxed">
@@ -659,7 +659,7 @@ export default function AboutPage() {
               className="font-normal leading-none mb-6 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2"
             >
               <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">Our Nashik</span>
-              <span className="text-brand-brown text-7xl md:text-8xl lg:text-[6rem]">Roots</span>
+              <span className="text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[6rem]">Roots</span>
             </h2>
 
             <div className="space-y-6">
@@ -681,7 +681,7 @@ export default function AboutPage() {
             05
           </div>
 
-          <div className="stats-card-container bg-white rounded-[3rem] p-12 md:p-20 text-center shadow-[0_20px_50px_rgba(92,51,23,0.05)] border border-brand-brown/5 relative overflow-hidden">
+          <div className="stats-card-container bg-white rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-12 md:p-20 text-center shadow-[0_20px_50px_rgba(92,51,23,0.05)] border border-brand-brown/5 relative overflow-hidden">
             {/* Decorative blur background elements */}
             <div className="absolute top-0 left-0 w-64 h-64 bg-brand-gold/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl pointer-events-none"></div>
             <div className="absolute bottom-0 right-0 w-64 h-64 bg-brand-brown/5 rounded-full translate-x-1/2 translate-y-1/2 blur-3xl pointer-events-none"></div>
@@ -691,7 +691,7 @@ export default function AboutPage() {
               className="font-normal leading-none mb-16 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2 justify-center relative z-10"
             >
               <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">Healthy Inside,</span>
-              <span className="text-brand-brown text-7xl md:text-8xl lg:text-[6rem]">Yummy Outside</span>
+              <span className="text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[6rem]">Yummy Outside</span>
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-12 relative z-10">

@@ -268,7 +268,7 @@ export default function BuildBoxPage() {
                 Your Box ({boxSize}-Pack)
               </h3>
 
-              <div className="grid grid-cols-3 gap-3 mb-8">
+              <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-3 gap-3 mb-8">
                 {loading ? (
                   Array.from({ length: boxSize }).map((_, i) => (
                     <div key={i} className="aspect-square rounded-2xl bg-gray-100/70 animate-pulse border border-brand-brown/5" />

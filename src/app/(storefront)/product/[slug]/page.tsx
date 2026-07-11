@@ -309,14 +309,14 @@ export default function ProductDetail() {
                 {product.inStock === false ? (
                   <button 
                     disabled
-                    className="flex-grow flex items-center justify-center space-x-2 px-8 py-4 bg-brand-error/10 text-brand-error/60 border border-brand-error/20 font-bold rounded-full cursor-not-allowed h-[54px] text-base"
+                    className="flex-grow flex items-center justify-center space-x-2 px-4 sm:px-8 py-4 bg-brand-error/10 text-brand-error/60 border border-brand-error/20 font-bold rounded-full cursor-not-allowed h-[54px] text-sm sm:text-base"
                   >
                     <span>Out of Stock</span>
                   </button>
                 ) : (
                   <button 
                     onClick={handleAddToCart}
-                    className="flex-grow flex items-center justify-center space-x-2 px-8 py-4 bg-brand-brown hover:bg-brand-gold text-white font-bold rounded-full transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 h-[54px] cursor-pointer text-base"
+                    className="flex-grow flex items-center justify-center space-x-2 px-4 sm:px-8 py-4 bg-brand-brown hover:bg-brand-gold text-white font-bold rounded-full transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 h-[54px] cursor-pointer text-sm sm:text-base whitespace-nowrap"
                   >
                     <ShoppingCart className="w-5 h-5 mr-2" />
                     <span>Add to Cart - ₹{(currentPrice * quantity).toFixed(0)}</span>

@@ -215,7 +215,7 @@ export function Categories() {
                   key={idx} 
                   className={`cat-heading-word opacity-0 inline-block ${
                     isLast 
-                      ? "text-brand-brown text-7xl md:text-8xl lg:text-[8rem] relative" 
+                      ? "text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[8rem] relative" 
                       : "text-brand-gold text-2xl md:text-3xl lg:text-[3rem]"
                   }`}
                 >

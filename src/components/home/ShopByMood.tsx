@@ -225,7 +225,7 @@ export function ShopByMood() {
                   key={idx} 
                   className={`mood-heading-word opacity-0 inline-block ${
                     isLast 
-                      ? "text-brand-brown text-7xl md:text-8xl lg:text-[8rem] relative" 
+                      ? "text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[8rem] relative" 
                       : "text-brand-gold text-2xl md:text-3xl lg:text-[3rem]"
                   }`}
                 >
@@ -242,7 +242,7 @@ export function ShopByMood() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {moods.map((mood) => {
             const Icon = mood.icon;
             const isSelected = selectedMood === mood.id;

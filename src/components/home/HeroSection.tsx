@@ -116,7 +116,7 @@ export function HeroSection() {
               fontFamily: "'Amsterdam Signature', 'Playfair Display', serif",
               textShadow: "0 2px 10px rgba(0, 0, 0, 0.25)"
             }}
-            className="hero-title text-6xl md:text-[6.5rem] lg:text-[7.5rem] font-normal leading-[0.85] text-white mb-2"
+            className="hero-title text-4xl sm:text-6xl md:text-[6.5rem] lg:text-[7.5rem] font-normal leading-[0.85] text-white mb-2"
           >
             <span className="text-white">{part1}</span>
             <br />
@@ -129,10 +129,10 @@ export function HeroSection() {
           >
             {mounted ? heroSubtitle : "Premium millet cookies and healthy bakery products crafted with wholesome ingredients, rich flavours, and freshly baked goodness."}
           </p>
-          <div className="hero-cta flex gap-4 w-full justify-start mt-2">
+          <div className="hero-cta flex flex-col sm:flex-row gap-4 w-full justify-start mt-2 max-w-sm sm:max-w-none">
             <Link
               href="/shop"
-              className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-brand-cream bg-[#E29B52] rounded-full hover:bg-white hover:text-brand-brown transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-brand-cream bg-[#E29B52] rounded-full hover:bg-white hover:text-brand-brown transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full sm:w-auto text-center"
             >
               Shop Now
             </Link>
@@ -141,7 +141,7 @@ export function HeroSection() {
               href="https://wa.me/917796116622"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-green-500 rounded-full hover:bg-green-700 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-green-500 rounded-full hover:bg-green-700 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full sm:w-auto text-center whitespace-nowrap"
             >
               Order on WhatsApp
             </a>

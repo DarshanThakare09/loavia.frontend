@@ -183,7 +183,7 @@ export default function WhyChoose() {
             className="font-normal leading-none mb-6 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2"
           >
             <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">{part1}</span>
-            <span className="text-brand-brown text-7xl md:text-8xl lg:text-[6rem]">{part2}</span>
+            <span className="text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[6rem]">{part2}</span>
           </h2>
 
           <p className="font-sans text-brand-text-secondary text-sm md:text-base lg:text-lg mb-8 leading-relaxed max-w-2xl font-light">

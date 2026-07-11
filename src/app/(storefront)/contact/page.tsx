@@ -297,7 +297,7 @@ export default function ContactPage() {
               className="font-normal leading-none mb-8 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2"
             >
               <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">Our</span>
-              <span className="text-brand-brown text-7xl md:text-8xl lg:text-[6rem]">Details</span>
+              <span className="text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[6rem]">Details</span>
             </h2>
 
             <div className="w-full space-y-6">

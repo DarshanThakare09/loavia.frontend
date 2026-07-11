@@ -553,9 +553,9 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                   )}
-                  <div className="flex gap-4">
-                    <button onClick={() => setStep(1)} className="w-1/3 px-8 py-4 font-bold text-brand-brown bg-brand-light rounded-xl hover:bg-brand-brown/10 transition-colors cursor-pointer">Back</button>
-                    <button onClick={handleNextStep} className="w-2/3 flex items-center justify-center space-x-2 px-8 py-4 font-bold text-white bg-brand-brown rounded-xl hover:bg-brand-gold transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <button onClick={() => setStep(1)} className="w-full sm:w-1/3 px-6 py-3.5 font-bold text-brand-brown bg-brand-light rounded-xl hover:bg-brand-brown/10 transition-colors cursor-pointer order-2 sm:order-1">Back</button>
+                    <button onClick={handleNextStep} className="w-full sm:w-2/3 flex items-center justify-center space-x-2 px-6 py-3.5 font-bold text-white bg-brand-brown rounded-xl hover:bg-brand-gold transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer order-1 sm:order-2">
                       <span>Continue to Payment</span>
                       <ChevronRight className="w-5 h-5" />
                     </button>
@@ -592,9 +592,9 @@ export default function CheckoutPage() {
                     )}
                   </div>
 
-                  <div className="flex gap-4 max-w-md mx-auto">
-                    <button onClick={() => setStep(2)} className="w-1/3 px-8 py-4 font-bold text-brand-brown bg-brand-light rounded-xl hover:bg-brand-brown/10 transition-colors cursor-pointer">Back</button>
-                    <button onClick={handlePlaceOrder} className="w-2/3 flex items-center justify-center space-x-2 px-8 py-4 font-bold text-white bg-brand-gold rounded-xl hover:bg-brand-brown transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
+                  <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+                    <button onClick={() => setStep(2)} className="w-full sm:w-1/3 px-6 py-3.5 font-bold text-brand-brown bg-brand-light rounded-xl hover:bg-brand-brown/10 transition-colors cursor-pointer order-2 sm:order-1">Back</button>
+                    <button onClick={handlePlaceOrder} className="w-full sm:w-2/3 flex items-center justify-center space-x-2 px-6 py-3.5 font-bold text-white bg-brand-gold rounded-xl hover:bg-brand-brown transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer order-1 sm:order-2">
                       <CheckCircle2 className="w-5 h-5" />
                       <span>Pay ₹{total.toFixed(2)}</span>
                     </button>

@@ -333,7 +333,7 @@ export function Navbar() {
         />
       )}
 
-      <div className={`fixed top-0 right-0 bottom-0 w-[300px] bg-[#FDFBF7] z-50 shadow-2xl p-6 flex flex-col justify-between transition-transform duration-500 ease-out md:hidden transform ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+      <div className={`fixed top-0 right-0 bottom-0 w-[300px] max-w-[85vw] bg-[#FDFBF7] z-50 shadow-2xl p-6 flex flex-col justify-between transition-transform duration-500 ease-out md:hidden transform ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}>
         <div>
           {/* Drawer Header */}

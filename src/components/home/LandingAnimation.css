@@ -464,3 +464,104 @@
     background: radial-gradient(circle, transparent 25%, rgba(0, 0, 0, 0.4) 65%, rgba(0, 0, 0, 0.85) 100%);
     transition: opacity 0.3s ease;
 }
+
+/* Responsive Media Queries for Landing Intro Animation */
+@media (max-width: 767px) {
+    .overlay-text-content,
+    .overlay-text-content-bottom-left,
+    .overlay-text-content-top-center,
+    .overlay-text-content-center {
+        left: 5% !important;
+        right: 5% !important;
+        max-width: 90% !important;
+        width: 90% !important;
+        transform: none !important;
+        text-align: center !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .overlay-text-content {
+        top: 20vh !important;
+    }
+
+    .overlay-text-content-bottom-left {
+        bottom: 12vh !important;
+    }
+
+    .overlay-text-content-top-center {
+        top: 20vh !important;
+    }
+
+    .overlay-heading {
+        font-size: 3.5rem !important;
+        line-height: 0.95 !important;
+    }
+
+    .overlay-subheading {
+        font-size: 0.75rem !important;
+        letter-spacing: 2px !important;
+        text-align: center !important;
+    }
+
+    .heading-underline {
+        margin: 0.5rem auto 1rem auto !important;
+    }
+
+    .loader-brand {
+        font-size: 3.8rem !important;
+    }
+
+    .scroll-indicator {
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        bottom: 30px !important;
+        gap: 1rem !important;
+    }
+
+    .scroll-line {
+        height: 60px !important;
+    }
+
+    @keyframes scrollAnimation {
+        0% {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        30% {
+            opacity: 1;
+        }
+        60% {
+            transform: translateY(60px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(60px);
+            opacity: 0;
+        }
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .overlay-text-content,
+    .overlay-text-content-bottom-left {
+        max-width: 70vw !important;
+        left: 6vw !important;
+    }
+
+    .overlay-heading {
+        font-size: 5rem !important;
+        line-height: 0.9 !important;
+    }
+
+    .overlay-subheading {
+        font-size: 0.8rem !important;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1365px) {
+    .overlay-heading {
+        font-size: 6rem !important;
+    }
+}
+

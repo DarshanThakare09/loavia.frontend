@@ -180,7 +180,7 @@ export function Footer() {
           <p className="text-center md:text-left mb-4 md:mb-0">
             &copy; {new Date().getFullYear()} Akshar Foods (LOAVIA™). All rights reserved.
           </p>
-          <div className="flex space-x-6">
+          <div className="flex flex-wrap justify-center sm:justify-start gap-x-6 gap-y-2 mt-4 md:mt-0">
             <Link href="/privacy" className="hover:text-brand-gold transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-brand-gold transition-colors">Terms of Service</Link>
             <Link href="/shipping" className="hover:text-brand-gold transition-colors">Shipping Info</Link>

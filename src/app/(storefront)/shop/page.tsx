@@ -278,7 +278,7 @@ export default function ShopPage() {
               className="shop-header-el font-normal leading-tight pb-8 mb-4 pt-6 sm:pt-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2"
             >
               <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">Our Fresh</span>
-              <span className="text-brand-brown text-7xl md:text-8xl lg:text-[6rem]">Menu</span>
+              <span className="text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[6rem]">Menu</span>
             </h1>
             <p className="shop-header-el text-brand-text-secondary font-sans font-light mt-4">
               Freshly baked with premium, wholesome ingredients. Find your craving.
