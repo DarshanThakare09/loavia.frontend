@@ -39,7 +39,7 @@ export default function ProfileSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-brand-brown">Admin Profile</h1>
           <p className="text-sm text-brand-text-secondary mt-1">Update admin profile</p>
@@ -54,7 +54,7 @@ export default function ProfileSettingsPage() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-brand-brown/10 p-6">
-        <div className="space-y-4 md:grid md:grid-cols-2 md:gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-brand-text-secondary">Full Name</label>
             <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="mt-1 w-full rounded-lg border p-3" />

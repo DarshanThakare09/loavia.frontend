@@ -91,7 +91,7 @@ export default function AdminInventoryPage() {
     <div className="space-y-6 animate-in fade-in duration-500 pb-16">
 
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-brand-brown font-serif">Inventory</h1>
           <p className="text-brand-text-secondary mt-1">
@@ -239,7 +239,7 @@ export default function AdminInventoryPage() {
       {/* ── Restock Modal ─────────────────────────────────────────────────── */}
       {restockModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-brand-brown/10 animate-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-brand-brown/10 animate-in zoom-in-95 duration-200 overflow-y-auto max-h-[90vh]">
             <div className="p-6 border-b border-brand-brown/10 flex items-center justify-between">
               <div>
                 <h3 className="font-serif font-bold text-xl text-brand-brown flex items-center gap-2">
@@ -294,7 +294,7 @@ export default function AdminInventoryPage() {
       {/* ── Adjust Modal ──────────────────────────────────────────────────── */}
       {adjustModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-brand-brown/10 animate-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-brand-brown/10 animate-in zoom-in-95 duration-200 overflow-y-auto max-h-[90vh]">
             <div className="p-6 border-b border-brand-brown/10 flex items-center justify-between">
               <div>
                 <h3 className="font-serif font-bold text-xl text-brand-brown flex items-center gap-2">

@@ -436,7 +436,7 @@ export default function AdminDashboard() {
       <div className="bg-white rounded-2xl shadow-sm border border-brand-brown/10 overflow-hidden flex flex-col md:flex-row min-h-[500px]">
 
         {/* Left Nav */}
-        <aside className="w-full md:w-64 border-r border-brand-brown/10 bg-brand-light/40 flex-shrink-0 p-4 space-y-1">
+        <aside className="w-full md:w-64 border-b md:border-b-0 md:border-r border-brand-brown/10 bg-brand-light/40 flex-shrink-0 p-4 space-y-1">
           <p className="text-[10px] font-bold text-brand-text-secondary/70 uppercase tracking-widest mb-3 ml-3 flex items-center">
             <Settings className="w-3.5 h-3.5 mr-1" /> Homepage Sections
           </p>

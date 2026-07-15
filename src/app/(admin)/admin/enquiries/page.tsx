@@ -51,7 +51,7 @@ export default function AdminEnquiriesPage() {
     <div className="space-y-6 animate-in fade-in duration-500 pb-16">
 
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-brand-brown font-serif">Contact Enquiries</h1>
           <p className="text-brand-text-secondary mt-1">

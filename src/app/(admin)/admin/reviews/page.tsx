@@ -83,7 +83,7 @@ export default function AdminReviewsPage() {
     <div className="space-y-6 animate-in fade-in duration-500 pb-16">
 
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-brand-brown font-serif">Reviews</h1>
           <p className="text-brand-text-secondary mt-1">
@@ -182,7 +182,7 @@ export default function AdminReviewsPage() {
                 </div>
 
                 {/* Row 2: Reviewer + Date */}
-                <div className="flex items-center gap-3 text-sm text-brand-text-secondary">
+                <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-brand-text-secondary">
                   <div className="w-7 h-7 rounded-full bg-brand-gold/15 text-brand-gold font-bold flex items-center justify-center text-xs border border-brand-gold/10 flex-shrink-0">
                     {review.userName.charAt(0).toUpperCase()}
                   </div>
