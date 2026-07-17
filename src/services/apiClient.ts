@@ -104,12 +104,38 @@ apiClient.interceptors.response.use(
         isRefreshing = false;
         
         // Refresh token failed/expired/revoked -> Force logout
-        const wasAuthenticated = useAuthStore.getState().isAuthenticated;
-        useAuthStore.getState().logout();
-        if (typeof window !== "undefined" && wasAuthenticated && !window.location.pathname.startsWith("/auth")) {
-          window.location.href = "/auth?session_expired=true";
+        if (typeof window !== "undefined") {
+          const isAdminRoute = window.location.pathname.startsWith("/admin");
+          if (isAdminRoute) {
+            try {
+              const { useAdminAuthStore } = await import("@/store/adminAuthStore");
+              useAdminAuthStore.getState().logout();
+            } catch {}
+            if (!window.location.pathname.startsWith("/admin/login")) {
+              window.location.href = "/admin/login?session_expired=true";
+            }
+          } else {
+            const wasAuthenticated = useAuthStore.getState().isAuthenticated;
+            useAuthStore.getState().logout();
+            if (wasAuthenticated && !window.location.pathname.startsWith("/auth")) {
+              window.location.href = "/auth?session_expired=true";
+            }
+          }
         }
         return Promise.reject(refreshError);
+      }
+    }
+
+    // Handle any unhandled 401/403 for admin routes (e.g. after retry fails, or direct 403 forbidden)
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      if (typeof window !== "undefined" && window.location.pathname.startsWith("/admin")) {
+        try {
+          const { useAdminAuthStore } = await import("@/store/adminAuthStore");
+          useAdminAuthStore.getState().logout();
+        } catch {}
+        if (!window.location.pathname.startsWith("/admin/login")) {
+          window.location.href = "/admin/login?session_expired=true";
+        }
       }
     }
 

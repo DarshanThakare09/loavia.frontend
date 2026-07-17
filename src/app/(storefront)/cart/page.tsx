@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Minus, Plus, X, ArrowRight, Tag, Heart } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
-import { useSettingsStore } from "@/store/settingsStore";
+import { useSiteStore } from "@/store/siteStore";
 import { usePromoStore } from "@/store/promoStore";
 import { toast } from "sonner";
 
@@ -40,7 +40,7 @@ export default function CartPage() {
   };
 
   const subtotal = getCartTotal();
-  const { shippingCharge, freeShippingThreshold } = useSettingsStore();
+  const { shippingCharge, freeShippingThreshold } = useSiteStore();
   const shipping = subtotal > freeShippingThreshold ? 0 : shippingCharge;
   const promoValidation = appliedPromoCode
     ? validatePromoCode(appliedPromoCode, subtotal)

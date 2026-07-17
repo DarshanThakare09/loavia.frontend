@@ -7,6 +7,7 @@ import { LayoutDashboard, ShoppingBag, Users, Settings, Tag, LogOut, Menu, X, Ar
 import { useSettingsStore } from "@/store/settingsStore";
 import { useAdminAuthStore } from "@/store/adminAuthStore";
 import LogoutModal from "@/components/admin/LogoutModal";
+import { apiClient } from "@/services/apiClient";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -14,7 +15,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { isAdminAuthenticated, logout } = useAdminAuthStore();
-  const { adminName, adminAvatar } = useSettingsStore();
+  const { adminName, adminAvatar, updateAdminProfile } = useSettingsStore();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
@@ -34,6 +35,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [mounted, isAdminAuthenticated, isLoginPage, router]);
 
+  // Load and sync admin details from database on mount if authenticated
+  useEffect(() => {
+    if (!mounted || !isAdminAuthenticated || isLoginPage) return;
+    async function syncAdmin() {
+      try {
+        const res = await apiClient.get("/admin/me/profile");
+        if (res.data?.success && res.data?.data) {
+          const u = res.data.data;
+          updateAdminProfile(u.name, u.email, u.phone || "", adminAvatar || "");
+        }
+      } catch (err) {
+        console.error("Failed to sync admin details in layout:", err);
+      }
+    }
+    syncAdmin();
+  }, [mounted, isAdminAuthenticated, isLoginPage, adminAvatar, updateAdminProfile]);
+
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
@@ -51,12 +69,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     setLogoutModalOpen(true);
   };
 
-  const handleLogoutConfirm = () => {
+  const handleLogoutConfirm = async () => {
     setLogoutLoading(true);
+    try {
+      await apiClient.post("/auth/admin-logout");
+    } catch {}
     try {
       localStorage.removeItem("mockAdminAuth");
     } catch { /* */ }
     logout();
+    setLogoutLoading(false);
     router.push("/admin/login");
   };
 

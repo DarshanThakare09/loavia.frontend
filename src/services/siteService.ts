@@ -39,6 +39,9 @@ export interface BackendSettings {
   shopByMoodSubtitle: string;
   shopByMoodList: string;
   categoriesList: string;
+  shippingCharge?: number;
+  freeShippingThreshold?: number;
+  currency?: string;
 }
 
 export interface SettingsApiResponse {

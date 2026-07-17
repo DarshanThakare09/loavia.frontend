@@ -141,6 +141,7 @@ export default function AuthPage() {
                   required 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="off"
                   className="w-full bg-white border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-xl py-3 pl-10 pr-4 outline-none font-medium text-brand-brown shadow-sm transition-all duration-300"
                   placeholder="you@example.com"
                 />
@@ -163,6 +164,7 @@ export default function AuthPage() {
                   required 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
                   className="w-full bg-white border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-xl py-3 pl-10 pr-10 outline-none font-medium text-brand-brown shadow-sm transition-all duration-300"
                   placeholder="••••••••"
                 />

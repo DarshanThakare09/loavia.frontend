@@ -30,11 +30,23 @@ export default function AdminProfilePage() {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Sync form from settingsStore after hydration
+  // Sync form and settingsStore directly from database admin profile on mount
   useEffect(() => {
     if (!mounted) return;
-    setForm({ name: adminName || "", email: adminEmail || "", phone: adminPhone || "" });
-  }, [mounted, adminName, adminEmail, adminPhone]);
+    async function loadProfile() {
+      try {
+        const res = await apiClient.get("/admin/me/profile");
+        if (res.data?.success && res.data?.data) {
+          const u = res.data.data;
+          setForm({ name: u.name || "", email: u.email || "", phone: u.phone || "" });
+          updateAdminProfile(u.name, u.email, u.phone || "", adminAvatar || "");
+        }
+      } catch (err) {
+        console.error("Failed to load admin profile from DB:", err);
+      }
+    }
+    loadProfile();
+  }, [mounted, adminAvatar, updateAdminProfile]);
 
   const initials = useMemo(() => getInitials(adminName || "Admin"), [adminName]);
 
@@ -106,7 +118,7 @@ export default function AdminProfilePage() {
       toast.success("Password updated. Please log in again.");
       setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
       // Clear admin cookie and log out
-      try { await apiClient.post("/auth/logout"); } catch {}
+      try { await apiClient.post("/auth/admin-logout"); } catch {}
       logout();
       router.push("/admin/login");
     } catch (err: any) {

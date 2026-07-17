@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { CheckCircle2, ChevronRight, CreditCard, Truck, MapPin, Tag, ArrowLeft, Gift } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
+import { useSiteStore } from "@/store/siteStore";
 import { checkoutService, CheckoutValidateResponse, CheckoutValidatePayload, PlaceOrderPayload, CouponDTO } from "@/services/checkoutService";
 import { toast } from "sonner";
 
@@ -56,6 +57,8 @@ export default function CheckoutPage() {
     }
   }, [mounted]);
 
+  const { shippingCharge, freeShippingThreshold } = useSiteStore();
+
   // Client-side calculations fallback based on cart items (in Rupees)
   const clientSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   
@@ -68,8 +71,8 @@ export default function CheckoutPage() {
   const clientNetTaxable = clientSubtotal - clientDiscount;
   const clientTax = clientNetTaxable * 0.18; // 18% GST
   
-  // Free shipping if net taxable subtotal > ₹999, else flat ₹100
-  const clientShipping = clientNetTaxable > 999 ? 0 : 100;
+  // Free shipping if net taxable subtotal > freeShippingThreshold, else flat shippingCharge
+  const clientShipping = clientNetTaxable > freeShippingThreshold ? 0 : shippingCharge;
   const clientTotal = clientNetTaxable + clientTax + clientShipping;
 
   const subtotal = calculations ? calculations.subtotal / 100 : clientSubtotal;

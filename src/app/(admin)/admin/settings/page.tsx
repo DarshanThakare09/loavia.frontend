@@ -6,11 +6,8 @@ import { useSettingsStore } from "@/store/settingsStore";
 
 export default function AdminSettingsHub() {
   const rows = [
-    { key: "general", title: "General Settings", desc: "Basic website information", href: "/admin/settings/general" },
     { key: "store", title: "Store Settings", desc: "Shipping and currency settings", href: "/admin/settings/store" },
-    { key: "social", title: "Social Media Links", desc: "Manage social accounts", href: "/admin/settings/social" },
-    { key: "profile", title: "Admin Profile", desc: "Admin name and email", href: "/admin/settings/profile" },
-    { key: "security", title: "Security", desc: "Change admin password", href: "/admin/settings/security" },
+    { key: "profile", title: "Admin Profile & Security", desc: "Update admin name, email, and change password", href: "/admin/settings/profile" },
   ];
 
   return (

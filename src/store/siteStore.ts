@@ -79,6 +79,11 @@ interface SiteState {
   testimonialsList: ReviewItem[];
   reviewsList: ReviewItem[];
 
+  // Store Settings
+  shippingCharge: number;
+  freeShippingThreshold: number;
+  currency: string;
+
   // About Page settings
   aboutStoryTitle: string;
   aboutStorySubtitle: string;
@@ -104,6 +109,7 @@ interface SiteState {
   
   // Setters
   loadSettingsFromServer: () => Promise<void>;
+  updateStoreSettings: (shippingCharge: number, freeShippingThreshold: number, currency: string) => Promise<void>;
   updateShopByMood: (title: string, subtitle: string, list: string) => void;
   updateAnnouncement: (text: string) => void;
   updateHero: (title: string, subtitle: string) => void;
@@ -230,6 +236,11 @@ Today, LOAVIA™ proudly brings you premium millet cookies crafted with love, fr
 export const useSiteStore = create<SiteState>()(
   persist(
     (set, get) => ({
+      // Store Settings Defaults
+      shippingCharge: 100,
+      freeShippingThreshold: 999,
+      currency: 'INR',
+
       // Hero & Header Default Values
       announcementText: "✨ Free shipping on all orders over ₹999! Taste the magic of Nashik. ✨    |    100% Organic, Zero Preservatives    |    Use code LOAVIA10 for 10% off your first order! ✨",
       heroTitle: "Healthy Inside,\nYummy Outside.",
@@ -351,9 +362,29 @@ export const useSiteStore = create<SiteState>()(
             shopByMoodSubtitle: settings.shopByMoodSubtitle,
             shopByMoodList: settings.shopByMoodList,
             categoriesList: settings.categoriesList ? JSON.parse(settings.categoriesList) : [],
+            shippingCharge: settings.shippingCharge ?? 100,
+            freeShippingThreshold: settings.freeShippingThreshold ?? 999,
+            currency: settings.currency ?? 'INR',
           });
         } catch (err) {
           console.error("Failed to load settings from server:", err);
+        }
+      },
+      updateStoreSettings: async (shippingCharge, freeShippingThreshold, currency) => {
+        try {
+          const settings = await siteService.updateSettings({
+            shippingCharge,
+            freeShippingThreshold,
+            currency,
+          });
+          set({
+            shippingCharge: settings.shippingCharge ?? 100,
+            freeShippingThreshold: settings.freeShippingThreshold ?? 999,
+            currency: settings.currency ?? 'INR',
+          });
+        } catch (err) {
+          console.error("Failed to update store settings on server:", err);
+          throw err;
         }
       },
       updateShopByMood: (title, subtitle, list) => set({ shopByMoodTitle: title, shopByMoodSubtitle: subtitle, shopByMoodList: list }),

@@ -1,24 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { useSettingsStore } from "@/store/settingsStore";
+import { useSiteStore } from "@/store/siteStore";
 
 export default function StoreSettingsPage() {
-  const { shippingCharge, freeShippingThreshold, currency, updateStore } = useSettingsStore();
-  const [form, setForm] = useState({ shippingCharge: String(shippingCharge ?? 0), freeShippingThreshold: String(freeShippingThreshold ?? 0), currency: currency || 'INR' });
+  const { shippingCharge, freeShippingThreshold, currency, updateStoreSettings, loadSettingsFromServer } = useSiteStore();
+  const [form, setForm] = useState({ shippingCharge: "0", freeShippingThreshold: "0", currency: "INR" });
   const [loading, setLoading] = useState(false);
 
-  const save = () => {
-    if (!Number.isFinite(Number(form.shippingCharge))) return toast.error('Shipping charge must be a number');
-    if (!Number.isFinite(Number(form.freeShippingThreshold))) return toast.error('Free shipping threshold must be a number');
+  useEffect(() => {
+    loadSettingsFromServer();
+  }, [loadSettingsFromServer]);
+
+  useEffect(() => {
+    setForm({
+      shippingCharge: String(shippingCharge ?? 0),
+      freeShippingThreshold: String(freeShippingThreshold ?? 0),
+      currency: currency || "INR",
+    });
+  }, [shippingCharge, freeShippingThreshold, currency]);
+
+  const save = async () => {
+    const chargeNum = Number(form.shippingCharge);
+    const thresholdNum = Number(form.freeShippingThreshold);
+    if (isNaN(chargeNum) || chargeNum < 0) return toast.error("Shipping charge must be a non-negative number");
+    if (isNaN(thresholdNum) || thresholdNum < 0) return toast.error("Free shipping threshold must be a non-negative number");
+    
     setLoading(true);
     try {
-      updateStore(Number(form.shippingCharge), Number(form.freeShippingThreshold), form.currency);
-      toast.success('Store settings saved.');
+      await updateStoreSettings(chargeNum, thresholdNum, form.currency);
+      toast.success("Store settings saved.");
     } catch {
-      toast.error('Failed to save store settings.');
-    } finally { setLoading(false); }
+      toast.error("Failed to save store settings.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
