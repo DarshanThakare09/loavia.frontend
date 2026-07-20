@@ -53,7 +53,7 @@ export default function CustomerLove() {
   return (
     <section
       ref={containerRef}
-      className="relative py-24 pb-72 md:pb-80 lg:pb-96 overflow-hidden bg-[#FDFBF7]"
+      className="relative py-16 sm:py-24 pb-52 sm:pb-72 md:pb-80 lg:pb-96 overflow-hidden bg-[#FDFBF7]"
       style={{
         backgroundImage: "url('/testimonialsbg.png')",
         backgroundSize: "cover",
@@ -78,13 +78,13 @@ export default function CustomerLove() {
           z-index: 30;
         }
         .testimonial-card-prev {
-          transform: translateX(calc(-50% - 280px)) scale(0.9) rotateY(15deg);
+          transform: translateX(calc(-50% - 55vw)) scale(0.9) rotateY(15deg);
           opacity: 0.4;
           z-index: 20;
           cursor: pointer;
         }
         .testimonial-card-next {
-          transform: translateX(calc(-50% + 280px)) scale(0.9) rotateY(-15deg);
+          transform: translateX(calc(-50% + 55vw)) scale(0.9) rotateY(-15deg);
           opacity: 0.4;
           z-index: 20;
           cursor: pointer;
@@ -95,17 +95,18 @@ export default function CustomerLove() {
           z-index: 10;
           pointer-events: none;
         }
-        @media (max-width: 1024px) {
+        @media (min-width: 1024px) {
           .testimonial-card-prev {
-            transform: translateX(calc(-50% - 180px)) scale(0.9) rotateY(10deg);
+            transform: translateX(calc(-50% - 280px)) scale(0.9) rotateY(15deg);
           }
           .testimonial-card-next {
-            transform: translateX(calc(-50% + 180px)) scale(0.9) rotateY(-10deg);
+            transform: translateX(calc(-50% + 280px)) scale(0.9) rotateY(-15deg);
           }
         }
         @media (max-width: 768px) {
           .testimonial-card {
-            max-width: 95%;
+            max-width: 92%;
+            width: 92%;
           }
           .testimonial-card-prev {
             transform: translateX(-150%) scale(0.8);
@@ -139,7 +140,7 @@ export default function CustomerLove() {
         </div>
 
         {/* Carousel Deck wrapper */}
-        <div className="relative testimonial-deck w-full min-h-[380px] md:min-h-[320px] flex items-center justify-center overflow-visible">
+        <div className="relative testimonial-deck w-full min-h-[350px] sm:min-h-[380px] md:min-h-[320px] flex items-center justify-center overflow-hidden">
           
           {/* Navigation Arrows */}
           <button

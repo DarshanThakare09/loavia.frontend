@@ -88,7 +88,7 @@ export function HeroSection() {
           top: "var(--navbar-height, 108px)",
           height: "calc(100vh - var(--navbar-height, 108px))"
         }}
-        className="relative lg:sticky min-h-[calc(100vh-7rem)] w-full flex items-center overflow-hidden"
+        className="relative lg:sticky min-h-[calc(100svh-4rem)] sm:min-h-[calc(100svh-5rem)] lg:min-h-[calc(100vh-7rem)] w-full flex items-center overflow-hidden"
       >
         {/* Background GIF */}
         <div className="absolute inset-0 z-0">
@@ -110,29 +110,29 @@ export function HeroSection() {
         </div>
 
         {/* Text Content matching position and styling of the first animation text */}
-        <div className="absolute top-[15vh] left-[8vw] max-w-[85vw] lg:max-w-[55vw] flex flex-col gap-2.5 text-left items-start z-10">
+        <div className="absolute top-[8vh] sm:top-[12vh] lg:top-[15vh] left-[5vw] sm:left-[6vw] lg:left-[8vw] max-w-[90vw] sm:max-w-[85vw] lg:max-w-[55vw] flex flex-col gap-2 sm:gap-2.5 text-left items-start z-10">
           <h1
             style={{
               fontFamily: "'Amsterdam Signature', 'Playfair Display', serif",
               textShadow: "0 2px 10px rgba(0, 0, 0, 0.25)"
             }}
-            className="hero-title text-4xl sm:text-6xl md:text-[6.5rem] lg:text-[7.5rem] font-normal leading-[0.85] text-white mb-2"
+            className="hero-title text-[2.4rem] xs:text-5xl sm:text-[5rem] md:text-[6.5rem] lg:text-[7.5rem] font-normal leading-[0.85] text-white mb-1 sm:mb-2"
           >
             <span className="text-white">{part1}</span>
             <br />
             <span className="text-[#E29B52]">{part2}</span>
           </h1>
-          <div className="hero-underline w-[150px] h-[2px] bg-[#E29B52] my-4 opacity-85"></div>
+          <div className="hero-underline w-[100px] sm:w-[150px] h-[2px] bg-[#E29B52] my-2 sm:my-4 opacity-85"></div>
           <p
             style={{ fontFamily: "'Outfit', 'Proxima Nova', 'Montserrat', sans-serif" }}
-            className="hero-subtitle text-xs md:text-sm font-medium tracking-[3px] text-white/85 uppercase leading-relaxed mb-8 whitespace-pre-wrap"
+            className="hero-subtitle text-[10px] sm:text-xs md:text-sm font-medium tracking-[2px] sm:tracking-[3px] text-white/85 uppercase leading-relaxed mb-4 sm:mb-8 whitespace-pre-wrap max-w-[80vw] sm:max-w-none"
           >
             {mounted ? heroSubtitle : "Premium millet cookies and healthy bakery products crafted with wholesome ingredients, rich flavours, and freshly baked goodness."}
           </p>
-          <div className="hero-cta flex flex-col sm:flex-row gap-4 w-full justify-start mt-2 max-w-sm sm:max-w-none">
+          <div className="hero-cta flex flex-col xs:flex-row gap-3 sm:gap-4 w-full justify-start mt-1 sm:mt-2 max-w-xs xs:max-w-sm sm:max-w-none">
             <Link
               href="/shop"
-              className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-brand-cream bg-[#E29B52] rounded-full hover:bg-white hover:text-brand-brown transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full sm:w-auto text-center"
+              className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-bold text-brand-cream bg-[#E29B52] rounded-full hover:bg-white hover:text-brand-brown transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full xs:w-auto text-center"
             >
               Shop Now
             </Link>
@@ -141,7 +141,7 @@ export function HeroSection() {
               href="https://wa.me/917796116622"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-green-500 rounded-full hover:bg-green-700 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full sm:w-auto text-center whitespace-nowrap"
+              className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-bold text-white bg-green-500 rounded-full hover:bg-green-700 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full xs:w-auto text-center whitespace-nowrap"
             >
               Order on WhatsApp
             </a>

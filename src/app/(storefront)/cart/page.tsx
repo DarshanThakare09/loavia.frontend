@@ -70,7 +70,7 @@ export default function CartPage() {
             </Link>
           </div>
         ) : (
-          <div className="flex flex-col lg:flex-row gap-12">
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
             
             {/* Cart Items */}
             <div className="w-full lg:w-2/3">
@@ -134,7 +134,7 @@ export default function CartPage() {
 
             {/* Order Summary */}
             <div className="w-full lg:w-1/3">
-              <div className="bg-white p-8 rounded-3xl shadow-sm border border-brand-brown/5 sticky top-24">
+              <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-brand-brown/5 lg:sticky lg:top-24">
                 <h2 className="text-2xl font-serif font-bold text-brand-brown mb-6">Order Summary</h2>
                 
                 <div className="space-y-4 mb-6 border-b border-brand-brown/10 pb-6 text-brand-text-primary">
@@ -155,8 +155,8 @@ export default function CartPage() {
                 </div>
 
                 <div className="flex justify-between items-center mb-8">
-                  <span className="text-xl font-bold text-brand-brown">Total</span>
-                  <span className="text-3xl font-bold text-brand-brown">₹{total.toFixed(2)}</span>
+                  <span className="text-lg sm:text-xl font-bold text-brand-brown">Total</span>
+                  <span className="text-2xl sm:text-3xl font-bold text-brand-brown">₹{total.toFixed(2)}</span>
                 </div>
 
                 {/* Promo Code */}

@@ -65,7 +65,7 @@ export function BestSellers() {
         <div className="text-center mb-16">
           <h2 
             style={{ fontFamily: "'Amsterdam Signature', serif" }}
-            className="font-normal leading-none mb-6 pt-4 pb-4 text-brand-brown text-5xl md:text-6xl lg:text-7xl"
+            className="font-normal leading-none mb-6 pt-4 pb-4 text-brand-brown text-4xl sm:text-5xl md:text-6xl lg:text-7xl"
           >
             {bestSellersTitle}
           </h2>

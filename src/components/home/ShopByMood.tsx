@@ -225,8 +225,8 @@ export function ShopByMood() {
                   key={idx} 
                   className={`mood-heading-word opacity-0 inline-block ${
                     isLast 
-                      ? "text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[8rem] relative" 
-                      : "text-brand-gold text-2xl md:text-3xl lg:text-[3rem]"
+                      ? "text-brand-brown text-4xl sm:text-6xl md:text-7xl lg:text-[8rem] relative" 
+                      : "text-brand-gold text-xl sm:text-2xl md:text-3xl lg:text-[3rem]"
                   }`}
                 >
                   {word}

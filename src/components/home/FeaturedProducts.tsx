@@ -109,7 +109,7 @@ export default function FeaturedProducts() {
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto px-6 w-full h-full flex items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full h-full flex items-center">
         <div className={`w-full lg:w-[52%] xl:w-[48%] flex flex-col justify-center text-left py-6 lg:py-12 transition-all duration-1000 ease-out transform ${
           isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.98] pointer-events-none"
         }`}>
@@ -117,8 +117,8 @@ export default function FeaturedProducts() {
             style={{ fontFamily: "'Amsterdam Signature', serif" }}
             className="font-normal leading-none mb-6 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2"
           >
-            <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">{part1}</span>
-            <span className="text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[8rem]">{part2}</span>
+            <span className="text-brand-gold text-xl sm:text-2xl md:text-3xl lg:text-[3rem]">{part1}</span>
+            <span className="text-brand-brown text-4xl sm:text-6xl md:text-7xl lg:text-[8rem] break-words">{part2}</span>
           </h2>
 
           <p className="font-sans text-brand-text-secondary text-sm md:text-base lg:text-lg mb-8 leading-relaxed max-w-2xl font-light">

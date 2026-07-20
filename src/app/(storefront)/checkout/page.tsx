@@ -358,9 +358,9 @@ export default function CheckoutPage() {
     <div className="bg-brand-cream min-h-screen pt-8 pb-24">
       {/* Dynamic backdrop loader during Razorpay/API calls */}
       {isProcessing && (
-        <div className="fixed inset-0 bg-brand-brown/70 backdrop-blur-md z-50 flex flex-col items-center justify-center text-white">
-          <div className="w-16 h-16 border-4 border-brand-cream border-t-brand-gold rounded-full animate-spin mb-6"></div>
-          <p className="text-xl font-serif font-bold text-brand-cream tracking-wide">{loaderMessage}</p>
+        <div className="fixed inset-0 bg-brand-brown/70 backdrop-blur-md z-50 flex flex-col items-center justify-center text-white p-4">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 border-4 border-brand-cream border-t-brand-gold rounded-full animate-spin mb-6"></div>
+          <p className="text-base sm:text-xl font-serif font-bold text-brand-cream tracking-wide text-center">{loaderMessage}</p>
         </div>
       )}
 
@@ -368,7 +368,7 @@ export default function CheckoutPage() {
         
         <h1 className="text-3xl md:text-4xl font-serif font-bold text-brand-brown mb-8">Checkout</h1>
 
-        <div className="flex flex-col lg:flex-row gap-12">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           
           {/* Main Checkout Flow */}
           <div className="w-full lg:w-2/3">
@@ -394,7 +394,7 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            <div className="bg-white p-8 rounded-3xl shadow-sm border border-brand-brown/5">
+            <div className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-brand-brown/5">
               
               {step === 1 && (
                 <div className="animate-in fade-in slide-in-from-right-4 duration-500">

@@ -191,14 +191,14 @@ export function Navbar() {
 
             {/* Left Brand Logo */}
             <div className="flex-1 flex justify-start items-center">
-              <Link href="/" className="relative w-[290px] h-[110px] transition-transform duration-500 hover:scale-103 block">
+              <Link href="/" className="relative w-[160px] h-[60px] sm:w-[210px] sm:h-[80px] md:w-[260px] md:h-[98px] lg:w-[290px] lg:h-[110px] transition-transform duration-500 hover:scale-103 block flex-shrink-0">
                 <Image
                   src="/loavia-logo.png"
                   alt="LOAVIA Logo"
                   fill
                   className="object-contain"
                   priority
-                  sizes="(max-width: 768px) 150px, 290px"
+                  sizes="(max-width: 480px) 160px, (max-width: 768px) 210px, (max-width: 1024px) 260px, 290px"
                 />
               </Link>
             </div>
@@ -242,7 +242,7 @@ export function Navbar() {
 
                   {/* Glassmorphic Search Dropdown */}
                   {isSearchOpen && (
-                    <div className="absolute right-0 top-full mt-4 w-80 bg-white/95 backdrop-blur-md shadow-2xl rounded-3xl border border-brand-brown/10 overflow-hidden z-50 p-4 transform origin-top-right transition-all duration-300">
+                    <div className="absolute right-0 top-full mt-4 w-[min(320px,90vw)] bg-white/95 backdrop-blur-md shadow-2xl rounded-3xl border border-brand-brown/10 overflow-hidden z-50 p-4 transform origin-top-right transition-all duration-300">
                       <div className="relative mb-3">
                         <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-brand-text-secondary" />
                         <input

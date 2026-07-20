@@ -275,10 +275,10 @@ export default function ShopPage() {
             <span className="shop-header-el text-brand-gold font-sans font-bold text-xs uppercase tracking-[3px] mb-6 block">Freshly Baked Menu</span>
             <h1
               style={{ fontFamily: "'Amsterdam Signature', serif" }}
-              className="shop-header-el font-normal leading-tight pb-8 mb-4 pt-6 sm:pt-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2"
+              className="shop-header-el font-normal leading-tight pb-4 mb-4 pt-4 sm:pt-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2"
             >
-              <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">Our Fresh</span>
-              <span className="text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[6rem]">Menu</span>
+              <span className="text-brand-gold text-xl sm:text-2xl md:text-3xl lg:text-[3rem]">Our Fresh</span>
+              <span className="text-brand-brown text-4xl sm:text-5xl md:text-7xl lg:text-[6rem]">Menu</span>
             </h1>
             <p className="shop-header-el text-brand-text-secondary font-sans font-light mt-4">
               Freshly baked with premium, wholesome ingredients. Find your craving.
@@ -291,13 +291,13 @@ export default function ShopPage() {
             )}
           </div>
           
-          <div className="shop-header-el mt-6 md:mt-0 flex items-center space-x-4">
+          <div className="shop-header-el mt-4 md:mt-0 flex items-center gap-3 flex-wrap">
             {/* Mobile Filter Toggle */}
             <button 
               onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-              className="md:hidden flex items-center px-5 py-2.5 bg-white rounded-full text-brand-brown font-medium shadow-sm border border-brand-brown/10 hover:border-brand-gold/40 transition-colors"
+              className="md:hidden flex items-center px-4 py-2 bg-white rounded-full text-brand-brown font-medium shadow-sm border border-brand-brown/10 hover:border-brand-gold/40 transition-colors text-sm"
             >
-              <Filter className="w-4 h-4 mr-2 text-brand-gold" /> 
+              <Filter className="w-4 h-4 mr-1.5 text-brand-gold" /> 
               <span>Filters</span>
             </button>
             
@@ -305,10 +305,10 @@ export default function ShopPage() {
             <div className="relative" ref={dropdownRef}>
               <button 
                 onClick={() => setIsSortOpen(!isSortOpen)}
-                className="flex items-center justify-between min-w-[180px] bg-white border border-brand-brown/10 text-brand-brown py-2.5 px-5 rounded-full font-medium shadow-sm hover:border-brand-gold/40 transition-all text-sm font-sans cursor-pointer"
+                className="flex items-center justify-between min-w-[160px] sm:min-w-[180px] bg-white border border-brand-brown/10 text-brand-brown py-2 sm:py-2.5 px-4 sm:px-5 rounded-full font-medium shadow-sm hover:border-brand-gold/40 transition-all text-sm font-sans cursor-pointer"
               >
-                <span>{SORT_OPTIONS.find(o => o.value === sortBy)?.label}</span>
-                <ChevronDown className={`w-4 h-4 text-brand-gold ml-2 transition-transform duration-300 ${isSortOpen ? "rotate-180" : ""}`} />
+                <span className="truncate">{SORT_OPTIONS.find(o => o.value === sortBy)?.label}</span>
+                <ChevronDown className={`w-4 h-4 text-brand-gold ml-2 flex-shrink-0 transition-transform duration-300 ${isSortOpen ? "rotate-180" : ""}`} />
               </button>
               
               {isSortOpen && (
@@ -340,7 +340,7 @@ export default function ShopPage() {
           
           {/* Sidebar Filters */}
           <aside className={`shop-sidebar-el ${isMobileFilterOpen ? "block" : "hidden"} md:block w-full md:w-64 flex-shrink-0 z-10`}>
-            <div className="bg-white/80 backdrop-blur-md p-6 rounded-[2rem] shadow-[0_8px_30px_rgba(92,51,23,0.02)] border border-brand-brown/10 sticky top-28">
+            <div className="bg-white/80 backdrop-blur-md p-5 sm:p-6 rounded-[2rem] shadow-[0_8px_30px_rgba(92,51,23,0.02)] border border-brand-brown/10 md:sticky md:top-28 max-h-[80vh] md:max-h-none overflow-y-auto">
               
               {/* Category Filter */}
               <div className="mb-8">

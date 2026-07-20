@@ -75,7 +75,7 @@ export function BuildBoxHighlight() {
               
               <h2
                 style={{ fontFamily: "'Amsterdam Signature', serif" }}
-                className="font-normal leading-none mb-4 pt-3 pb-3 text-5xl sm:text-6xl lg:text-[5rem] xl:text-[5.8rem]"
+                className="font-normal leading-none mb-4 pt-3 pb-3 text-[3.2rem] sm:text-5xl md:text-6xl lg:text-[5rem] xl:text-[5.8rem]"
               >
                 Build Your Own <br className="hidden sm:block" />
                 <span className="text-brand-gold">Perfect Box</span>

@@ -54,3 +54,47 @@
 .scroll-spacer {
   font-family: var(--font-sans);
 }
+
+/* ═══════════════════════════════════════════════════════════
+   GLOBAL RESPONSIVE FIXES
+   Prevents horizontal scroll and ensures all content stays
+   within the viewport on all screen sizes.
+═══════════════════════════════════════════════════════════ */
+
+@layer base {
+  /* Prevent any element from causing horizontal overflow */
+  html {
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
+  /* Prevent long words/URLs from breaking layout */
+  p, h1, h2, h3, h4, h5, h6, span, a, li {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* Ensure images never overflow their containers */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Smoother scrolling on mobile */
+  body {
+    overscroll-behavior-y: contain;
+  }
+}
+
+/* ── Custom xs breakpoint (480px) ── */
+@media (min-width: 480px) {
+  .xs\:flex-row { flex-direction: row; }
+  .xs\:w-auto   { width: auto; }
+  .xs\:text-5xl { font-size: 3rem; line-height: 1; }
+  .xs\:max-w-sm { max-width: 24rem; }
+}

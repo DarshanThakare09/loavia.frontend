@@ -165,22 +165,22 @@
 /* Scroll Down Indicator Styles */
 .scroll-indicator {
     position: fixed;
-    left: 50px;
-    bottom: 60px;
+    left: 36px;
+    bottom: 40px;
     z-index: 15;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2rem;
+    gap: 1rem;
     pointer-events: none;
     transition: opacity 0.3s ease;
 }
 
 .scroll-text {
     font-family: 'Outfit', sans-serif;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 900;
-    letter-spacing: 6px;
+    letter-spacing: 5px;
     color: #5c3d2e;
     writing-mode: vertical-lr;
     text-transform: uppercase;
@@ -190,7 +190,7 @@
 
 .scroll-line {
     width: 2px;
-    height: 130px;
+    height: 75px;
     background: rgba(92, 61, 46, 0.25);
     position: relative;
     overflow: hidden;
@@ -199,7 +199,7 @@
 
 .scroll-dot {
     width: 4px;
-    height: 25px;
+    height: 20px;
     background: #5c3d2e;
     position: absolute;
     top: 0;
@@ -225,7 +225,7 @@
 
 @keyframes scrollAnimation {
     0% {
-        transform: translateY(-30px);
+        transform: translateY(-20px);
         opacity: 0;
     }
 
@@ -234,12 +234,12 @@
     }
 
     60% {
-        transform: translateY(130px);
+        transform: translateY(75px);
         opacity: 0;
     }
 
     100% {
-        transform: translateY(130px);
+        transform: translateY(75px);
         opacity: 0;
     }
 }
@@ -272,7 +272,7 @@
 .overlay-text-content {
     position: absolute;
     top: 15vh;
-    left: 8vw;
+    left: max(95px, 7vw);
     max-width: 45vw;
     display: flex;
     flex-direction: column;
@@ -387,7 +387,7 @@
 .overlay-text-content-bottom-left {
     position: absolute;
     bottom: 10vh;
-    left: 8vw;
+    left: max(95px, 7vw);
     max-width: 45vw;
     display: flex;
     flex-direction: column;
@@ -471,10 +471,10 @@
     .overlay-text-content-bottom-left,
     .overlay-text-content-top-center,
     .overlay-text-content-center {
-        left: 5% !important;
-        right: 5% !important;
-        max-width: 90% !important;
-        width: 90% !important;
+        left: 48px !important;
+        right: 16px !important;
+        max-width: calc(100% - 64px) !important;
+        width: calc(100% - 64px) !important;
         transform: none !important;
         text-align: center !important;
         align-items: center !important;
@@ -482,19 +482,23 @@
     }
     
     .overlay-text-content {
-        top: 20vh !important;
+        top: 16vh !important;
     }
 
     .overlay-text-content-bottom-left {
-        bottom: 12vh !important;
+        bottom: 18vh !important;
+    }
+
+    .overlay-text-content-center {
+        bottom: 18vh !important;
     }
 
     .overlay-text-content-top-center {
-        top: 20vh !important;
+        top: 16vh !important;
     }
 
     .overlay-heading {
-        font-size: 3.5rem !important;
+        font-size: 3.2rem !important;
         line-height: 0.95 !important;
     }
 
@@ -513,30 +517,39 @@
     }
 
     .scroll-indicator {
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        bottom: 30px !important;
-        gap: 1rem !important;
+        left: 16px !important;
+        transform: none !important;
+        bottom: 24px !important;
+        gap: 0.4rem !important;
+    }
+
+    .scroll-text {
+        font-size: 0.7rem !important;
+        letter-spacing: 4px !important;
     }
 
     .scroll-line {
-        height: 60px !important;
+        height: 35px !important;
+    }
+
+    .scroll-dot {
+        height: 14px !important;
     }
 
     @keyframes scrollAnimation {
         0% {
-            transform: translateY(-20px);
+            transform: translateY(-15px);
             opacity: 0;
         }
         30% {
             opacity: 1;
         }
         60% {
-            transform: translateY(60px);
+            transform: translateY(35px);
             opacity: 0;
         }
         100% {
-            transform: translateY(60px);
+            transform: translateY(35px);
             opacity: 0;
         }
     }
@@ -545,8 +558,8 @@
 @media (min-width: 768px) and (max-width: 1023px) {
     .overlay-text-content,
     .overlay-text-content-bottom-left {
-        max-width: 70vw !important;
-        left: 6vw !important;
+        max-width: calc(100% - 100px) !important;
+        left: 80px !important;
     }
 
     .overlay-heading {

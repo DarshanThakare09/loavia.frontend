@@ -132,8 +132,8 @@ export function GiftingSection() {
               style={{ fontFamily: "'Amsterdam Signature', serif" }}
               className="gifting-element font-normal leading-none mb-6 pt-2 pb-2 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2"
             >
-              <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">{part1}</span>
-              <span className="text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[8rem]">{part2}</span>
+              <span className="text-brand-gold text-xl sm:text-2xl md:text-3xl lg:text-[3rem]">{part1}</span>
+              <span className="text-brand-brown text-4xl sm:text-5xl md:text-7xl lg:text-[8rem] break-words">{part2}</span>
             </h2>
             
             <p className="gifting-element font-sans text-brand-text-secondary text-sm md:text-base lg:text-lg mb-10 leading-relaxed max-w-xl font-light">

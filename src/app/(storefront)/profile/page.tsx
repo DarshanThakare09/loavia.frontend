@@ -162,26 +162,26 @@ export default function ProfilePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Profile Header */}
-        <div className="bg-brand-brown text-white rounded-[2.5rem] p-8 mb-8 flex flex-col sm:flex-row items-center justify-between shadow-[0_20px_50px_rgba(46,25,14,0.1)] border border-brand-brown/10 relative overflow-hidden">
+        <div className="bg-brand-brown text-white rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 mb-8 flex flex-col sm:flex-row items-center justify-between shadow-[0_20px_50px_rgba(46,25,14,0.1)] border border-brand-brown/10 relative overflow-hidden gap-4">
           <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold rounded-full mix-blend-multiply filter blur-3xl opacity-35" />
 
-          <div className="flex flex-col sm:flex-row items-center text-center sm:text-left space-y-4 sm:space-y-0 sm:space-x-6 relative z-10 font-sans">
-            <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md border border-white/20 text-2xl font-black uppercase tracking-wide">
+          <div className="flex flex-col sm:flex-row items-center text-center sm:text-left space-y-3 sm:space-y-0 sm:space-x-6 relative z-10 font-sans w-full sm:w-auto">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md border border-white/20 text-xl sm:text-2xl font-black uppercase tracking-wide flex-shrink-0">
               {user.name.substring(0, 2)}
             </div>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-extrabold mb-1 tracking-tight">{user.name}</h1>
-              <p className="text-white/70 text-sm font-medium">{user.email}</p>
-              <div className="mt-3 flex items-center space-x-2 bg-brand-gold/25 w-max px-3.5 py-1 rounded-full border border-brand-gold/30 mx-auto sm:mx-0">
-                <Star className="w-3.5 h-3.5 text-brand-gold fill-brand-gold" />
-                <span className="text-xs font-black uppercase tracking-wider text-brand-gold">Gold Member</span>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold mb-1 tracking-tight truncate max-w-[200px] sm:max-w-none">{user.name}</h1>
+              <p className="text-white/70 text-xs sm:text-sm font-medium truncate max-w-[200px] sm:max-w-none">{user.email}</p>
+              <div className="mt-2 sm:mt-3 flex items-center space-x-2 bg-brand-gold/25 w-max px-3 sm:px-3.5 py-1 rounded-full border border-brand-gold/30 mx-auto sm:mx-0">
+                <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-gold fill-brand-gold" />
+                <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-brand-gold">Gold Member</span>
               </div>
             </div>
           </div>
 
           <button
             onClick={handleLogout}
-            className="mt-6 sm:mt-0 flex items-center space-x-2 px-6 py-3 bg-white/10 hover:bg-white text-white hover:text-brand-brown font-bold text-sm transition-all duration-300 rounded-full backdrop-blur-md border border-white/20 relative z-10 cursor-pointer shadow-md hover:shadow-lg"
+            className="flex items-center space-x-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-white/10 hover:bg-white text-white hover:text-brand-brown font-bold text-sm transition-all duration-300 rounded-full backdrop-blur-md border border-white/20 relative z-10 cursor-pointer shadow-md hover:shadow-lg flex-shrink-0"
           >
             <LogOut className="w-4 h-4" />
             <span>Sign Out</span>
@@ -190,9 +190,38 @@ export default function ProfilePage() {
 
         <div className="flex flex-col md:flex-row gap-8">
 
-          {/* Sidebar Nav */}
+          {/* Sidebar Nav - horizontal on mobile, vertical on desktop */}
           <div className="w-full md:w-64 flex-shrink-0">
-            <div className="bg-white rounded-[2.5rem] shadow-[0_8px_30px_rgba(92,51,23,0.02)] border border-brand-brown/5 overflow-hidden sticky top-24 p-3">
+            {/* Mobile: horizontal scrollable tab bar */}
+            <div className="md:hidden bg-white rounded-2xl shadow-sm border border-brand-brown/5 p-2 overflow-x-auto">
+              <nav className="flex gap-1 font-sans min-w-max">
+                {[
+                  { id: "orders",    label: "Orders",    icon: Package },
+                  { id: "info",      label: "Info",      icon: User },
+                  { id: "addresses", label: "Addresses", icon: MapPin },
+                  { id: "wishlist",  label: "Wishlist",  icon: Heart },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      className={`flex items-center space-x-2 px-4 py-2.5 transition-all duration-300 font-bold text-xs rounded-xl cursor-pointer whitespace-nowrap ${
+                        isActive
+                          ? "bg-brand-brown text-white shadow-md"
+                          : "text-brand-text-secondary hover:bg-brand-brown/5 hover:text-brand-brown"
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
+            {/* Desktop: vertical sidebar */}
+            <div className="hidden md:block bg-white rounded-[2.5rem] shadow-[0_8px_30px_rgba(92,51,23,0.02)] border border-brand-brown/5 overflow-hidden sticky top-24 p-3">
               <nav className="flex flex-col gap-1 font-sans">
                 {[
                   { id: "orders",    label: "My Orders",        icon: Package },
@@ -232,8 +261,8 @@ export default function ProfilePage() {
           </div>
 
           {/* Content Area */}
-          <div className="flex-1">
-            <div className="bg-white rounded-[2.5rem] p-8 shadow-[0_8px_30px_rgba(92,51,23,0.02)] border border-brand-brown/5 min-h-[500px]">
+          <div className="flex-1 min-w-0">
+            <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 shadow-[0_8px_30px_rgba(92,51,23,0.02)] border border-brand-brown/5 min-h-[500px]">
 
               {/* ── ORDERS TAB ── */}
               {activeTab === "orders" && (

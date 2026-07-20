@@ -452,7 +452,7 @@ export default function AboutPage() {
 
         {/* Content Container aligned to right */}
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-end">
-          <div className="w-full md:w-[55%] lg:w-[50%] flex flex-col items-start text-left py-16 md:py-0">
+          <div className="w-full sm:w-[75%] md:w-[55%] lg:w-[50%] flex flex-col items-start text-left py-12 sm:py-16 md:py-0">
             <span className="hero-text-el text-brand-gold font-sans font-bold text-xs uppercase tracking-[3px] mb-2 block">
               About LOAVIA
             </span>
@@ -463,7 +463,7 @@ export default function AboutPage() {
                 fontFamily: "'Amsterdam Signature', 'Playfair Display', serif",
                 textShadow: "0 2px 10px rgba(0, 0, 0, 0.3)"
               }}
-              className="hero-text-el text-5xl sm:text-6xl md:text-[5.5rem] lg:text-[6.5rem] font-normal leading-[0.85] mb-2"
+              className="hero-text-el text-4xl sm:text-5xl md:text-[5.5rem] lg:text-[6.5rem] font-normal leading-[0.85] mb-2"
             >
               {firstPart && <span className="text-brand-cream block md:inline">{firstPart} </span>}
               {lastWord && <span className="text-[#E29B52] block md:inline">{lastWord}</span>}
