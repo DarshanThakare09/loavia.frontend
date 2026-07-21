@@ -338,7 +338,7 @@ export default function EditProductPage() {
             {images.map((url, idx) => (
               <div key={idx} className="flex items-center gap-2">
                 <span className="text-xs font-bold text-brand-text-secondary w-6">{idx + 1}.</span>
-                <input type="url" value={url} onChange={e => updateImage(idx, e.target.value)} className={`${inputClass} flex-1`} placeholder={`Image ${idx + 1} URL`} />
+                <input type="text" value={url} onChange={e => updateImage(idx, e.target.value)} className={`${inputClass} flex-1`} placeholder={`Image ${idx + 1} URL or path (e.g. /image.png or https://...)`} />
               </div>
             ))}
           </div>

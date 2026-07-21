@@ -10,8 +10,13 @@ export default function CustomerLove() {
 
   const { testimonialsList } = useSiteStore();
   
-  const testimonials = testimonialsList && testimonialsList.length > 0
-    ? testimonialsList
+  // Only show reviews that have been approved — never show pending/rejected publicly
+  const approvedReviews = testimonialsList
+    ? testimonialsList.filter((r) => r.status === "approved")
+    : [];
+
+  const testimonials = approvedReviews.length > 0
+    ? approvedReviews
     : [
         {
           id: 1,

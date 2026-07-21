@@ -192,7 +192,7 @@ export default function AdminUsersPage() {
 
       <div className="flex flex-col lg:flex-row gap-6 items-start">
         {/* Left Side: Customers list Table (or empty state) */}
-        <div className="flex-1 w-full space-y-6">
+        <div className="flex-1 min-w-0 w-full space-y-6">
           {/* Loading Skeleton */}
           {store.isLoadingCustomers && (
             <div className="bg-white rounded-2xl shadow-sm border border-brand-brown/10 p-8">
@@ -219,16 +219,16 @@ export default function AdminUsersPage() {
           {!store.isLoadingCustomers && displayedCustomers.length > 0 && (
             <div className="bg-white rounded-2xl shadow-sm border border-brand-brown/10 overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full min-w-[750px] text-left border-collapse">
                   <thead>
                     <tr className="bg-brand-light border-b border-brand-brown/10">
-                      <th className="p-4 font-semibold text-brand-brown text-sm">Customer</th>
-                      <th className="p-4 font-semibold text-brand-brown text-sm">Phone</th>
-                      <th className="p-4 font-semibold text-brand-brown text-sm">Role</th>
-                      <th className="p-4 font-semibold text-brand-brown text-sm">Status</th>
-                      <th className="p-4 font-semibold text-brand-brown text-sm">Orders</th>
-                      <th className="p-4 font-semibold text-brand-brown text-sm">Total Spent</th>
-                      <th className="p-4 font-semibold text-brand-brown text-sm">Actions</th>
+                      <th className="p-4 font-semibold text-brand-brown text-sm min-w-[220px]">Customer</th>
+                      <th className="p-4 font-semibold text-brand-brown text-sm min-w-[130px]">Phone</th>
+                      <th className="p-4 font-semibold text-brand-brown text-sm min-w-[110px]">Role</th>
+                      <th className="p-4 font-semibold text-brand-brown text-sm min-w-[100px]">Status</th>
+                      <th className="p-4 font-semibold text-brand-brown text-sm min-w-[80px] text-center">Orders</th>
+                      <th className="p-4 font-semibold text-brand-brown text-sm min-w-[110px] text-right">Total Spent</th>
+                      <th className="p-4 font-semibold text-brand-brown text-sm min-w-[80px] text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -237,41 +237,45 @@ export default function AdminUsersPage() {
                         key={customer.id}
                         className="border-b border-brand-brown/5 hover:bg-brand-light/40 transition-colors"
                       >
-                        <td className="p-4">
-                          <div className="flex items-center gap-3">
+                        <td className="p-4 max-w-[260px]">
+                          <div className="flex items-center gap-3 min-w-0">
                             <div className="w-9 h-9 rounded-full bg-brand-gold/15 text-brand-gold font-bold flex items-center justify-center text-sm border border-brand-gold/10 flex-shrink-0">
                               {customer.name.charAt(0).toUpperCase()}
                             </div>
-                            <div>
-                              <span className="font-semibold text-brand-text-primary text-sm block">{customer.name}</span>
-                              <span className="text-xs text-brand-text-secondary">{customer.email}</span>
+                            <div className="min-w-0 flex-1">
+                              <span className="font-semibold text-brand-text-primary text-sm block truncate" title={customer.name}>
+                                {customer.name}
+                              </span>
+                              <span className="text-xs text-brand-text-secondary block truncate" title={customer.email}>
+                                {customer.email}
+                              </span>
                             </div>
                           </div>
                         </td>
-                        <td className="p-4 text-sm text-brand-text-secondary">
+                        <td className="p-4 text-sm text-brand-text-secondary whitespace-nowrap">
                           {customer.phone || "N/A"}
                         </td>
-                        <td className="p-4">
-                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold border ${getRoleBadge(customer.role)}`}>
+                        <td className="p-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border whitespace-nowrap ${getRoleBadge(customer.role)}`}>
                             {customer.role}
                           </span>
                         </td>
-                        <td className="p-4">
-                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${getStatusBadge(customer.status)}`}>
+                        <td className="p-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold whitespace-nowrap ${getStatusBadge(customer.status)}`}>
                             {customer.status}
                           </span>
                         </td>
-                        <td className="p-4 text-sm text-brand-text-secondary">
+                        <td className="p-4 text-sm text-brand-text-secondary text-center whitespace-nowrap">
                           {customer.ordersCount ?? "—"}
                         </td>
-                        <td className="p-4 font-bold text-brand-text-primary text-sm">
+                        <td className="p-4 font-bold text-brand-text-primary text-sm text-right whitespace-nowrap">
                           {formatRupees(customer.totalSpent)}
                         </td>
-                        <td className="p-4">
+                        <td className="p-4 text-center whitespace-nowrap">
                           <button
                             onClick={() => handleViewProfile(customer)}
                             disabled={store.isLoadingCustomer}
-                            className="text-brand-gold hover:text-brand-brown p-2 hover:bg-brand-gold/10 rounded-lg transition-colors disabled:opacity-50"
+                            className="text-brand-gold hover:text-brand-brown p-2 hover:bg-brand-gold/10 rounded-lg transition-colors disabled:opacity-50 inline-flex items-center justify-center"
                             title="View Profile"
                           >
                             {store.isLoadingCustomer ? (

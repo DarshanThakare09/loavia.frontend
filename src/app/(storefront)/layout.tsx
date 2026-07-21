@@ -39,33 +39,36 @@ export default function StorefrontLayout({
       } catch (err) {
         console.error("Failed to load settings from server", err);
       }
+      // Fetch products independently
       try {
-        const [productsData, _categoriesData, reviews] = await Promise.all([
-          catalogService.getProducts({ limit: 100 }),
-          catalogService.getCategories(),
-          reviewService.getApprovedReviews(),
-        ]);
+        const productsData = await catalogService.getProducts({ limit: 100 });
         setProducts(productsData.products);
+      } catch (err) {
+        console.error("Failed to load products from backend", err);
+      }
 
+      // Fetch approved reviews independently — must not be blocked by product/category failures
+      try {
+        const reviews = await reviewService.getApprovedReviews();
         const mappedReviews = reviews.map((r: any) => ({
           id: r.id,
           customerName: r.user?.name || "Anonymous",
           customerEmail: r.user?.email || "",
           reviewText: r.comment || "",
           rating: r.rating,
+          // Backend returns uppercase "APPROVED"; normalise to lowercase for siteStore
           status: (r.status || "APPROVED").toLowerCase() as any,
           featured: false,
           pinned: false,
           createdAt: r.createdAt,
-          // Legacy compat for storefront Testimonials component
+          // Legacy compat fields consumed by CustomerLove / Testimonials
           name: r.user?.name || "Anonymous",
           role: "Verified Buyer",
           content: r.comment || "",
         }));
-
         setReviews(mappedReviews);
       } catch (err) {
-        console.error("Failed to load initial storefront data from backend", err);
+        console.error("Failed to load approved reviews from backend", err);
       }
     }
     loadData();

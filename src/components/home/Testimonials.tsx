@@ -14,7 +14,10 @@ export function Testimonials() {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const { testimonialsList } = useSiteStore();
-  const testimonials = testimonialsList || [];
+  // Only render reviews that have been approved — never expose pending/rejected publicly
+  const testimonials = testimonialsList
+    ? testimonialsList.filter((r) => r.status === "approved")
+    : [];
 
   // Auto-advance testimonials
   useEffect(() => {
