@@ -7,13 +7,11 @@ import { GiftingSection } from "@/components/home/GiftingSection";
 import CustomerLove from "@/components/home/CustomerLove";
 import WhyChoose from "@/components/home/WhyChoose";
 import FeaturedProducts from "@/components/home/FeaturedProducts";
-import LandingAnimation from "@/components/home/LandingAnimation";
 import { Navbar } from "@/components/layout/Navbar";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      <LandingAnimation />
       <Navbar />
       <HeroSection />
       <WhyChoose />

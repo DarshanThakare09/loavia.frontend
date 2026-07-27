@@ -23,10 +23,30 @@ export default function LandingAnimation() {
   const [canvasPosition, setCanvasPosition] = useState<'fixed' | 'absolute'>('fixed');
   const [canvasTop, setCanvasTop] = useState(0);
 
-  // Scroll to top on fresh mount
+  // Restore scroll position when returning from build-box
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+    if (!loading) {
+      if (typeof window !== "undefined") {
+        const restoreHomeScroll = sessionStorage.getItem("restore_home_scroll");
+        const savedScroll = sessionStorage.getItem("home_scroll_position");
+        const prevPathname = sessionStorage.getItem("prev_pathname");
+        
+        if (restoreHomeScroll === "true" && savedScroll && prevPathname === "/build-box") {
+          const scrollY = parseInt(savedScroll, 10);
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              window.scrollTo({
+                top: scrollY,
+                behavior: "smooth"
+              });
+              sessionStorage.removeItem("restore_home_scroll");
+              sessionStorage.removeItem("home_scroll_position");
+            }, 50);
+          });
+        }
+      }
+    }
+  }, [loading]);
 
   // Preload all four animation frame sets
   useEffect(() => {

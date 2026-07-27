@@ -31,7 +31,7 @@ export function Navbar() {
 
   // Layout refs to avoid layout thrashing on scroll
   const transitionStartRef = useRef(15 * 800);
-  const heroEndRef = useRef(16.8 * 800);
+  //const heroEndRef = useRef(16.8 * 800);
 
   // Update navbar height CSS variable and layout dimensions on mount and resize
   useEffect(() => {
@@ -44,13 +44,13 @@ export function Navbar() {
       const vh = window.innerHeight;
       const vw = window.innerWidth;
 
-      transitionStartRef.current = 15 * vh;
+     // transitionStartRef.current = 15 * vh;
 
-      if (vw >= 1024) {
+     /* if (vw >= 1024) {
         heroEndRef.current = 16.8 * vh;
       } else {
         heroEndRef.current = 15 * vh;
-      }
+      } */
     };
 
     updateLayout();
@@ -71,32 +71,23 @@ export function Navbar() {
       const vh = window.innerHeight;
       const isHomepage = window.location.pathname === "/";
 
-      const transitionStart = transitionStartRef.current;
-      const heroEnd = heroEndRef.current;
+      // const transitionStart = transitionStartRef.current;
+      //const heroEnd = heroEndRef.current;
 
       if (isHomepage) {
-        if (currentScrollY < transitionStart - vh) {
-          navbarEl.style.position = "sticky";
-          navbarEl.style.top = "0px";
-          navbarEl.style.opacity = "0";
-          navbarEl.style.pointerEvents = "none";
-          navbarEl.style.transition = "opacity 0.2s ease";
-        } else if (currentScrollY >= transitionStart - vh && currentScrollY < heroEnd) {
-          navbarEl.style.position = "sticky";
-          navbarEl.style.top = "0px";
-          navbarEl.style.opacity = "1";
-          navbarEl.style.pointerEvents = "auto";
-          navbarEl.style.transition = "opacity 0.2s ease";
-        } else {
-          navbarEl.style.position = "sticky";
-          navbarEl.style.opacity = "1";
-          navbarEl.style.pointerEvents = "auto";
-          const dY = currentScrollY - heroEnd;
-          const topVal = Math.max(-32, -dY);
-          navbarEl.style.top = `${topVal}px`;
-          navbarEl.style.transition = "none";
-        }
-      } else {
+  navbarEl.style.opacity = "1";
+  navbarEl.style.pointerEvents = "auto";
+
+  if (currentScrollY < 32) {
+    navbarEl.style.position = "sticky";
+    navbarEl.style.top = `${-currentScrollY}px`;
+    navbarEl.style.transition = "none";
+  } else {
+    navbarEl.style.position = "sticky";
+    navbarEl.style.top = "-32px";
+    navbarEl.style.transition = "none";
+  }
+} else {
         navbarEl.style.opacity = "1";
         navbarEl.style.pointerEvents = "auto";
         if (currentScrollY < 32) {
