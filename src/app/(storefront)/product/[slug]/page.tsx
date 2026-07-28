@@ -157,12 +157,12 @@ export default function ProductDetail() {
       <div className="max-w-7xl mx-auto">
         
         {/* Breadcrumbs */}
-        <div className="flex items-center space-x-2 text-sm text-brand-text-secondary mb-12 border-b border-brand-brown/5 pb-4">
-          <Link href="/" className="hover:text-brand-brown font-semibold transition-colors">Home</Link>
-          <span className="text-brand-brown/30">/</span>
-          <Link href="/shop" className="hover:text-brand-brown font-semibold transition-colors">Shop</Link>
-          <span className="text-brand-brown/30">/</span>
-          <span className="text-brand-brown font-black">{product.name}</span>
+        <div className="flex items-center space-x-2 text-sm text-brand-text-secondary mb-8 sm:mb-12 border-b border-brand-brown/5 pb-4 overflow-hidden">
+          <Link href="/" className="hover:text-brand-brown font-semibold transition-colors flex-shrink-0">Home</Link>
+          <span className="text-brand-brown/30 flex-shrink-0">/</span>
+          <Link href="/shop" className="hover:text-brand-brown font-semibold transition-colors flex-shrink-0">Shop</Link>
+          <span className="text-brand-brown/30 flex-shrink-0">/</span>
+          <span className="text-brand-brown font-black truncate min-w-0">{product.name}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
@@ -225,7 +225,7 @@ export default function ProductDetail() {
                 )}
               </div>
               
-              <h1 className="text-4xl lg:text-5xl font-black text-brand-brown tracking-tight mb-3 leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-brand-brown tracking-tight mb-3 leading-tight">
                 {product.name}
               </h1>
 

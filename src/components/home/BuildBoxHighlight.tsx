@@ -71,7 +71,7 @@ export function BuildBoxHighlight() {
               
               <h2
                 style={{ fontFamily: "'Amsterdam Signature', serif" }}
-                className="font-normal leading-none mb-4 pt-3 pb-3 text-5xl sm:text-6xl lg:text-[5rem] xl:text-[5.8rem]"
+                className="font-normal leading-none mb-4 pt-3 pb-3 text-[3.2rem] sm:text-5xl md:text-6xl lg:text-[5rem] xl:text-[5.8rem]"
               >
                 Build Your Own <br className="hidden sm:block" />
                 <span className="text-brand-gold">Perfect Box</span>
@@ -84,6 +84,12 @@ export function BuildBoxHighlight() {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <Link 
                   href="/build-box" 
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      sessionStorage.setItem("home_scroll_position", window.scrollY.toString());
+                      sessionStorage.setItem("restore_home_scroll", "true");
+                    }
+                  }}
                   className="inline-flex items-center justify-center px-7 py-3.5 text-base font-bold text-brand-brown bg-brand-gold rounded-full hover:bg-white transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1 duration-300 whitespace-nowrap"
                 >
                   Start Building

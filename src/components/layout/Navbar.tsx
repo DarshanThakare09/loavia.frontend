@@ -146,7 +146,7 @@ export function Navbar() {
 
             {/* Left Brand Logo */}
             <div className="flex-1 flex justify-start items-center">
-              <Link href="/" className="relative w-[140px] sm:w-[180px] md:w-[240px] lg:w-[290px] h-[48px] sm:h-[65px] md:h-[90px] lg:h-[110px] transition-transform duration-500 hover:scale-103 block">
+              <Link href="/" className="relative w-[140px] sm:w-[180px] md:w-[240px] lg:w-[290px] h-[48px] sm:h-[65px] md:h-[90px] lg:h-[110px] transition-transform duration-500 hover:scale-105 block">
                 <Image
                   src="/loavia-logo.png"
                   alt="LOAVIA Logo"

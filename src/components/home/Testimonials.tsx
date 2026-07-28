@@ -14,7 +14,10 @@ export function Testimonials() {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const { testimonialsList } = useSiteStore();
-  const testimonials = testimonialsList || [];
+  // Only render reviews that have been approved — never expose pending/rejected publicly
+  const testimonials = testimonialsList
+    ? testimonialsList.filter((r) => r.status === "approved")
+    : [];
 
   // Auto-advance testimonials
   useEffect(() => {
@@ -69,8 +72,8 @@ export function Testimonials() {
           style={{ fontFamily: "'Amsterdam Signature', serif" }}
           className="font-normal leading-none mb-10 pt-2 pb-2 flex flex-col sm:flex-row sm:items-baseline sm:justify-center sm:flex-wrap gap-x-4 gap-y-2 text-center"
         >
-          <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">{part1}</span>
-          <span className="text-brand-brown text-7xl md:text-8xl lg:text-[8rem]">{part2}</span>
+          <span className="text-brand-gold text-xl sm:text-2xl md:text-3xl lg:text-[3rem]">{part1}</span>
+          <span className="text-brand-brown text-4xl sm:text-6xl md:text-7xl lg:text-[8rem]">{part2}</span>
         </h2>
 
         {/* Floating Glassmorphic Testimonial Card */}

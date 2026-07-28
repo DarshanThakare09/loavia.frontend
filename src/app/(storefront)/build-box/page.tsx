@@ -140,8 +140,8 @@ export default function BuildBoxPage() {
             style={{ fontFamily: "'Amsterdam Signature', serif" }}
             className="font-normal leading-none mb-6 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2 justify-center"
           >
-            <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">Build Your</span>
-            <span className="text-brand-brown text-7xl md:text-8xl lg:text-[6rem]">Box</span>
+            <span className="text-brand-gold text-xl sm:text-2xl md:text-3xl lg:text-[3rem]">Build Your</span>
+            <span className="text-brand-brown text-4xl sm:text-6xl md:text-7xl lg:text-[6rem]">Box</span>
           </h1>
           <p className="text-brand-text-secondary text-base md:text-lg max-w-2xl mx-auto font-light leading-relaxed">
             Mix and match your favorite flavors. Choose a size and fill it up to your heart's content.

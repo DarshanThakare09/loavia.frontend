@@ -14,12 +14,47 @@ export default function ScrollToTop() {
       }
     }
 
-    // Force immediate scroll reset to the top of the viewport
-    window.scrollTo(0, 0);
+    const isPopstate = typeof window !== "undefined" && sessionStorage.getItem("is_popstate") === "true";
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("is_popstate");
+    }
+
+    const prevPathname = typeof window !== "undefined" ? sessionStorage.getItem("current_pathname") || "" : "";
+    
+    let shouldSkipScroll = false;
+    if (
+      pathname === "/" &&
+      prevPathname === "/build-box" &&
+      isPopstate &&
+      typeof window !== "undefined" &&
+      sessionStorage.getItem("restore_home_scroll") === "true"
+    ) {
+      shouldSkipScroll = true;
+    }
+
+    if (!shouldSkipScroll) {
+      window.scrollTo(0, 0);
+    }
+
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("prev_pathname", prevPathname);
+      sessionStorage.setItem("current_pathname", pathname);
+    }
   }, [pathname]);
 
   useEffect(() => {
     const handlePopState = () => {
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("is_popstate", "true");
+        
+        // Skip forcing scroll to top on back/forward if we are returning to home from build-box
+        const prevPathname = sessionStorage.getItem("current_pathname") || "";
+        const restoreHomeScroll = sessionStorage.getItem("restore_home_scroll") === "true";
+        if (window.location.pathname === "/" && prevPathname === "/build-box" && restoreHomeScroll) {
+          return;
+        }
+      }
+
       // Force scroll to top on back/forward browser navigation
       window.scrollTo(0, 0);
     };

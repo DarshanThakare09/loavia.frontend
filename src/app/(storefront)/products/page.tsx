@@ -162,13 +162,13 @@ export default function ProductsPage() {
         />
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-end">
-          <div className="w-full md:w-[52%] lg:w-[48%] flex flex-col items-start text-left py-12 md:py-0">
+          <div className="w-full sm:w-[70%] md:w-[52%] lg:w-[48%] flex flex-col items-start text-left py-10 sm:py-12 md:py-0">
             <h1
               style={{
                 fontFamily: "'Amsterdam Signature', 'Playfair Display', serif",
                 textShadow: "0 2px 10px rgba(0, 0, 0, 0.3)"
               }}
-              className="hero-text-el text-5xl sm:text-6xl md:text-[5.5rem] lg:text-[6.5rem] font-normal leading-[0.85] mb-2"
+              className="hero-text-el text-4xl sm:text-5xl md:text-[5rem] lg:text-[6.5rem] font-normal leading-[0.85] mb-2"
             >
               <span className="text-brand-cream">Introducing your</span>
               <br />
@@ -205,8 +205,8 @@ export default function ProductsPage() {
             style={{ fontFamily: "'Amsterdam Signature', serif" }}
             className="font-normal leading-none mb-6 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2 justify-center"
           >
-            <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">Our Cookie</span>
-            <span className="text-brand-brown text-7xl md:text-8xl lg:text-[6rem]">Collection</span>
+            <span className="text-brand-gold text-xl sm:text-2xl md:text-3xl lg:text-[3rem]">Our Cookie</span>
+            <span className="text-brand-brown text-4xl sm:text-6xl md:text-7xl lg:text-[6rem]">Collection</span>
           </h2>
           <p className="text-base md:text-lg text-brand-text-secondary leading-relaxed max-w-2xl mx-auto font-light">
             Discover our delicious range of premium millet cookies crafted with wholesome ingredients,
@@ -341,11 +341,11 @@ export default function ProductsPage() {
           style={{ fontFamily: "'Amsterdam Signature', serif" }}
           className="font-normal leading-none mb-12 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2 justify-center"
         >
-          <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">Product</span>
-          <span className="text-brand-brown text-7xl md:text-8xl lg:text-[6rem]">Highlights</span>
+          <span className="text-brand-gold text-xl sm:text-2xl md:text-3xl lg:text-[3rem]">Product</span>
+          <span className="text-brand-brown text-4xl sm:text-6xl md:text-7xl lg:text-[6rem]">Highlights</span>
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 w-full">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 w-full">
           {[
             { title: "No Maida", desc: "100% whole grain millet flour", icon: <Leaf className="w-6 h-6 text-brand-gold" /> },
             { title: "No Preservatives", desc: "Pure, clean-label recipe", icon: <Shield className="w-6 h-6 text-brand-gold" /> },
@@ -393,8 +393,8 @@ export default function ProductsPage() {
                 style={{ fontFamily: "'Amsterdam Signature', serif" }}
                 className="font-normal leading-none mb-6 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2"
               >
-                <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">The Power of</span>
-                <span className="text-brand-brown text-7xl md:text-8xl lg:text-[6rem]">Millets</span>
+                <span className="text-brand-gold text-xl sm:text-2xl md:text-3xl lg:text-[3rem]">The Power of</span>
+                <span className="text-brand-brown text-4xl sm:text-6xl md:text-7xl lg:text-[6rem]">Millets</span>
               </h2>
 
               <p className="text-base sm:text-lg text-brand-text-secondary leading-relaxed font-light mb-6 font-sans">
@@ -420,7 +420,7 @@ export default function ProductsPage() {
           </div>
 
           {/* Benefits Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-16">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mt-16">
             {[
               { title: "Rich in Fiber", icon: "🌾" },
               { title: "Low GI Index", icon: "📉" },
