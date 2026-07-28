@@ -18,11 +18,7 @@ export default function StorefrontLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const showGlobalNavbar = pathname !== "/";
-
   const setProducts = useProductStore((state) => state.setProducts);
-  const updateCategories = useSiteStore((state) => state.updateCategories);
   const setReviews = useSiteStore((state) => state.setReviews);
   const loadSettingsFromServer = useSiteStore((state) => state.loadSettingsFromServer);
   const hydrateSession = useAuthStore((state) => state.hydrateSession);
@@ -40,7 +36,7 @@ export default function StorefrontLayout({
         console.error("Failed to load settings from server", err);
       }
       try {
-        const [productsData, _categoriesData, reviews] = await Promise.all([
+        const [productsData, , reviews] = await Promise.all([
           catalogService.getProducts({ limit: 100 }),
           catalogService.getCategories(),
           reviewService.getApprovedReviews(),
@@ -74,7 +70,7 @@ export default function StorefrontLayout({
 
   return (
     <>
-      {showGlobalNavbar && <Navbar />}
+      <Navbar />
       <MiniCart />
       <main className="flex-grow flex flex-col">
         {children}

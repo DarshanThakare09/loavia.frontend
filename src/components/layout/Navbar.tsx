@@ -7,7 +7,6 @@ import { Search, User, ShoppingCart, Menu, X, ArrowRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
-import { useProductStore } from "@/store/productStore";
 import { useSiteStore } from "@/store/siteStore";
 import { catalogService } from "@/services/catalogService";
 
@@ -22,34 +21,18 @@ export function Navbar() {
 
   const { items, openMiniCart } = useCartStore();
   const { isAuthenticated } = useAuthStore();
-  const { products } = useProductStore();
   const { announcementText } = useSiteStore();
 
   // Prevent hydration mismatch
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // Layout refs to avoid layout thrashing on scroll
-  const transitionStartRef = useRef(15 * 800);
-  const heroEndRef = useRef(16.8 * 800);
-
-  // Update navbar height CSS variable and layout dimensions on mount and resize
+  // Update navbar height CSS variable on mount and resize
   useEffect(() => {
     const updateLayout = () => {
       const rect = navbarRef.current?.getBoundingClientRect();
       if (rect) {
         document.documentElement.style.setProperty("--navbar-height", `${rect.height}px`);
-      }
-
-      const vh = window.innerHeight;
-      const vw = window.innerWidth;
-
-      transitionStartRef.current = 15 * vh;
-
-      if (vw >= 1024) {
-        heroEndRef.current = 16.8 * vh;
-      } else {
-        heroEndRef.current = 15 * vh;
       }
     };
 
@@ -68,46 +51,18 @@ export function Navbar() {
       if (!navbarEl) return;
 
       const currentScrollY = window.scrollY;
-      const vh = window.innerHeight;
-      const isHomepage = window.location.pathname === "/";
 
-      const transitionStart = transitionStartRef.current;
-      const heroEnd = heroEndRef.current;
+      navbarEl.style.opacity = "1";
+      navbarEl.style.pointerEvents = "auto";
 
-      if (isHomepage) {
-        if (currentScrollY < transitionStart - vh) {
-          navbarEl.style.position = "sticky";
-          navbarEl.style.top = "0px";
-          navbarEl.style.opacity = "0";
-          navbarEl.style.pointerEvents = "none";
-          navbarEl.style.transition = "opacity 0.2s ease";
-        } else if (currentScrollY >= transitionStart - vh && currentScrollY < heroEnd) {
-          navbarEl.style.position = "sticky";
-          navbarEl.style.top = "0px";
-          navbarEl.style.opacity = "1";
-          navbarEl.style.pointerEvents = "auto";
-          navbarEl.style.transition = "opacity 0.2s ease";
-        } else {
-          navbarEl.style.position = "sticky";
-          navbarEl.style.opacity = "1";
-          navbarEl.style.pointerEvents = "auto";
-          const dY = currentScrollY - heroEnd;
-          const topVal = Math.max(-32, -dY);
-          navbarEl.style.top = `${topVal}px`;
-          navbarEl.style.transition = "none";
-        }
+      if (currentScrollY < 32) {
+        navbarEl.style.position = "sticky";
+        navbarEl.style.top = `${-currentScrollY}px`;
+        navbarEl.style.transition = "none";
       } else {
-        navbarEl.style.opacity = "1";
-        navbarEl.style.pointerEvents = "auto";
-        if (currentScrollY < 32) {
-          navbarEl.style.position = "sticky";
-          navbarEl.style.top = `${-currentScrollY}px`;
-          navbarEl.style.transition = "none";
-        } else {
-          navbarEl.style.position = "sticky";
-          navbarEl.style.top = "-32px";
-          navbarEl.style.transition = "none";
-        }
+        navbarEl.style.position = "sticky";
+        navbarEl.style.top = "-32px";
+        navbarEl.style.transition = "none";
       }
     };
 
@@ -186,19 +141,19 @@ export function Navbar() {
         {/* Subtle decorative bottom glow line */}
         <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-brand-gold/25 to-transparent pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16 sm:h-20 lg:h-24">
 
             {/* Left Brand Logo */}
             <div className="flex-1 flex justify-start items-center">
-              <Link href="/" className="relative w-[290px] h-[110px] transition-transform duration-500 hover:scale-103 block">
+              <Link href="/" className="relative w-[140px] sm:w-[180px] md:w-[240px] lg:w-[290px] h-[48px] sm:h-[65px] md:h-[90px] lg:h-[110px] transition-transform duration-500 hover:scale-103 block">
                 <Image
                   src="/loavia-logo.png"
                   alt="LOAVIA Logo"
                   fill
-                  className="object-contain"
+                  className="object-contain object-left"
                   priority
-                  sizes="(max-width: 768px) 150px, 290px"
+                  sizes="(max-width: 640px) 140px, (max-width: 1024px) 240px, 290px"
                 />
               </Link>
             </div>
@@ -227,22 +182,22 @@ export function Navbar() {
 
             {/* Right Action Icons */}
             <div className="flex-1 flex justify-end items-center">
-              <div className="flex items-center space-x-2 md:space-x-4 text-brand-brown">
+              <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4 text-brand-brown">
 
                 {/* Search Toggle */}
                 <div className="relative" ref={searchRef}>
                   <button
                     aria-label="Search"
                     onClick={() => setIsSearchOpen(!isSearchOpen)}
-                    className={`w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#5C3317]/5 transition-all duration-300 ${isSearchOpen ? "text-brand-gold bg-[#5C3317]/5" : "text-brand-brown hover:text-brand-gold"
+                    className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center hover:bg-[#5C3317]/5 transition-all duration-300 ${isSearchOpen ? "text-brand-gold bg-[#5C3317]/5" : "text-brand-brown hover:text-brand-gold"
                       }`}
                   >
-                    <Search className="w-5 h-5" />
+                    <Search className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
 
                   {/* Glassmorphic Search Dropdown */}
                   {isSearchOpen && (
-                    <div className="absolute right-0 top-full mt-4 w-80 bg-white/95 backdrop-blur-md shadow-2xl rounded-3xl border border-brand-brown/10 overflow-hidden z-50 p-4 transform origin-top-right transition-all duration-300">
+                    <div className="absolute right-0 top-full mt-4 w-[calc(100vw-2rem)] sm:w-80 max-w-sm bg-white/95 backdrop-blur-md shadow-2xl rounded-3xl border border-brand-brown/10 overflow-hidden z-50 p-4 transform origin-top-right transition-all duration-300">
                       <div className="relative mb-3">
                         <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-brand-text-secondary" />
                         <input

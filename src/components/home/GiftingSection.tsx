@@ -2,7 +2,6 @@
 
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -65,28 +64,19 @@ export function GiftingSection() {
   const descriptionText = giftingDescription || "Share the joy of guilt-free indulgence with our premium gift boxes. Perfectly packed, thoughtfully curated, and filled with wholesome goodness for any special occasion.";
 
   return (
-    <section ref={containerRef} className="py-24 bg-brand-light relative overflow-hidden">
-      
-      {/* Background Image on the right (slightly wider to allow smooth blending) */}
-      <div className="absolute top-0 right-0 h-full w-full lg:w-[60%] xl:w-[55%] z-0">
-        <img
-          src="/giftingbg.jpg?v=1"
-          alt="Gifting Box"
-          className="w-full h-full object-cover object-right"
-        />
-      </div>
-
-      {/* Off-white gradient overlay: solid from left to middle (50%), then fading transparent to the right corner */}
-      <div className="absolute inset-0 bg-gradient-to-b from-brand-light via-brand-light/92 to-transparent lg:bg-gradient-to-r lg:from-brand-light lg:via-brand-light lg:to-transparent z-10 pointer-events-none" />
-
-      {/* Decorative background elements (soft glow behind text) */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#FADCD9] rounded-full mix-blend-multiply filter blur-3xl opacity-20 z-0"></div>
-
+    <section ref={containerRef} className="py-14 sm:py-24 bg-brand-light relative overflow-hidden gifting-bg-layer">
       <style>{`
+        .gifting-bg-layer {
+          background-image: url('/giftingbg.jpg?v=1');
+          background-size: cover;
+          background-position: right center;
+          background-repeat: no-repeat;
+          background-attachment: fixed;
+        }
         .gifting-glass-card {
           position: relative;
           overflow: hidden;
-          background: rgba(255, 255, 255, 0.7);
+          background: rgba(255, 255, 255, 0.75);
           backdrop-filter: blur(12px);
           border: 1px solid rgba(92, 51, 23, 0.08);
           transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -119,38 +109,47 @@ export function GiftingSection() {
         }
       `}</style>
 
+      {/* Off-white gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-brand-light/95 via-brand-light/85 to-transparent lg:bg-gradient-to-r lg:from-brand-light lg:via-brand-light/95 lg:to-transparent z-10 pointer-events-none" />
+
+      {/* Decorative background elements (soft glow behind text) */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#FADCD9] rounded-full mix-blend-multiply filter blur-3xl opacity-20 z-0"></div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
           {/* Left Column: Text content */}
           <div className="lg:col-span-7 flex flex-col text-left">
-            <div className="gifting-element inline-flex items-center justify-center w-12 h-12 bg-brand-gold/10 text-brand-gold rounded-full mb-6 border border-brand-gold/20">
-              <Gift className="w-5 h-5" />
+            
+            {/* Floating Badge */}
+            <div className="gifting-element inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-gold/15 border border-brand-gold/30 text-brand-gold text-[10px] uppercase font-bold tracking-[2px] mb-4 w-fit shadow-xs">
+              <Gift className="w-3.5 h-3.5" />
+              <span>Thoughtful & Healthy Gifting</span>
             </div>
             
             <h2 
               style={{ fontFamily: "'Amsterdam Signature', serif" }}
-              className="gifting-element font-normal leading-none mb-6 pt-2 pb-2 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2"
+              className="gifting-element font-normal leading-none mb-4 sm:mb-6 pt-1 pb-1 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-1"
             >
               <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">{part1}</span>
-              <span className="text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[8rem]">{part2}</span>
+              <span className="text-brand-brown text-3xl sm:text-5xl md:text-6xl lg:text-[7rem]">{part2}</span>
             </h2>
             
-            <p className="gifting-element font-sans text-brand-text-secondary text-sm md:text-base lg:text-lg mb-10 leading-relaxed max-w-xl font-light">
+            <p className="gifting-element font-sans text-brand-text-secondary text-sm md:text-base lg:text-lg mb-8 sm:mb-10 leading-relaxed max-w-xl font-light">
               {descriptionText}
             </p>
 
             {/* Occasions cards */}
-            <div className="gifting-element grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
+            <div className="gifting-element grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8 sm:mb-10">
               {occasions.map((occasion) => {
                 const Icon = occasion.icon;
                 return (
                   <div 
                     key={occasion.label} 
-                    className="gifting-glass-card rounded-[2rem] p-5 flex flex-col items-center justify-center text-center cursor-pointer group"
+                    className="gifting-glass-card rounded-2xl sm:rounded-[2rem] p-3.5 sm:p-5 flex flex-col items-center justify-center text-center cursor-pointer group border-l-2 border-l-brand-gold sm:border-l-transparent"
                   >
-                    <div className="w-12 h-12 bg-brand-gold/10 text-brand-gold rounded-full flex items-center justify-center mb-3 transition-all duration-300 group-hover:bg-brand-gold group-hover:text-white group-hover:scale-110 border border-brand-gold/20">
-                      <Icon className="w-5 h-5" />
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-brand-gold/15 text-brand-gold rounded-full flex items-center justify-center mb-2.5 transition-all duration-300 group-hover:bg-brand-gold group-hover:text-white group-hover:scale-110 border border-brand-gold/20 shadow-xs">
+                      <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                     <span className="font-sans font-bold text-brand-brown group-hover:text-brand-gold transition-colors duration-300 text-xs sm:text-sm">
                       {occasion.label}
@@ -160,18 +159,18 @@ export function GiftingSection() {
               })}
             </div>
 
-            <div className="gifting-element">
+            <div className="gifting-element flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <Link 
                 href="/gift" 
-                className="inline-flex items-center justify-center px-10 py-4.5 text-base font-semibold text-white bg-brand-brown rounded-full hover:bg-brand-gold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center px-8 sm:px-10 py-4 text-sm sm:text-base font-bold text-white bg-brand-brown rounded-full hover:bg-brand-gold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:scale-95 w-full sm:w-auto text-center"
               >
                 Explore Gifting Options
               </Link>
-              
-              <h4 className="text-xs text-brand-text-secondary mt-5 font-light tracking-wide max-w-md">
-                Customized packaging and bulk gifting solutions are available for events and corporate gifts.
-              </h4>
             </div>
+            
+            <p className="gifting-element text-[11px] sm:text-xs text-brand-text-secondary mt-4 font-light tracking-wide max-w-md">
+              ✨ Customized packaging and bulk corporate solutions available upon request.
+            </p>
           </div>
 
           {/* Right Column: Empty spacer to let background show on desktop */}

@@ -39,14 +39,10 @@ export function BuildBoxHighlight() {
         .build-bg-layer {
           background-image: url('/cookie-parallax-bg.png');
           background-size: cover;
-          background-position: center;
+          background-position: right center;
           background-repeat: no-repeat;
+          background-attachment: fixed;
           transform-origin: center;
-        }
-        @media (min-width: 1024px) {
-          .build-bg-layer {
-            background-attachment: fixed;
-          }
         }
       `}</style>
       <div className="build-bg-layer absolute inset-[-8%] z-0"></div>

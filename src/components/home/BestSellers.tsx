@@ -9,7 +9,6 @@ import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
-import { useProductStore } from "@/store/productStore";
 import { useSiteStore } from "@/store/siteStore";
 import { catalogService } from "@/services/catalogService";
 import { toast } from "sonner";
@@ -58,32 +57,32 @@ export function BestSellers() {
   }, { scope: containerRef, dependencies: [mounted, products.length] });
 
   return (
-    <section ref={containerRef} className="py-24 bg-brand-light relative">
+    <section ref={containerRef} className="py-14 sm:py-24 bg-brand-light relative">
       <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none mix-blend-multiply" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10">
+        <div className="text-center mb-8 sm:mb-16">
           <h2 
             style={{ fontFamily: "'Amsterdam Signature', serif" }}
-            className="font-normal leading-none mb-6 pt-4 pb-4 text-brand-brown text-5xl md:text-6xl lg:text-7xl"
+            className="font-normal leading-none mb-3 sm:mb-6 pt-2 pb-2 text-brand-brown text-4xl sm:text-6xl lg:text-7xl"
           >
             {bestSellersTitle}
           </h2>
-          <p className="font-sans text-brand-text-secondary max-w-2xl mx-auto text-sm md:text-base lg:text-lg font-light leading-relaxed">
+          <p className="font-sans text-brand-text-secondary max-w-2xl mx-auto text-xs sm:text-base lg:text-lg font-light leading-relaxed px-2">
             {bestSellersSubtitle}
           </p>
         </div>
         
-        <div className="flex justify-center mb-8">
-          <Link href="/shop" className="inline-block font-semibold text-brand-gold hover:text-brand-brown transition-colors uppercase tracking-widest text-sm">
+        <div className="flex justify-center mb-6 sm:mb-8">
+          <Link href="/shop" className="inline-block font-semibold text-brand-gold hover:text-brand-brown transition-colors uppercase tracking-widest text-xs sm:text-sm">
             View All →
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
           {products.map((product) => (
-            <div key={product.id} className="product-card group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
-              <div className="absolute top-4 right-4 z-10">
+            <div key={product.id} className="product-card group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-[#5C3317]/5 flex flex-col justify-between">
+              <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 z-10">
                 <button 
                   onClick={(e) => {
                     e.preventDefault();
@@ -94,9 +93,9 @@ export function BestSellers() {
                     toggleWishlist({ ...product, id: product.id.toString() });
                     toast.success(user?.wishlist?.some(w => w.id === product.id.toString()) ? "Removed from wishlist" : "Added to wishlist");
                   }}
-                  className="p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-colors"
+                  className="p-1.5 sm:p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-colors"
                 >
-                  <Heart className={`w-4 h-4 ${user?.wishlist?.some(w => w.id === product.id.toString()) ? "fill-brand-gold text-brand-gold" : "text-brand-text-secondary hover:text-brand-gold"}`} />
+                  <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${user?.wishlist?.some(w => w.id === product.id.toString()) ? "fill-brand-gold text-brand-gold" : "text-brand-text-secondary hover:text-brand-gold"}`} />
                 </button>
               </div>
               

@@ -7,7 +7,7 @@ import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   Cookie, Leaf, Sparkles, Heart, Tag,
-  ChevronLeft, ChevronRight, LucideIcon,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSiteStore } from "@/store/siteStore";
@@ -15,13 +15,13 @@ import { useSiteStore } from "@/store/siteStore";
 gsap.registerPlugin(ScrollTrigger);
 
 /* ─── Icon map ───────────────────────────────────────────────────────────── */
-const getCategoryIcon = (name: string): LucideIcon => {
+const renderCategoryIcon = (name: string) => {
   const l = name.toLowerCase();
-  if (l.includes("vegan"))                                       return Leaf;
-  if (l.includes("diet") || l.includes("oat") || l.includes("health")) return Heart;
-  if (l.includes("classic") || l.includes("millet"))            return Cookie;
-  if (l.includes("gluten"))                                      return Sparkles;
-  return Tag;
+  if (l.includes("vegan")) return <Leaf className="w-4 h-4 text-brand-gold transition-colors duration-300 group-hover:text-inherit" />;
+  if (l.includes("diet") || l.includes("oat") || l.includes("health")) return <Heart className="w-4 h-4 text-brand-gold transition-colors duration-300 group-hover:text-inherit" />;
+  if (l.includes("classic") || l.includes("millet")) return <Cookie className="w-4 h-4 text-brand-gold transition-colors duration-300 group-hover:text-inherit" />;
+  if (l.includes("gluten")) return <Sparkles className="w-4 h-4 text-brand-gold transition-colors duration-300 group-hover:text-inherit" />;
+  return <Tag className="w-4 h-4 text-brand-gold transition-colors duration-300 group-hover:text-inherit" />;
 };
 
 /* ─── Floating decorative particles ─────────────────────────────────────── */
@@ -48,7 +48,6 @@ interface CardProps {
   onEnter: () => void; onLeave: () => void; onClick: () => void;
 }
 function CategoryCard({ cat, uid, hovered, onEnter, onLeave, onClick }: CardProps) {
-  const Icon = getCategoryIcon(cat.name);
   const isHov = hovered === uid;
   return (
     <button
@@ -66,7 +65,7 @@ function CategoryCard({ cat, uid, hovered, onEnter, onLeave, onClick }: CardProp
         <div className="cat-sheen-sweep z-10" />
         {/* icon badge */}
         <div className="absolute top-4 right-4 z-10 bg-white/90 p-2.5 rounded-full border border-brand-gold/20 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:bg-brand-gold group-hover:text-white">
-          <Icon className="w-4 h-4 text-brand-gold transition-colors duration-300 group-hover:text-inherit" />
+          {renderCategoryIcon(cat.name)}
         </div>
         {/* text overlay */}
         <div className="relative z-10 w-full bg-white/90 backdrop-blur-md border border-[#5C3317]/10 p-4 rounded-2xl shadow-lg transition-all duration-300 group-hover:bg-white group-hover:border-brand-gold/40 transform group-hover:translate-y-[-4px]">
@@ -152,8 +151,8 @@ export function Categories() {
     const available = wrap.clientWidth;
     // on small screens, show 1.2 cards; on tablet show 2; desktop show 3
     let shown = CARDS_SHOWN;
-    if (available < 500) shown = 1.2;
-    else if (available < 780) shown = 2;
+    if (available < 500) shown = 1.15;
+    else if (available < 780) shown = 1.8;
     const cw = Math.floor((available - GAP * (Math.floor(shown) - 1)) / shown);
     setCardWidth(cw);
   }, [base.length]);
@@ -257,9 +256,11 @@ export function Categories() {
       <style>{`
         .category-bg-layer {
           background-image: url('/cookie-parallax-bg.png');
-          background-size: cover; background-position: center; background-repeat: no-repeat;
+          background-size: cover;
+          background-position: right center;
+          background-repeat: no-repeat;
+          background-attachment: fixed;
         }
-        @media (min-width: 1024px) { .category-bg-layer { background-attachment: fixed; } }
 
         .cat-glass-card {
           position: relative; overflow: hidden; background-size: cover; background-position: center;
@@ -281,6 +282,29 @@ export function Categories() {
 
         /* Carousel wrapper clips overflow */
         .cat-viewport { overflow: hidden; position: relative; }
+
+        @media (max-width: 767px) {
+          .cat-viewport {
+            mask-image: linear-gradient(
+              to right,
+              transparent 0%,
+              rgba(0, 0, 0, 0.4) 5%,
+              rgba(0, 0, 0, 1) 20%,
+              rgba(0, 0, 0, 1) 80%,
+              rgba(0, 0, 0, 0.4) 95%,
+              transparent 100%
+            );
+            -webkit-mask-image: linear-gradient(
+              to right,
+              transparent 0%,
+              rgba(0, 0, 0, 0.4) 5%,
+              rgba(0, 0, 0, 1) 20%,
+              rgba(0, 0, 0, 1) 80%,
+              rgba(0, 0, 0, 0.4) 95%,
+              transparent 100%
+            );
+          }
+        }
 
         /* The moving track — we drive it via JS transform, NO scroll */
         .cat-track {
@@ -347,7 +371,7 @@ export function Categories() {
 
         {/* ── Carousel ── */}
         <div
-          className="cat-carousel-shell opacity-0 relative px-8 sm:px-10"
+          className="cat-carousel-shell opacity-0 relative px-2 sm:px-10"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => { setIsPaused(false); setIsDragging(false); }}
         >

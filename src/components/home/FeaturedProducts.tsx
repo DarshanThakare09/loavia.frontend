@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
-import { useProductStore } from "@/store/productStore";
 import { useSiteStore } from "@/store/siteStore";
 import { catalogService } from "@/services/catalogService";
 
@@ -67,11 +66,7 @@ export default function FeaturedProducts() {
           background-size: cover;
           background-position: right center;
           background-repeat: no-repeat;
-        }
-        @media (min-width: 1024px) {
-          .parallax-bg {
-            background-attachment: fixed;
-          }
+          background-attachment: fixed;
         }
         .featured-product-card {
           position: relative;
@@ -109,28 +104,35 @@ export default function FeaturedProducts() {
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto px-6 w-full h-full flex items-center">
-        <div className={`w-full lg:w-[52%] xl:w-[48%] flex flex-col justify-center text-left py-6 lg:py-12 transition-all duration-1000 ease-out transform ${
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full h-full flex items-center">
+        <div className={`w-full lg:w-[52%] xl:w-[48%] flex flex-col justify-center text-left p-6 sm:p-8 lg:p-0 rounded-[2.5rem] lg:rounded-none bg-gradient-to-b from-[#FDFBF7]/92 via-[#FDFBF7]/88 to-[#F5ECD7]/90 lg:bg-none backdrop-blur-xl lg:backdrop-blur-none border border-[#5C3317]/15 lg:border-none shadow-2xl lg:shadow-none transition-all duration-1000 ease-out transform ${
           isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.98] pointer-events-none"
         }`}>
+          
+          {/* Mobile Badge */}
+          <div className="lg:hidden inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-gold/15 border border-brand-gold/30 text-brand-gold text-[10px] uppercase font-bold tracking-[2px] mb-2 w-fit shadow-xs">
+            <span>🍪</span>
+            <span>Handcrafted Selection</span>
+          </div>
+
           <h2 
             style={{ fontFamily: "'Amsterdam Signature', serif" }}
-            className="font-normal leading-none mb-6 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2"
+            className="font-normal leading-none mb-4 sm:mb-6 pt-2 pb-2 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-1"
           >
             <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">{part1}</span>
-            <span className="text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[8rem]">{part2}</span>
+            <span className="text-brand-brown text-4xl sm:text-6xl md:text-7xl lg:text-[7rem]">{part2}</span>
           </h2>
 
-          <p className="font-sans text-brand-text-secondary text-sm md:text-base lg:text-lg mb-8 leading-relaxed max-w-2xl font-light">
+          <p className="font-sans text-brand-text-secondary text-sm md:text-base lg:text-lg mb-6 sm:mb-8 leading-relaxed max-w-2xl font-light">
             {descriptionText}
           </p>
 
-          <div className="flex flex-col space-y-4 w-full">
+          <div className="flex flex-col space-y-3 sm:space-y-4 w-full">
             {mounted && products.map((product) => (
               <Link
                 key={product.id}
                 href={`/product/${product.slug || product.id}`}
-                className="group featured-product-card rounded-2xl p-4 flex flex-row items-center space-x-4 cursor-pointer"
+                className="group featured-product-card rounded-2xl p-3.5 sm:p-4 flex flex-row items-center space-x-3.5 sm:space-x-4 cursor-pointer border-l-4 border-l-brand-gold sm:border-l-transparent"
               >
                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-white flex-shrink-0">
                   <Image

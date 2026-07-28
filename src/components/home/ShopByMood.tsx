@@ -199,7 +199,12 @@ export function ShopByMood() {
         }
         .mood-card:hover .mood-explore-btn,
         .mood-card:focus-within .mood-explore-btn {
-          max-height: 2rem;
+          max-height: 2.5rem;
+        }
+        @media (hover: none) {
+          .mood-explore-btn {
+            max-height: 2.5rem !important;
+          }
         }
         .mood-card:hover .sheen-sweep {
           left: 150%;
@@ -212,10 +217,10 @@ export function ShopByMood() {
       `}</style>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-16">
+        <div className="text-center mb-10 sm:mb-16">
           <h2 
             style={{ fontFamily: "'Amsterdam Signature', serif" }}
-            className="font-normal leading-none mb-6 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:justify-center sm:flex-wrap gap-x-4 gap-y-2 text-center"
+            className="font-normal leading-none mb-4 sm:mb-6 pt-2 pb-2 flex flex-col sm:flex-row sm:items-baseline sm:justify-center sm:flex-wrap gap-x-4 gap-y-1 text-center"
           >
             {shopByMoodTitle.split(" ").map((word, idx) => {
               const words = shopByMoodTitle.split(" ");
@@ -225,7 +230,7 @@ export function ShopByMood() {
                   key={idx} 
                   className={`mood-heading-word opacity-0 inline-block ${
                     isLast 
-                      ? "text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[8rem] relative" 
+                      ? "text-brand-brown text-4xl sm:text-6xl md:text-7xl lg:text-[8rem] relative" 
                       : "text-brand-gold text-2xl md:text-3xl lg:text-[3rem]"
                   }`}
                 >

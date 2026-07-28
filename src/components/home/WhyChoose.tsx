@@ -126,7 +126,7 @@ export default function WhyChoose() {
   return (
     <section
       ref={sectionRef}
-      className="w-full relative min-h-[70vh] lg:min-h-[85vh] flex items-center py-20 lg:py-24 overflow-hidden parallax-bg"
+      className="w-full relative min-h-[70vh] lg:min-h-[85vh] flex items-center py-14 sm:py-20 lg:py-24 overflow-hidden parallax-bg"
     >
       <style>{`
         .parallax-bg {
@@ -134,11 +134,7 @@ export default function WhyChoose() {
           background-size: cover;
           background-position: right center;
           background-repeat: no-repeat;
-        }
-        @media (min-width: 1024px) {
-          .parallax-bg {
-            background-attachment: fixed;
-          }
+          background-attachment: fixed;
         }
         .why-choose-card {
           position: relative;
@@ -175,28 +171,35 @@ export default function WhyChoose() {
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto px-6 w-full h-full flex items-center">
-        <div className={`w-full lg:w-[52%] xl:w-[48%] flex flex-col justify-center text-left py-6 lg:py-12 transition-all duration-1000 ease-out transform ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.98] pointer-events-none"
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full h-full flex items-center">
+        <div className={`w-full lg:w-[52%] xl:w-[48%] flex flex-col justify-center text-left p-6 sm:p-8 lg:p-0 rounded-[2.5rem] lg:rounded-none bg-gradient-to-b from-[#FDFBF7]/92 via-[#FDFBF7]/88 to-[#F5ECD7]/90 lg:bg-none backdrop-blur-xl lg:backdrop-blur-none border border-[#5C3317]/15 lg:border-none shadow-2xl lg:shadow-none transition-all duration-1000 ease-out transform ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.98] pointer-events-none"
           }`}>
+          
+          {/* Mobile Badge */}
+          <div className="lg:hidden inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-gold/15 border border-brand-gold/30 text-brand-gold text-[10px] uppercase font-bold tracking-[2px] mb-2 w-fit shadow-xs">
+            <span>✨</span>
+            <span>Why Choose Loavia</span>
+          </div>
+
           <h2
             style={{ fontFamily: "'Amsterdam Signature', serif" }}
-            className="font-normal leading-none mb-6 pt-4 pb-4 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-2"
+            className="font-normal leading-none mb-4 sm:mb-6 pt-2 pb-2 flex flex-col sm:flex-row sm:items-baseline sm:flex-wrap gap-x-4 gap-y-1"
           >
             <span className="text-brand-gold text-2xl md:text-3xl lg:text-[3rem]">{part1}</span>
-            <span className="text-brand-brown text-5xl sm:text-7xl md:text-8xl lg:text-[6rem]">{part2}</span>
+            <span className="text-brand-brown text-4xl sm:text-6xl md:text-7xl lg:text-[6rem]">{part2}</span>
           </h2>
 
-          <p className="font-sans text-brand-text-secondary text-sm md:text-base lg:text-lg mb-8 leading-relaxed max-w-2xl font-light">
+          <p className="font-sans text-brand-text-secondary text-sm md:text-base lg:text-lg mb-6 sm:mb-8 leading-relaxed max-w-2xl font-light">
             {descriptionText}
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-5">
             {whyChooseFeatures?.map((feature) => (
               <div
                 key={feature}
-                className="group why-choose-card rounded-2xl p-5 flex items-center space-x-4 cursor-pointer h-full"
+                className="group why-choose-card rounded-2xl p-4 sm:p-5 flex items-center space-x-3.5 sm:space-x-4 cursor-pointer h-full border-l-4 border-l-brand-gold sm:border-l-transparent"
               >
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-brand-gold/15 flex items-center justify-center text-brand-gold group-hover:bg-brand-gold group-hover:text-white transition-all duration-300 transform group-hover:scale-110">
+                <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-brand-gold/15 flex items-center justify-center text-brand-gold group-hover:bg-brand-gold group-hover:text-white transition-all duration-300 transform group-hover:scale-110 shadow-xs">
                   {getFeatureIcon(feature)}
                 </div>
                 <span className="font-sans font-semibold text-brand-brown text-sm md:text-base transition-colors duration-300 group-hover:text-brand-gold">
