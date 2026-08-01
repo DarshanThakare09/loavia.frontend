@@ -284,7 +284,7 @@ export default function WhyChoose() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. pranita@loavia.com"
+                  placeholder="e.g. Sales@loavia.in"
                   className="w-full px-4 py-3 bg-brand-light border border-brand-brown/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold/40 text-brand-brown font-sans font-light"
                 />
               </div>

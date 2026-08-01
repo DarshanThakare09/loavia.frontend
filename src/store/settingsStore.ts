@@ -39,8 +39,8 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set, get) => ({
       websiteName: 'LOAVIA',
-      supportEmail: 'support@loavia.com',
-      contactPhone: '+91-9000000000',
+      supportEmail: 'Sales@loavia.in',
+      contactPhone: '+917796116622',
       businessAddress: 'Nashik, Maharashtra, India',
 
       shippingCharge: 50,
@@ -53,8 +53,8 @@ export const useSettingsStore = create<SettingsState>()(
       youtubeUrl: '',
 
       adminName: 'Admin User',
-      adminEmail: 'admin@loavia.com',
-      adminPhone: '+91-9000000000',
+      adminEmail: 'Sales@loavia.in',
+      adminPhone: '+917796116622',
       adminAvatar: '',
       adminStatus: 'Active',
       adminPassword: '123',

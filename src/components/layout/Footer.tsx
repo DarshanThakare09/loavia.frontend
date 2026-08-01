@@ -133,11 +133,11 @@ export function Footer() {
               </li>
               <li className="flex items-center space-x-3 opacity-75">
                 <Mail className="w-5 h-5 text-brand-gold flex-shrink-0" />
-                <a href="mailto:hello@loavia.com" className="hover:text-brand-gold transition-colors">hello@loavia.com</a>
+                <a href="mailto:Sales@loavia.in" className="hover:text-brand-gold transition-colors">Sales@loavia.in</a>
               </li>
               <li className="flex items-center space-x-3 opacity-75">
                 <Phone className="w-5 h-5 text-brand-gold flex-shrink-0" />
-                <a href="tel:+919876543210" className="hover:text-brand-gold transition-colors">+91 98765 43210</a>
+                <a href="tel:+917796116622" className="hover:text-brand-gold transition-colors">+917796116622</a>
               </li>
             </ul>
 

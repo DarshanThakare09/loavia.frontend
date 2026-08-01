@@ -412,7 +412,7 @@ export default function ProfilePage() {
                             type="text"
                             value={editPhone}
                             onChange={(e) => setEditPhone(e.target.value)}
-                            placeholder="+91 98765 43210"
+                            placeholder="+917796116622"
                             className="w-full bg-[#FDFBF7] border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-xl py-3 px-4 outline-none font-medium text-brand-brown shadow-sm transition-all duration-300"
                           />
                         </div>
@@ -524,7 +524,7 @@ export default function ProfilePage() {
                         {/* Phone */}
                         <div>
                           <label className="block text-[10px] uppercase tracking-widest font-black text-brand-text-secondary mb-1">Phone</label>
-                          <input type="text" value={addrForm.phone} onChange={e => setAddrForm({ ...addrForm, phone: e.target.value })} placeholder="9876543210" className="w-full bg-white border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-xl py-2 px-4 outline-none font-medium text-brand-brown shadow-sm transition-all" />
+                          <input type="text" value={addrForm.phone} onChange={e => setAddrForm({ ...addrForm, phone: e.target.value })} placeholder="+917796116622" className="w-full bg-white border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-xl py-2 px-4 outline-none font-medium text-brand-brown shadow-sm transition-all" />
                         </div>
                       </div>
                       <div className="flex items-center space-x-2 mt-2">

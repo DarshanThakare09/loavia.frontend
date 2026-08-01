@@ -249,7 +249,7 @@ export default function ContactPage() {
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+91 XXXXX XXXXX"
+                  placeholder="+917796116622"
                   className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-brand-brown/10 rounded-2xl focus:ring-1 focus:ring-brand-gold focus:border-brand-gold outline-none text-sm font-sans"
                 />
               </div>
@@ -312,13 +312,13 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-brand-gold">Phone Number</p>
-                  <p className="text-lg font-serif font-bold text-brand-brown mt-0.5">+91 7796116622</p>
+                  <p className="text-lg font-serif font-bold text-brand-brown mt-0.5">+917796116622</p>
                 </div>
               </a>
 
               {/* EMAIL */}
               <a 
-                href="mailto:info@loavia.com"
+                href="mailto:Sales@loavia.in"
                 className="info-card-el group flex items-center gap-5 bg-white p-5 rounded-[2rem] border border-brand-brown/10 shadow-[0_8px_30px_rgba(92,51,23,0.02)] hover:border-brand-gold/40 hover:-translate-y-1 transition-all duration-300"
               >
                 <div className="w-12 h-12 rounded-full bg-brand-gold/10 flex items-center justify-center text-brand-gold group-hover:bg-brand-gold group-hover:text-white transition-all duration-300">
@@ -326,7 +326,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-brand-gold">Email Address</p>
-                  <p className="text-lg font-serif font-bold text-brand-brown mt-0.5">info@loavia.com</p>
+                  <p className="text-lg font-serif font-bold text-brand-brown mt-0.5">Sales@loavia.in</p>
                 </div>
               </a>
 

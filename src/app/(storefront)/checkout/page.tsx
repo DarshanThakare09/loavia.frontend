@@ -476,7 +476,7 @@ export default function CheckoutPage() {
                         type="tel" 
                         value={addressForm.phone} 
                         onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
-                        placeholder="10-digit Phone" 
+                        placeholder="+917796116622" 
                         className="w-full bg-white border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-xl py-3 px-4 outline-none font-medium text-brand-brown shadow-sm transition-all duration-300" 
                       />
                     </div>
@@ -488,7 +488,7 @@ export default function CheckoutPage() {
                           type="email" 
                           value={addressForm.email} 
                           onChange={(e) => setAddressForm({ ...addressForm, email: e.target.value })}
-                          placeholder="your-email@example.com" 
+                          placeholder="Sales@loavia.in" 
                           className="w-full bg-white border border-brand-brown/10 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/30 rounded-xl py-3 px-4 outline-none font-medium text-brand-brown shadow-sm transition-all duration-300" 
                         />
                       </div>
