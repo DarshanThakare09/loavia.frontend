@@ -1,5 +1,6 @@
 import { apiClient } from "./apiClient";
 import { Product } from "@/store/productStore";
+import { PRODUCTS } from "@/lib/mockData";
 import {
   BackendProduct,
   BackendCategory,
@@ -42,9 +43,6 @@ export function mapBackendProduct(p: BackendProduct): Product {
   const primaryImageUrl = primaryImageObj?.url || "/premium_cookie.png";
   const mappedImages = p.images.map(img => img.url);
 
-  // If comparePrice is defined, it is the lower sale price (discountPrice), and basePrice is the original price.
-  // Wait, let's make sure that if comparePrice is greater than basePrice, basePrice is the sale price.
-  // Let's do a safe conversion:
   let price = p.basePrice / 100;
   let discountPrice: number | null = null;
 
@@ -98,52 +96,184 @@ export function mapBackendProduct(p: BackendProduct): Product {
   };
 }
 
+// Fallback logic when API server is unavailable
+function getMockProductsResponse(filters?: ProductFilterInput): { products: Product[]; pagination: PaginationMeta } {
+  let list: Product[] = PRODUCTS.map((p: any, index: number) => ({
+    id: p.id || String(index + 1),
+    name: p.name,
+    price: p.price,
+    discountPrice: p.discountPrice || null,
+    image: p.image || "/premium_cookie.png",
+    images: p.images || [p.image || "/premium_cookie.png"],
+    primaryImage: p.image || "/premium_cookie.png",
+    coverImage: p.image || "/premium_cookie.png",
+    rating: p.rating || 5,
+    reviews: p.reviews || 10,
+    category: p.category || "Cookie",
+    tags: p.tags || [],
+    moods: p.moods || [],
+    description: p.description || "",
+    ingredients: p.ingredients || "",
+    calories: p.calories || undefined,
+    nutritionTable: p.nutritionTable || [],
+    slug: p.slug || p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+    inStock: p.inStock ?? true,
+    isPopular: p.isPopular ?? true,
+    isFeatured: p.isFeatured ?? true,
+    featuredOrder: p.featuredOrder,
+    featuredBadgeText: p.featuredBadgeText ?? "Featured",
+  }));
+
+  if (filters) {
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      list = list.filter(p => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q));
+    }
+    if (filters.categorySlug) {
+      const cat = filters.categorySlug.toLowerCase();
+      list = list.filter(p => p.category.toLowerCase().replace(/[^a-z0-9]+/g, "-") === cat || p.category.toLowerCase() === cat);
+    }
+    if (filters.tagSlug) {
+      const tag = filters.tagSlug.toLowerCase();
+      list = list.filter(p => p.tags.some(t => t.toLowerCase().replace(/[^a-z0-9]+/g, "-") === tag || t.toLowerCase() === tag));
+    }
+    if (filters.isFeatured !== undefined) {
+      list = list.filter(p => !!p.isFeatured === !!filters.isFeatured);
+    }
+    if (filters.isBestSeller !== undefined) {
+      list = list.filter(p => !!p.isPopular === !!filters.isBestSeller);
+    }
+    if (filters.minPrice !== undefined) {
+      list = list.filter(p => p.price >= filters.minPrice! / 100);
+    }
+    if (filters.maxPrice !== undefined) {
+      list = list.filter(p => p.price <= filters.maxPrice! / 100);
+    }
+    if (filters.sortBy) {
+      if (filters.sortBy === "price_asc") list.sort((a, b) => a.price - b.price);
+      if (filters.sortBy === "price_desc") list.sort((a, b) => b.price - a.price);
+      if (filters.sortBy === "rated") list.sort((a, b) => b.rating - a.rating);
+    }
+  }
+
+  const total = list.length;
+  const page = filters?.page || 1;
+  const limit = filters?.limit || 10;
+  const totalPages = Math.ceil(total / limit) || 1;
+  const startIndex = (page - 1) * limit;
+  const paginatedList = list.slice(startIndex, startIndex + limit);
+
+  return {
+    products: paginatedList,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages
+    }
+  };
+}
+
 export const catalogService = {
   // GET /products with optional filters
   async getProducts(filters?: ProductFilterInput): Promise<{ products: Product[]; pagination: PaginationMeta }> {
-    const params: Record<string, any> = {};
+    try {
+      const params: Record<string, any> = {};
 
-    if (filters) {
-      if (filters.search) params.search = filters.search;
-      if (filters.categoryId) params.categoryId = filters.categoryId;
-      if (filters.categorySlug) params.categorySlug = filters.categorySlug;
-      if (filters.collectionId) params.collectionId = filters.collectionId;
-      if (filters.collectionSlug) params.collectionSlug = filters.collectionSlug;
-      if (filters.tagSlug) params.tagSlug = filters.tagSlug;
-      if (filters.isFeatured !== undefined) params.isFeatured = filters.isFeatured ? "true" : "false";
-      if (filters.isBestSeller !== undefined) params.isBestSeller = filters.isBestSeller ? "true" : "false";
-      if (filters.isNewArrival !== undefined) params.isNewArrival = filters.isNewArrival ? "true" : "false";
-      if (filters.minPrice !== undefined) params.minPrice = Math.round(filters.minPrice * 100); // convert to Paise
-      if (filters.maxPrice !== undefined) params.maxPrice = Math.round(filters.maxPrice * 100); // convert to Paise
-      if (filters.sortBy) params.sortBy = filters.sortBy;
-      if (filters.page) params.page = filters.page;
-      if (filters.limit) params.limit = filters.limit;
+      if (filters) {
+        if (filters.search) params.search = filters.search;
+        if (filters.categoryId) params.categoryId = filters.categoryId;
+        if (filters.categorySlug) params.categorySlug = filters.categorySlug;
+        if (filters.collectionId) params.collectionId = filters.collectionId;
+        if (filters.collectionSlug) params.collectionSlug = filters.collectionSlug;
+        if (filters.tagSlug) params.tagSlug = filters.tagSlug;
+        if (filters.isFeatured !== undefined) params.isFeatured = filters.isFeatured ? "true" : "false";
+        if (filters.isBestSeller !== undefined) params.isBestSeller = filters.isBestSeller ? "true" : "false";
+        if (filters.isNewArrival !== undefined) params.isNewArrival = filters.isNewArrival ? "true" : "false";
+        if (filters.minPrice !== undefined) params.minPrice = Math.round(filters.minPrice * 100); // convert to Paise
+        if (filters.maxPrice !== undefined) params.maxPrice = Math.round(filters.maxPrice * 100); // convert to Paise
+        if (filters.sortBy) params.sortBy = filters.sortBy;
+        if (filters.page) params.page = filters.page;
+        if (filters.limit) params.limit = filters.limit;
+      }
+
+      const response = await apiClient.get<PublicProductsResponse>("/products", { params });
+      const { data, pagination } = response.data;
+      
+      return {
+        products: data.map(mapBackendProduct),
+        pagination
+      };
+    } catch (err) {
+      console.warn("[catalogService] API call to /products failed. Falling back to mockData.", err);
+      return getMockProductsResponse(filters);
     }
-
-    const response = await apiClient.get<PublicProductsResponse>("/products", { params });
-    const { data, pagination } = response.data;
-    
-    return {
-      products: data.map(mapBackendProduct),
-      pagination
-    };
   },
 
   // GET /products/:slug
   async getProductBySlug(slug: string): Promise<Product> {
-    const response = await apiClient.get<PublicSingleProductResponse>(`/products/${slug}`);
-    return mapBackendProduct(response.data.data);
+    try {
+      const response = await apiClient.get<PublicSingleProductResponse>(`/products/${slug}`);
+      return mapBackendProduct(response.data.data);
+    } catch (err) {
+      console.warn(`[catalogService] API call to /products/${slug} failed. Falling back to mockData.`, err);
+      const found = PRODUCTS.find((p: any) => {
+        const pSlug = p.slug || p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+        return pSlug === slug || p.id === slug;
+      });
+      const item: any = found || PRODUCTS[0];
+      return {
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        discountPrice: item.discountPrice || null,
+        image: item.image || "/premium_cookie.png",
+        images: item.images || [item.image || "/premium_cookie.png"],
+        primaryImage: item.image || "/premium_cookie.png",
+        coverImage: item.image || "/premium_cookie.png",
+        rating: item.rating || 5,
+        reviews: item.reviews || 10,
+        category: item.category || "Cookie",
+        tags: item.tags || [],
+        moods: item.moods || [],
+        description: item.description || "",
+        ingredients: item.ingredients || "",
+        calories: item.calories || undefined,
+        nutritionTable: item.nutritionTable || [],
+        slug: item.slug || item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        inStock: item.inStock ?? true,
+        isPopular: item.isPopular ?? true,
+        isFeatured: item.isFeatured ?? true,
+      };
+    }
   },
 
   // GET /categories
   async getCategories(): Promise<BackendCategory[]> {
-    const response = await apiClient.get<PublicCategoriesResponse>("/categories");
-    return response.data.data;
+    try {
+      const response = await apiClient.get<PublicCategoriesResponse>("/categories");
+      return response.data.data;
+    } catch (err) {
+      console.warn("[catalogService] API call to /categories failed. Falling back to mock categories.", err);
+      return [
+        { id: "cat-1", parentId: null, name: "Classic", slug: "classic", description: "Classic Collection", image: null, isActive: true, sortOrder: 1 },
+        { id: "cat-2", parentId: null, name: "Vegan", slug: "vegan", description: "Vegan Options", image: null, isActive: true, sortOrder: 2 },
+        { id: "cat-3", parentId: null, name: "Gluten-Free", slug: "gluten-free", description: "Gluten-Free Cookies", image: null, isActive: true, sortOrder: 3 },
+        { id: "cat-4", parentId: null, name: "Stuffed", slug: "stuffed", description: "Stuffed Cookies", image: null, isActive: true, sortOrder: 4 },
+        { id: "cat-5", parentId: null, name: "Specialty", slug: "specialty", description: "Specialty Flavors", image: null, isActive: true, sortOrder: 5 },
+      ];
+    }
   },
 
   // GET /collections
   async getCollections(): Promise<BackendCollection[]> {
-    const response = await apiClient.get<PublicCollectionsResponse>("/collections");
-    return response.data.data;
+    try {
+      const response = await apiClient.get<PublicCollectionsResponse>("/collections");
+      return response.data.data;
+    } catch (err) {
+      console.warn("[catalogService] API call to /collections failed.", err);
+      return [];
+    }
   }
 };
+
