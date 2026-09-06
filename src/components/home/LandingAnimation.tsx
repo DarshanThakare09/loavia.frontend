@@ -440,7 +440,7 @@ export default function LandingAnimation() {
                 <div className="background-image"></div>
                 <div className="background-overlay"></div>
                 <div className="logo-wrapper">
-                  <img src="/logo.png" alt="Loavia Logo" className="logo-img" />
+                  <img src="/loavia-brand-logo.png" alt="Loavia Logo" className="logo-img" />
                 </div>
               </div>
             )}

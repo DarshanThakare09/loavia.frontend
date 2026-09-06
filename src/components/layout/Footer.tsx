@@ -56,13 +56,13 @@ export function Footer() {
           {/* Brand Info & Newsletter (Col span 2) */}
           <div className="col-span-1 md:col-span-2 lg:col-span-2 flex flex-col justify-between">
             <div>
-              <Link href="/" className="inline-block mb-6">
+              <Link href="/" className="inline-block mb-6 bg-white/95 backdrop-blur-sm px-3.5 py-2 rounded-xl shadow-md transition-all duration-300 hover:scale-105 hover:bg-white">
                 <Image 
-                  src="/loavia-logo.png" 
+                  src="/loavia-brand-logo.png" 
                   alt="LOAVIA Logo" 
                   width={150} 
-                  height={50} 
-                  className="h-auto w-auto brightness-0 invert opacity-90 hover:opacity-100 transition-opacity duration-300"
+                  height={56} 
+                  className="h-auto max-h-[44px] w-auto object-contain"
                 />
               </Link>
               <p className="text-sm opacity-75 leading-relaxed mb-8 max-w-sm font-sans font-light">

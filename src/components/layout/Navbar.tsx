@@ -146,14 +146,14 @@ export function Navbar() {
 
             {/* Left Brand Logo */}
             <div className="flex-1 flex justify-start items-center">
-              <Link href="/" className="relative w-[140px] sm:w-[180px] md:w-[240px] lg:w-[290px] h-[48px] sm:h-[65px] md:h-[90px] lg:h-[110px] transition-transform duration-500 hover:scale-105 block">
+              <Link href="/" className="relative w-[120px] sm:w-[145px] md:w-[165px] lg:w-[185px] h-[42px] sm:h-[50px] md:h-[58px] lg:h-[65px] transition-transform duration-300 hover:scale-105 block">
                 <Image
-                  src="/loavia-logo.png"
+                  src="/loavia-brand-logo.png"
                   alt="LOAVIA Logo"
                   fill
                   className="object-contain object-left"
                   priority
-                  sizes="(max-width: 640px) 140px, (max-width: 1024px) 240px, 290px"
+                  sizes="(max-width: 640px) 120px, (max-width: 1024px) 165px, 185px"
                 />
               </Link>
             </div>
@@ -294,7 +294,7 @@ export function Navbar() {
           {/* Drawer Header */}
           <div className="flex justify-between items-center pb-6 border-b border-brand-brown/10 mb-6">
             <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="relative w-[130px] h-[45px]">
-              <Image src="/loavia-logo.png" alt="LOAVIA Logo" fill className="object-contain" sizes="130px" />
+              <Image src="/loavia-brand-logo.png" alt="LOAVIA Logo" fill className="object-contain" sizes="130px" />
             </Link>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
