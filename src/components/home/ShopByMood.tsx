@@ -54,19 +54,18 @@ export function ShopByMood() {
   let moods: any[] = [];
   try {
     const parsed = JSON.parse(shopByMoodList);
-    moods = parsed.map((m: any) => ({
-      ...m,
-      icon: iconMap[m.icon] || Tag
-    }));
+    moods = Array.isArray(parsed)
+      ? parsed.map((m: any) => ({
+          ...m,
+          icon: iconMap[m.icon] || Tag
+        }))
+      : [];
   } catch (err) {
-    console.error("Failed to parse shopByMoodList", err);
-    moods = [
-      { id: "sweet", name: "Craving Sweet", icon: Heart, image: "/stuffed_cookie.png", link: "/shop?mood=sweet" },
-      { id: "healthy", name: "Healthy Fix", icon: Sparkles, image: "/vegan_cookie.png", link: "/shop?mood=healthy" },
-      { id: "tea", name: "Perfect with Tea", icon: Coffee, image: "/premium_cookie.png", link: "/shop?mood=tea" },
-      { id: "gifting", name: "Gifting", icon: Gift, image: "/cookie_gift_box.png", link: "/shop?mood=gifting" },
-    ];
+    // silently ignore parse errors — no fallback dummy data
+    moods = [];
   }
+
+  const hasMoods = moods.length > 0;
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -77,6 +76,7 @@ export function ShopByMood() {
   }, []);
 
   useGSAP(() => {
+    if (!hasMoods) return;
     if (prefersReducedMotion) {
       gsap.set(".mood-heading-word, .mood-subtitle, .mood-card", { opacity: 1, y: 0, scale: 1 });
       return;
@@ -110,7 +110,10 @@ export function ShopByMood() {
       "-=0.4"
     );
 
-  }, { scope: containerRef, dependencies: [prefersReducedMotion] });
+  }, { scope: containerRef, dependencies: [prefersReducedMotion, hasMoods] });
+
+  // No moods configured — hide this section entirely
+  if (!hasMoods) return null;
 
   return (
     <section 

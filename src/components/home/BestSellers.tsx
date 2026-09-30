@@ -163,7 +163,12 @@ export function BestSellers() {
           ))}
         </div>
         
-
+        {mounted && products.length === 0 && (
+          <div className="text-center py-10 bg-white/60 backdrop-blur-sm rounded-2xl border border-[#5C3317]/10 max-w-md mx-auto">
+            <p className="text-brand-brown font-serif font-bold text-lg">No Best Sellers Available</p>
+            <p className="text-brand-text-secondary text-sm font-sans font-light mt-1">Products will appear here once added by admin.</p>
+          </div>
+        )}
       </div>
     </section>
   );

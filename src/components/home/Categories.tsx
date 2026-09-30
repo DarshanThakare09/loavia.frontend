@@ -251,6 +251,9 @@ export function Categories() {
     if (trackRef.current) trackRef.current.style.transform = `translateX(-${next}px)`;
   };
 
+  // No categories configured — hide this section entirely
+  if (base.length === 0) return null;
+
   return (
     <section ref={sectionRef} id="category-section" className="py-24 relative overflow-hidden">
       <style>{`

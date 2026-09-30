@@ -15,31 +15,8 @@ export default function CustomerLove() {
     ? testimonialsList.filter((r) => r.status === "approved")
     : [];
 
-  const testimonials = approvedReviews.length > 0
-    ? approvedReviews
-    : [
-        {
-          id: 1,
-          name: "Sarah Jenkins",
-          role: "Verified Buyer",
-          content: "These are genuinely the best cookies I've ever had. The Double Dark Chocolate is incredibly rich, and the packaging makes it feel so premium. Worth every penny!",
-          rating: 5
-        },
-        {
-          id: 2,
-          name: "Michael Chen",
-          role: "Verified Buyer",
-          content: "I sent the 12-pack custom box to my team for the holidays. They arrived fresh and everyone loved them. The UI for building the box was super easy to use.",
-          rating: 5
-        },
-        {
-          id: 3,
-          name: "Emma Roberts",
-          role: "Verified Buyer",
-          content: "I'm obsessed with the healthy alternatives. They actually taste like real, indulgent cookies without the guilt. LOAVIA has a customer for life.",
-          rating: 5
-        }
-      ];
+  const testimonials = approvedReviews;
+
 
   const handleNext = () => {
     setActiveIndex((prev) => (prev + 1) % testimonials.length);
@@ -145,95 +122,106 @@ export default function CustomerLove() {
         </div>
 
         {/* Carousel Deck wrapper */}
-        <div className="relative testimonial-deck w-full min-h-[350px] sm:min-h-[380px] md:min-h-[320px] flex items-center justify-center overflow-hidden">
-          
-          {/* Navigation Arrows */}
-          <button
-            onClick={handlePrev}
-            className="absolute left-0 md:left-2 lg:left-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/70 backdrop-blur-sm border border-[#5C3317]/10 flex items-center justify-center text-brand-brown hover:bg-brand-brown hover:text-white transition-all duration-300 shadow-md z-40"
-            aria-label="Previous testimonial"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
+        {testimonials.length > 0 ? (
+          <div className="relative testimonial-deck w-full min-h-[350px] sm:min-h-[380px] md:min-h-[320px] flex items-center justify-center overflow-hidden">
+            {/* Navigation Arrows */}
+            <button
+              onClick={handlePrev}
+              className="absolute left-0 md:left-2 lg:left-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/70 backdrop-blur-sm border border-[#5C3317]/10 flex items-center justify-center text-brand-brown hover:bg-brand-brown hover:text-white transition-all duration-300 shadow-md z-40"
+              aria-label="Previous testimonial"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
 
-          <button
-            onClick={handleNext}
-            className="absolute right-0 md:right-2 lg:right-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/70 backdrop-blur-sm border border-[#5C3317]/10 flex items-center justify-center text-brand-brown hover:bg-brand-brown hover:text-white transition-all duration-300 shadow-md z-40"
-            aria-label="Next testimonial"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
+            <button
+              onClick={handleNext}
+              className="absolute right-0 md:right-2 lg:right-8 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/70 backdrop-blur-sm border border-[#5C3317]/10 flex items-center justify-center text-brand-brown hover:bg-brand-brown hover:text-white transition-all duration-300 shadow-md z-40"
+              aria-label="Next testimonial"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
 
-          {/* Cards */}
-          <div className="w-full relative h-full flex items-center justify-center">
-            {testimonials.map((testimonial, index) => {
-              const total = testimonials.length;
-              let cardClass = "testimonial-card-out";
-              
-              if (total === 1) {
-                cardClass = "testimonial-card-active";
-              } else {
-                const diff = (index - activeIndex + total) % total;
-                if (diff === 0) cardClass = "testimonial-card-active";
-                else if (diff === 1 || (total === 2 && diff === 1)) cardClass = "testimonial-card-next";
-                else if (diff === total - 1) cardClass = "testimonial-card-prev";
-              }
+            {/* Cards */}
+            <div className="w-full relative h-full flex items-center justify-center">
+              {testimonials.map((testimonial, index) => {
+                const total = testimonials.length;
+                let cardClass = "testimonial-card-out";
+                
+                if (total === 1) {
+                  cardClass = "testimonial-card-active";
+                } else {
+                  const diff = (index - activeIndex + total) % total;
+                  if (diff === 0) cardClass = "testimonial-card-active";
+                  else if (diff === 1 || (total === 2 && diff === 1)) cardClass = "testimonial-card-next";
+                  else if (diff === total - 1) cardClass = "testimonial-card-prev";
+                }
 
-              return (
-                <div
-                  key={testimonial.id}
-                  onClick={() => {
-                    if (cardClass === "testimonial-card-next") handleNext();
-                    if (cardClass === "testimonial-card-prev") handlePrev();
-                  }}
-                  className={`testimonial-card ${cardClass} bg-white/70 backdrop-blur-md border border-white/50 p-8 sm:p-10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(92,51,23,0.15)] flex flex-col justify-between`}
-                >
-                  <div className="absolute top-6 left-6 text-brand-gold/15 text-8xl font-serif select-none pointer-events-none leading-none">
-                    “
-                  </div>
-                  
-                  <div className="relative z-10 flex flex-col h-full justify-between">
-                    {/* Stars */}
-                    <div className="flex justify-center space-x-1 mb-6 text-brand-gold">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 fill-current" />
-                      ))}
+                return (
+                  <div
+                    key={testimonial.id}
+                    onClick={() => {
+                      if (cardClass === "testimonial-card-next") handleNext();
+                      if (cardClass === "testimonial-card-prev") handlePrev();
+                    }}
+                    className={`testimonial-card ${cardClass} bg-white/70 backdrop-blur-md border border-white/50 p-8 sm:p-10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(92,51,23,0.15)] flex flex-col justify-between`}
+                  >
+                    <div className="absolute top-6 left-6 text-brand-gold/15 text-8xl font-serif select-none pointer-events-none leading-none">
+                      “
                     </div>
+                    
+                    <div className="relative z-10 flex flex-col h-full justify-between">
+                      {/* Stars */}
+                      <div className="flex justify-center space-x-1 mb-6 text-brand-gold">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star key={i} className="w-5 h-5 fill-current" />
+                        ))}
+                      </div>
 
-                    {/* Text content */}
-                    <p className="text-brand-brown font-sans font-light italic leading-relaxed text-center text-base md:text-lg mb-8">
-                      "{testimonial.content}"
-                    </p>
-
-                    {/* Author */}
-                    <div className="text-center mt-auto">
-                      <h4 className="font-bold text-brand-brown text-lg">
-                        {testimonial.name}
-                      </h4>
-                      <p className="text-brand-gold font-semibold uppercase tracking-wider text-[10px] mt-1">
-                        {testimonial.role}
+                      {/* Text content */}
+                      <p className="text-brand-brown font-sans font-light italic leading-relaxed text-center text-base md:text-lg mb-8">
+                        "{testimonial.content}"
                       </p>
+
+                      {/* Author */}
+                      <div className="text-center mt-auto">
+                        <h4 className="font-bold text-brand-brown text-lg">
+                          {testimonial.name}
+                        </h4>
+                        <p className="text-brand-gold font-semibold uppercase tracking-wider text-[10px] mt-1">
+                          {testimonial.role}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="max-w-md mx-auto text-center p-8 bg-white/70 backdrop-blur-md border border-white/50 rounded-[2.5rem] shadow-lg">
+            <span className="text-4xl mb-3 block">🌟</span>
+            <h3 className="font-serif font-bold text-xl text-brand-brown mb-2">Be the First to Share Your Experience</h3>
+            <p className="text-brand-text-secondary text-sm font-sans font-light">
+              We look forward to receiving your customer feedback once you try LOAVIA™ millet cookies!
+            </p>
+          </div>
+        )}
 
         {/* Indicators */}
-        <div className="flex justify-center space-x-3 mt-12 relative z-30">
-          {testimonials.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setActiveIndex(index)}
-              className={`h-2.5 rounded-full transition-all duration-300 ${
-                index === activeIndex ? "bg-brand-gold w-8" : "bg-brand-brown/20 hover:bg-brand-brown/40"
-              }`}
-              aria-label={`Go to testimonial ${index + 1}`}
-            />
-          ))}
-        </div>
+        {testimonials.length > 0 && (
+          <div className="flex justify-center space-x-3 mt-12 relative z-30">
+            {testimonials.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveIndex(index)}
+                className={`h-2.5 rounded-full transition-all duration-300 ${
+                  index === activeIndex ? "bg-brand-gold w-8" : "bg-brand-brown/20 hover:bg-brand-brown/40"
+                }`}
+                aria-label={`Go to testimonial ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

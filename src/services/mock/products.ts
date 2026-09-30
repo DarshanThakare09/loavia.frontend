@@ -1,18 +1,7 @@
 import { Product } from "@/store/productStore";
-import { PRODUCTS as initialProducts } from "@/lib/mockData";
 
-// Convert mock data to new schema
-const defaultProducts: Product[] = initialProducts.map((p, index) => ({
-  ...p,
-  discountPrice: null,
-  calories: p.calories || '',
-  nutritionTable: p.nutritionTable || [],
-  inStock: true,
-  isPopular: true,
-  isFeatured: index < 3,
-  featuredOrder: index + 1,
-  featuredBadgeText: "Featured",
-}));
+const defaultProducts: Product[] = [];
+
 
 // Local in-memory cache to simulate database
 let productsDb: Product[] = [...defaultProducts];

@@ -155,60 +155,13 @@ interface SiteState {
   addReview: (review: { customerName: string; customerEmail: string; reviewText: string; rating: number }) => void;
 }
 
-const defaultCategories: CategoryItem[] = [
-  { name: "Classic Collection", image: "/premium_cookie.png", link: "/shop?category=classic" },
-  { name: "Vegan Options", image: "/vegan_cookie.png", link: "/shop?category=vegan" },
-  { name: "Gluten-Free", image: "/gluten_free_cookie.png", link: "/shop?category=gluten-free" },
-  { name: "Stuffed Cookies", image: "/stuffed_cookie.png", link: "/shop?category=stuffed" },
-];
+const defaultCategories: CategoryItem[] = [];
 
-const defaultReviews: ReviewItem[] = [
-  {
-    id: 1,
-    customerName: "Sarah Jenkins",
-    customerEmail: "sarah@example.com",
-    reviewText: "These are genuinely the best cookies I've ever had. The Double Dark Chocolate is incredibly rich, and the packaging makes it feel so premium. Worth every penny!",
-    rating: 5,
-    status: "approved",
-    featured: true,
-    pinned: false,
-    createdAt: "2024-01-15T10:30:00Z",
-    name: "Sarah Jenkins",
-    role: "Verified Buyer",
-    content: "These are genuinely the best cookies I've ever had. The Double Dark Chocolate is incredibly rich, and the packaging makes it feel so premium. Worth every penny!",
-  },
-  {
-    id: 2,
-    customerName: "Michael Chen",
-    customerEmail: "michael@example.com",
-    reviewText: "I sent the 12-pack custom box to my team for the holidays. They arrived fresh and everyone loved them. The UI for building the box was super easy to use.",
-    rating: 5,
-    status: "approved",
-    featured: false,
-    pinned: false,
-    createdAt: "2024-02-03T14:15:00Z",
-    name: "Michael Chen",
-    role: "Verified Buyer",
-    content: "I sent the 12-pack custom box to my team for the holidays. They arrived fresh and everyone loved them. The UI for building the box was super easy to use.",
-  },
-  {
-    id: 3,
-    customerName: "Emma Roberts",
-    customerEmail: "emma@example.com",
-    reviewText: "I'm obsessed with the healthy alternatives. They actually taste like real, indulgent cookies without the guilt. LOAVIA has a customer for life.",
-    rating: 5,
-    status: "approved",
-    featured: true,
-    pinned: true,
-    createdAt: "2024-02-20T09:00:00Z",
-    name: "Emma Roberts",
-    role: "Verified Buyer",
-    content: "I'm obsessed with the healthy alternatives. They actually taste like real, indulgent cookies without the guilt. LOAVIA has a customer for life.",
-  },
-];
+const defaultReviews: ReviewItem[] = [];
 
 /** @deprecated use defaultReviews */
 const defaultTestimonials = defaultReviews;
+
 
 const defaultWhyChooseFeatures = [
   "No Maida in Millet Cookies",
@@ -258,12 +211,7 @@ export const useSiteStore = create<SiteState>()(
       // Shop By Mood Default Values
       shopByMoodTitle: "What's your mood?",
       shopByMoodSubtitle: "Whether you need a mid-day energy boost or a decadent midnight snack, we have a cookie crafted just for how you feel.",
-      shopByMoodList: JSON.stringify([
-        { id: "sweet", name: "Craving Sweet", icon: "Heart", image: "/stuffed_cookie.png", link: "/shop?mood=sweet" },
-        { id: "healthy", name: "Healthy Fix", icon: "Sparkles", image: "/vegan_cookie.png", link: "/shop?mood=healthy" },
-        { id: "tea", name: "Perfect with Tea", icon: "Coffee", image: "/premium_cookie.png", link: "/shop?mood=tea" },
-        { id: "gifting", name: "Gifting", icon: "Gift", image: "/cookie_gift_box.png", link: "/shop?mood=gifting" }
-      ]),
+      shopByMoodList: JSON.stringify([]),
       
       
       // Why Choose Default Values

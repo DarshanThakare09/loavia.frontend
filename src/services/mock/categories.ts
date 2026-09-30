@@ -1,11 +1,6 @@
 import { CategoryItem } from "@/store/siteStore";
 
-const defaultCategories: CategoryItem[] = [
-  { name: "Classic Collection", image: "/premium_cookie.png", link: "/shop?category=classic" },
-  { name: "Vegan Options", image: "/vegan_cookie.png", link: "/shop?category=vegan" },
-  { name: "Gluten-Free", image: "/gluten_free_cookie.png", link: "/shop?category=gluten-free" },
-  { name: "Stuffed Cookies", image: "/stuffed_cookie.png", link: "/shop?category=stuffed" },
-];
+const defaultCategories: CategoryItem[] = [];
 
 let categoriesDb = [...defaultCategories];
 

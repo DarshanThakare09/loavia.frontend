@@ -77,34 +77,44 @@ export function Testimonials() {
         </h2>
 
         {/* Floating Glassmorphic Testimonial Card */}
-        <div className="relative min-h-[300px] md:min-h-[240px] flex items-center justify-center bg-white/75 backdrop-blur-md border border-[#5C3317]/10 p-8 sm:p-10 rounded-[2.5rem] shadow-xl max-w-3xl mx-auto">
-          {testimonials.map((testimonial, index) => (
-            <div 
-              key={testimonial.id}
-              className={`absolute transition-all duration-700 w-full left-0 right-0 px-6 sm:px-10 ${
-                index === activeIndex 
-                  ? "opacity-100 translate-x-0 scale-100 z-10" 
-                  : "opacity-0 translate-x-10 scale-95 z-0 pointer-events-none"
-              }`}
-            >
-              {/* Rating stars */}
-              <div className="flex justify-center space-x-1 mb-5 text-brand-gold">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-current" />
-                ))}
+        {testimonials.length > 0 ? (
+          <div className="relative min-h-[300px] md:min-h-[240px] flex items-center justify-center bg-white/75 backdrop-blur-md border border-[#5C3317]/10 p-8 sm:p-10 rounded-[2.5rem] shadow-xl max-w-3xl mx-auto">
+            {testimonials.map((testimonial, index) => (
+              <div 
+                key={testimonial.id}
+                className={`absolute transition-all duration-700 w-full left-0 right-0 px-6 sm:px-10 ${
+                  index === activeIndex 
+                    ? "opacity-100 translate-x-0 scale-100 z-10" 
+                    : "opacity-0 translate-x-10 scale-95 z-0 pointer-events-none"
+                }`}
+              >
+                {/* Rating stars */}
+                <div className="flex justify-center space-x-1 mb-5 text-brand-gold">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-current" />
+                  ))}
+                </div>
+                
+                <p className="text-lg md:text-xl font-sans font-light italic leading-relaxed text-brand-brown mb-6 max-w-2xl mx-auto">
+                  &ldquo;{testimonial.content}&rdquo;
+                </p>
+                
+                <div>
+                  <p className="font-bold text-brand-brown text-lg">{testimonial.name}</p>
+                  <p className="text-brand-gold font-semibold uppercase tracking-wider text-[10px] mt-1">{testimonial.role}</p>
+                </div>
               </div>
-              
-              <p className="text-lg md:text-xl font-sans font-light italic leading-relaxed text-brand-brown mb-6 max-w-2xl mx-auto">
-                "{testimonial.content}"
-              </p>
-              
-              <div>
-                <p className="font-bold text-brand-brown text-lg">{testimonial.name}</p>
-                <p className="text-brand-gold font-semibold uppercase tracking-wider text-[10px] mt-1">{testimonial.role}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="max-w-md mx-auto text-center p-8 bg-white/75 backdrop-blur-md border border-[#5C3317]/10 rounded-[2.5rem] shadow-xl">
+            <span className="text-4xl mb-3 block">🌟</span>
+            <h3 className="font-serif font-bold text-xl text-brand-brown mb-2">Be the First to Share Your Experience</h3>
+            <p className="text-brand-text-secondary text-sm font-sans font-light">
+              We look forward to hearing from you after you try LOAVIA™ millet cookies!
+            </p>
+          </div>
+        )}
 
         {/* Indicators */}
         <div className="flex justify-center space-x-3 mt-8">
