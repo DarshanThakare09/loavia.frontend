@@ -12,6 +12,14 @@ export default function ScrollToTop() {
       if ("scrollRestoration" in window.history) {
         window.history.scrollRestoration = "manual";
       }
+      // Clean up any legacy or stale service workers registered on this origin
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
     }
 
     const isPopstate = typeof window !== "undefined" && sessionStorage.getItem("is_popstate") === "true";
