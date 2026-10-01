@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useSiteStore } from "@/store/siteStore";
 import { Wheat, ShieldCheck, Sprout, Dumbbell, Flame, Sparkles, X, Star } from "lucide-react";
 import { toast } from "sonner";
+import { apiClient } from "@/services/apiClient";
 
 const getFeatureIcon = (text: string) => {
   const lower = text.toLowerCase();
@@ -87,25 +88,12 @@ export default function WhyChoose() {
     
     setIsSubmitting(true);
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1"}/reviews`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            guestName: name.trim(),
-            guestEmail: email.trim(),
-            rating,
-            comment: comment.trim(),
-          }),
-        }
-      );
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData?.message || "Failed to submit review.");
-      }
+      await apiClient.post("/reviews", {
+        guestName: name.trim(),
+        guestEmail: email.trim(),
+        rating,
+        comment: comment.trim(),
+      });
 
       toast.success("Thank you! Your review has been submitted and is pending approval.");
       
