@@ -95,6 +95,9 @@ export const metadata: Metadata = {
     ],
     shortcut: "/favicon.ico",
   },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+  },
   category: "Food & Grocery",
 };
 
@@ -102,6 +105,57 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://www.loavia.in/#organization",
+      "name": "LOAVIA",
+      "legalName": "Akshar Foods",
+      "url": "https://www.loavia.in",
+      "logo": {
+        "@type": "ImageObject",
+        "@id": "https://www.loavia.in/#logo",
+        "url": "https://www.loavia.in/loavia-brand-logo.png",
+        "caption": "LOAVIA - Healthy Inside, Yummy Outside",
+      },
+      "image": "https://www.loavia.in/loavia-brand-logo.png",
+      "description":
+        "Wholesome, delicious, and premium millet cookies crafted with clean ingredients — where traditional Indian grains meet modern indulgence.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Nashik",
+        "addressRegion": "Maharashtra",
+        "addressCountry": "IN",
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+91-7796116622",
+        "contactType": "sales",
+        "email": "Sales@loavia.in",
+        "areaServed": "IN",
+        "availableLanguage": ["English", "Hindi", "Marathi"],
+      },
+      "sameAs": [
+        "https://instagram.com/loavia_cookies",
+        "https://facebook.com/loavia",
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.loavia.in/#website",
+      "url": "https://www.loavia.in",
+      "name": "LOAVIA",
+      "description": "Healthy Inside, Yummy Outside - Premium Millet Cookies",
+      "publisher": {
+        "@id": "https://www.loavia.in/#organization",
+      },
+      "inLanguage": "en-IN",
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -115,6 +169,10 @@ export default function RootLayout({
       className={`${inter.variable} ${playfair.variable} ${nunito.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-proxima text-brand-text-primary bg-brand-cream">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <ScrollToTop />
         <Toaster position="bottom-right" richColors />
         {children}
