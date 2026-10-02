@@ -1,16 +1,22 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Build Your Custom Cookie Box | Personalized Selection",
+  title: "Build Your Custom LOAVIA Cookie Box | Personalised Selection",
   description:
-    "Build your custom LOAVIA cookie box. Handpick your favorite wholesome millet cookie flavors in 6 or 12 piece personalized gift boxes.",
+    "Build your custom LOAVIA Cookies gift box. Handpick your favourite wholesome millet cookie flavours from Nashik in 6, 12, or 24-piece personalised gift boxes.",
   alternates: {
     canonical: "/build-box",
   },
   openGraph: {
-    title: "Build Your Custom Cookie Box | LOAVIA",
-    description: "Pick and mix your favorite millet cookie flavors in a custom gift box.",
+    title: "Build Your Custom LOAVIA Cookie Box | Personalised Selection",
+    description:
+      "Pick and mix your favourite LOAVIA millet cookie flavours in a custom gift box. Handcrafted in Nashik.",
     url: "https://www.loavia.in/build-box",
+  },
+  twitter: {
+    title: "Build Your Custom LOAVIA Cookie Box",
+    description:
+      "Pick and mix your favourite LOAVIA millet cookie flavours in a custom gift box. Handcrafted in Nashik.",
   },
 };
 

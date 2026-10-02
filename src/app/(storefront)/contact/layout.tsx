@@ -1,17 +1,22 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Contact Us | Customer Support & Gifting Enquiries",
+  title: "Contact LOAVIA Cookies | Customer Support & Gifting Enquiries",
   description:
-    "Contact LOAVIA for orders, corporate gifting, custom hampers, or customer support. Handcrafted bakery based in Nashik, Maharashtra, India.",
+    "Contact LOAVIA Cookies for orders, corporate gifting, custom hampers, or customer support. Nashik-based premium healthy millet cookie brand, Maharashtra, India.",
   alternates: {
     canonical: "/contact",
   },
   openGraph: {
-    title: "Contact LOAVIA | Customer Support & Gifting Enquiries",
+    title: "Contact LOAVIA Cookies | Customer Support & Gifting Enquiries",
     description:
-      "Get in touch with LOAVIA for customer support, bulk orders, and corporate gifting.",
+      "Get in touch with LOAVIA Cookies for customer support, bulk orders, and corporate gifting. Based in Nashik, Maharashtra.",
     url: "https://www.loavia.in/contact",
+  },
+  twitter: {
+    title: "Contact LOAVIA Cookies | Customer Support & Gifting",
+    description:
+      "Get in touch with LOAVIA Cookies for customer support, bulk orders, and corporate gifting. Based in Nashik.",
   },
 };
 

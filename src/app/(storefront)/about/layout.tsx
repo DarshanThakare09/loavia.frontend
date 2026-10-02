@@ -1,17 +1,22 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About Us | Our Story & Healthy Baking Philosophy",
+  title: "About LOAVIA Cookies | Our Story & Healthy Baking Philosophy",
   description:
-    "Learn about LOAVIA's story from Nashik, Maharashtra. Founded by certified Pâtissier Chef Pranita Vivek Patil, crafting wholesome millet cookies with pure ingredients and zero maida.",
+    "Learn about LOAVIA Cookies, Nashik\u2019s premium millet cookie brand. Founded by certified P\u00e2tissi\u00e8r Chef Pranita Vivek Patil, crafting wholesome millet cookies with pure ingredients, zero maida, and zero preservatives.",
   alternates: {
     canonical: "/about",
   },
   openGraph: {
-    title: "About LOAVIA | Healthy Inside, Yummy Outside",
+    title: "About LOAVIA Cookies | Healthy Inside, Yummy Outside",
     description:
-      "Crafted in Nashik. Wholesome millet cookies made with clean ingredients and traditional grains.",
+      "LOAVIA Cookies, crafted in Nashik. Wholesome millet cookies made with clean ingredients and traditional Indian grains.",
     url: "https://www.loavia.in/about",
+  },
+  twitter: {
+    title: "About LOAVIA Cookies | Healthy Inside, Yummy Outside",
+    description:
+      "LOAVIA Cookies from Nashik. Wholesome millet cookies made with clean ingredients and traditional Indian grains.",
   },
 };
 
